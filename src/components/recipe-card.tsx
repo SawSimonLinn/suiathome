@@ -6,7 +6,6 @@ import { useState } from "react";
 import type { Recipe } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface RecipeCardProps {
@@ -31,11 +30,11 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
     <Link href={`/recipes/${recipe.slug}`} className="group block">
       <div
         className={cn(
-          "overflow-hidden rounded-lg border bg-card text-card-foreground transition-all duration-300 group-hover:border-primary group-hover:shadow-[8px_8px_0px_hsl(var(--primary))]",
+          "overflow-hidden rounded-lg bg-card text-card-foreground transition-shadow duration-300 group-hover:shadow-xl border",
           className
         )}
       >
-        <div className="relative aspect-[4/3] w-full overflow-hidden border-b">
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
           {coverImage ? (
              <Image
               src={coverImage.imageUrl}
@@ -50,15 +49,15 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               <span className="text-muted-foreground">No Image</span>
             </div>
           )}
-          <Badge variant="secondary" className="absolute top-3 left-3 !font-body font-semibold">
+          <Badge variant="secondary" className="absolute top-3 left-3">
             {recipe.category.name}
           </Badge>
         </div>
         <div className="p-4">
-          <h3 className="font-headline text-2xl font-bold leading-tight truncate" title={recipe.title}>
+          <h3 className="font-headline text-xl font-bold leading-tight truncate" title={recipe.title}>
             {recipe.title}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1 font-semibold">
+          <p className="text-sm text-muted-foreground mt-1">
             By {recipe.author.name}
           </p>
           <div className="mt-4 flex items-center justify-between">
@@ -73,12 +72,9 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               Like ({likeCount})
             </button>
             <div className="flex items-center gap-1">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Favorite recipe">
+                <button className="text-sm font-medium text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Favorite recipe">
                     Favorite
-                </Button>
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Save recipe">
-                    Save
-                </Button>
+                </button>
             </div>
           </div>
         </div>
