@@ -82,7 +82,7 @@ export default function CommunityPage() {
                       <SelectValue placeholder="Link a recipe (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {recipes.map((recipe) => (
                         <SelectItem key={recipe.id} value={recipe.id}>
                           {recipe.title}
