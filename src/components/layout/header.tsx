@@ -12,6 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { SignOutButton } from "@/components/layout/sign-out-button";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -19,12 +20,15 @@ const navLinks = [
   { href: "/community", label: "Community" },
 ];
 
-export function Header() {
+type HeaderProps = {
+  userEmail: string | null;
+};
+
+export function Header({ userEmail }: HeaderProps) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Placeholder for auth state
-  const isLoggedIn = false;
+  const isLoggedIn = Boolean(userEmail);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 backdrop-blur-sm">
@@ -93,11 +97,14 @@ export function Header() {
         
         <div className="flex flex-1 items-center justify-end space-x-2">
           {isLoggedIn ? (
-            <Button variant="ghost" asChild>
-              <Link href="/profile">
-                Profile
-              </Link>
-            </Button>
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/profile">
+                  Profile
+                </Link>
+              </Button>
+              <SignOutButton />
+            </>
           ) : (
             <>
               <Button variant="ghost" asChild>

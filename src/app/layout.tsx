@@ -4,17 +4,33 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Sui at home',
   description: 'Delicious recipes for the home cook.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let userEmail: string | null = null;
+  const supabaseReady = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  );
+
+  if (supabaseReady) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    userEmail = user?.email ?? null;
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -28,7 +44,7 @@ export default function RootLayout({
         )}
       >
         <div className="relative flex min-h-screen flex-col">
-          <Header />
+          <Header userEmail={userEmail} />
           <main className="flex-1 container mx-auto px-4 md:px-8">{children}</main>
           <Footer />
         </div>
