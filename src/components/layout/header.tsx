@@ -22,13 +22,17 @@ const navLinks = [
 
 type HeaderProps = {
   userEmail: string | null;
+  isAdmin: boolean;
 };
 
-export function Header({ userEmail }: HeaderProps) {
+export function Header({ userEmail, isAdmin }: HeaderProps) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
   const isLoggedIn = Boolean(userEmail);
+  const mobileLinks = isAdmin
+    ? [...navLinks, { href: "/admin", label: "Admin" }]
+    : navLinks;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 backdrop-blur-sm">
@@ -77,7 +81,7 @@ export function Header({ userEmail }: HeaderProps) {
                 <span className="font-bold font-headline text-xl">Sui at home</span>
               </Link>
               <div className="flex flex-col space-y-3">
-                {navLinks.map((link) => (
+                {mobileLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -98,6 +102,13 @@ export function Header({ userEmail }: HeaderProps) {
         <div className="flex flex-1 items-center justify-end space-x-2">
           {isLoggedIn ? (
             <>
+              {isAdmin ? (
+                <Button variant="ghost" asChild>
+                  <Link href="/admin">
+                    Admin
+                  </Link>
+                </Button>
+              ) : null}
               <Button variant="ghost" asChild>
                 <Link href="/profile">
                   Profile

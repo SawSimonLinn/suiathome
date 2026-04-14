@@ -22,7 +22,9 @@ export type Recipe = {
   title: string;
   description: string;
   story: string;
-  imageId: string;
+  imageId?: string;
+  imageUrl?: string;
+  imageHint?: string;
   category: Category;
   prepTime: string;
   cookTime: string;
@@ -32,6 +34,9 @@ export type Recipe = {
   tips: string[];
   likes: number;
   favorites: number;
+  isLiked?: boolean;
+  isSaved?: boolean;
+  isFavorited?: boolean;
   comments: Comment[];
   createdAt: string;
   author: User;

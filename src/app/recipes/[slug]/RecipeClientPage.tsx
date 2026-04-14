@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useRecipeInteractions } from '@/hooks/use-recipe-interactions';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,7 +19,30 @@ interface RecipeClientPageProps {
 
 
 export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes }: RecipeClientPageProps) {
-  const coverImage = PlaceHolderImages.find((p) => p.id === recipe.imageId);
+  const {
+    isLiked,
+    isSaved,
+    isFavorited,
+    likeCount,
+    favoriteCount,
+    pendingAction,
+    toggleLike,
+    toggleSave,
+    toggleFavorite,
+  } = useRecipeInteractions({
+    recipeId: recipe.id,
+    initialLikeCount: recipe.likes,
+    initialFavoriteCount: recipe.favorites,
+    initialLiked: recipe.isLiked ?? false,
+    initialSaved: recipe.isSaved ?? false,
+    initialFavorited: recipe.isFavorited ?? false,
+  });
+  const coverImage = recipe.imageUrl
+    ? {
+        imageUrl: recipe.imageUrl,
+        imageHint: recipe.imageHint || 'recipe photo',
+      }
+    : PlaceHolderImages.find((p) => p.id === recipe.imageId);
 
   return (
     <div className="py-8 md:py-12">
@@ -110,14 +134,26 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
         <Separator className="my-12" />
 
         <div className="flex justify-center items-center gap-4">
-            <Button variant="outline">
-              Likes ({recipe.likes})
+            <Button
+              variant={isLiked ? 'secondary' : 'outline'}
+              onClick={() => void toggleLike()}
+              disabled={pendingAction === 'like'}
+            >
+              Likes ({likeCount})
             </Button>
-            <Button variant="outline">
-              Save
+            <Button
+              variant={isSaved ? 'secondary' : 'outline'}
+              onClick={() => void toggleSave()}
+              disabled={pendingAction === 'save'}
+            >
+              {isSaved ? 'Saved' : 'Save'}
             </Button>
-            <Button variant="outline">
-              Favorite
+            <Button
+              variant={isFavorited ? 'secondary' : 'outline'}
+              onClick={() => void toggleFavorite()}
+              disabled={pendingAction === 'favorite'}
+            >
+              Favorite ({favoriteCount})
             </Button>
         </div>
       </article>

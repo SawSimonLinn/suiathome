@@ -1,11 +1,10 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { RecipeCard } from '@/components/recipe-card';
-import { getLatestRecipes, getPopularRecipes } from '@/lib/data';
+import { getHomepageRecipes } from '@/lib/supabase/public-recipes';
 
-export default function Home() {
-  const latestRecipes = getLatestRecipes(3);
-  const popularRecipes = getPopularRecipes(4);
+export default async function Home() {
+  const { latestRecipes, popularRecipes } = await getHomepageRecipes();
 
   return (
     <div className="flex flex-col py-8 md:py-12">

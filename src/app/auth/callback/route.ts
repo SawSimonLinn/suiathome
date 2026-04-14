@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const next = getNextPath(searchParams.get('next'));
+  const providerError =
+    searchParams.get('error_description') || searchParams.get('error');
 
   if (code) {
     const supabase = await createClient();
@@ -22,9 +24,19 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
+
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent(error.message)}`
+    );
+  }
+
+  if (providerError) {
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent(providerError)}`
+    );
   }
 
   return NextResponse.redirect(
-    `${origin}/login?error=Could%20not%20authenticate%20user.`
+    `${origin}/login?error=Missing%20OAuth%20authorization%20code.`
   );
 }

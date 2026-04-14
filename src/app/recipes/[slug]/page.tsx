@@ -1,21 +1,20 @@
 import { notFound } from 'next/navigation';
-import { getRecipeBySlug, getCommunityPostsByRecipeId, getRelatedRecipes } from '@/lib/data';
+import { getPublicRecipeBySlug, getRelatedPublicRecipes } from '@/lib/supabase/public-recipes';
 import RecipeClientPage from './RecipeClientPage';
 
-export default function RecipeDetailPage({ params }: { params: { slug:string } }) {
-  const recipe = getRecipeBySlug(params.slug);
+export default async function RecipeDetailPage({ params }: { params: { slug:string } }) {
+  const recipe = await getPublicRecipeBySlug(params.slug);
 
   if (!recipe) {
     notFound();
   }
   
-  const relatedPosts = getCommunityPostsByRecipeId(recipe.id, 2);
-  const relatedRecipes = getRelatedRecipes(recipe, 3);
+  const relatedRecipes = await getRelatedPublicRecipes(recipe, 3);
 
   return (
     <RecipeClientPage
       recipe={recipe}
-      relatedPosts={relatedPosts}
+      relatedPosts={[]}
       relatedRecipes={relatedRecipes}
     />
   );

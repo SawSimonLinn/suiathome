@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/password-input';
 import { createClient } from '@/lib/supabase/client';
 
 type SignupFormProps = {
@@ -46,7 +47,7 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
 
     if (!supabaseReady) {
       setErrorMessage(
-        'Add your Supabase URL and publishable key to .env.local first.'
+        'Add your Supabase URL and publishable key to .env.local or .env first.'
       );
       return;
     }
@@ -90,7 +91,7 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
   const handleGoogleSignIn = async () => {
     if (!supabaseReady) {
       setErrorMessage(
-        'Add your Supabase URL and publishable key to .env.local first.'
+        'Add your Supabase URL and publishable key to .env.local or .env first.'
       );
       return;
     }
@@ -133,7 +134,8 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
                 <AlertTitle>Supabase keys are missing</AlertTitle>
                 <AlertDescription>
                   Add `NEXT_PUBLIC_SUPABASE_URL` and
-                  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to `.env.local`.
+                  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to `.env.local` or
+                  `.env`.
                 </AlertDescription>
               </Alert>
             ) : null}
@@ -169,9 +171,8 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   required
                   minLength={6}
                   value={password}

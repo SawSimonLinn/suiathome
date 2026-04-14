@@ -1,5 +1,4 @@
 import { RecipeCard } from "@/components/recipe-card";
-import { recipes, categories } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,8 +8,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getPublicRecipesData } from "@/lib/supabase/public-recipes";
 
-export default function RecipesPage() {
+export default async function RecipesPage() {
+  const { recipes, categories } = await getPublicRecipesData();
+
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <header className="text-center mb-8 md:mb-12">
@@ -45,9 +47,15 @@ export default function RecipesPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-        {recipes.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} />
-        ))}
+        {recipes.length > 0 ? (
+          recipes.map((recipe) => (
+            <RecipeCard key={recipe.id} recipe={recipe} />
+          ))
+        ) : (
+          <div className="col-span-full rounded-lg border bg-card p-8 text-center text-muted-foreground shadow-paper">
+            No recipes are published yet.
+          </div>
+        )}
       </div>
     </div>
   );

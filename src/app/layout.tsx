@@ -4,7 +4,8 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { createClient } from '@/lib/supabase/server';
+import { hasSupabaseEnv } from '@/lib/supabase/config';
+import { getAuthContext } from '@/lib/supabase/auth';
 
 export const metadata: Metadata = {
   title: 'Sui at home',
@@ -17,18 +18,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   let userEmail: string | null = null;
-  const supabaseReady = Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  );
+  let isAdmin = false;
+  const supabaseReady = hasSupabaseEnv();
 
   if (supabaseReady) {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    userEmail = user?.email ?? null;
+    const authContext = await getAuthContext();
+    userEmail = authContext.userEmail;
+    isAdmin = authContext.isAdmin;
   }
 
   return (
@@ -44,7 +40,7 @@ export default async function RootLayout({
         )}
       >
         <div className="relative flex min-h-screen flex-col">
-          <Header userEmail={userEmail} />
+          <Header userEmail={userEmail} isAdmin={isAdmin} />
           <main className="flex-1 container mx-auto px-4 md:px-8">{children}</main>
           <Footer />
         </div>

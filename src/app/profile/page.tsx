@@ -4,7 +4,8 @@ import { RecipeCard } from '@/components/recipe-card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getLatestRecipes } from '@/lib/data';
+import { hasSupabaseEnv } from '@/lib/supabase/config';
+import { getPublicRecipesData } from '@/lib/supabase/public-recipes';
 import { createClient } from '@/lib/supabase/server';
 
 type ProfileRow = {
@@ -17,10 +18,7 @@ function getInitials(name: string) {
 }
 
 export default async function ProfilePage() {
-  const supabaseReady = Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  );
+  const supabaseReady = hasSupabaseEnv();
 
   if (!supabaseReady) {
     redirect('/login?error=Add%20your%20Supabase%20env%20vars%20first.');
@@ -41,13 +39,35 @@ export default async function ProfilePage() {
     .eq('id', user.id)
     .maybeSingle<ProfileRow>();
 
+  const [{ data: savedRows }, { data: favoritedRows }, recipeData] =
+    await Promise.all([
+      supabase
+        .from('recipe_saves')
+        .select('recipe_id')
+        .eq('user_id', user.id),
+      supabase
+        .from('recipe_favorites')
+        .select('recipe_id')
+        .eq('user_id', user.id),
+      getPublicRecipesData(),
+    ]);
+
   const displayName =
     profile?.name?.trim() ||
     user.user_metadata.name?.trim() ||
     user.email?.split('@')[0] ||
     'Cook';
   const avatarUrl = profile?.avatar_url || user.user_metadata.avatar_url || '';
-  const savedRecipes = getLatestRecipes(4);
+  const savedIds = new Set((savedRows ?? []).map((row) => row.recipe_id));
+  const favoritedIds = new Set(
+    (favoritedRows ?? []).map((row) => row.recipe_id)
+  );
+  const savedRecipes = recipeData.recipes.filter((recipe) =>
+    savedIds.has(recipe.id)
+  );
+  const favoritedRecipes = recipeData.recipes.filter((recipe) =>
+    favoritedIds.has(recipe.id)
+  );
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 md:py-12">
@@ -74,8 +94,8 @@ export default async function ProfilePage() {
             session is coming from Supabase.
           </p>
           <p>
-            Saved recipes are still sample data for now, so auth is working
-            without forcing a full content migration yet.
+            Saved and favorited recipes now come from Supabase too, so this page
+            matches what real users store in the app.
           </p>
         </CardContent>
       </Card>
@@ -104,11 +124,21 @@ export default async function ProfilePage() {
           </div>
         </TabsContent>
         <TabsContent value="favorited">
-          <div className="text-center py-12 bg-card border shadow-paper">
-            <h3 className="text-lg font-semibold">No Favorited Recipes</h3>
-            <p className="text-muted-foreground mt-1">
-              Your most-loved recipes will appear here.
-            </p>
+          <div className="p-1">
+            {favoritedRecipes.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {favoritedRecipes.map((recipe) => (
+                  <RecipeCard key={recipe.id} recipe={recipe} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-card border shadow-paper">
+                <h3 className="text-lg font-semibold">No Favorited Recipes</h3>
+                <p className="text-muted-foreground mt-1">
+                  Your most-loved recipes will appear here.
+                </p>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>

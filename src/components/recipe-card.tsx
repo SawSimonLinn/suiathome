@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import type { Recipe } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useRecipeInteractions } from "@/hooks/use-recipe-interactions";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "./ui/badge";
 
 interface RecipeCardProps {
@@ -15,16 +16,35 @@ interface RecipeCardProps {
 }
 
 export function RecipeCard({ recipe, className }: RecipeCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(recipe.likes);
+  const {
+    isLiked,
+    isSaved,
+    isFavorited,
+    likeCount,
+    favoriteCount,
+    pendingAction,
+    toggleLike,
+    toggleSave,
+    toggleFavorite,
+  } = useRecipeInteractions({
+    recipeId: recipe.id,
+    initialLikeCount: recipe.likes,
+    initialFavoriteCount: recipe.favorites,
+    initialLiked: recipe.isLiked ?? false,
+    initialSaved: recipe.isSaved ?? false,
+    initialFavorited: recipe.isFavorited ?? false,
+  });
 
-  const coverImage = PlaceHolderImages.find((p) => p.id === recipe.imageId);
+  const coverImage = recipe.imageUrl
+    ? {
+        imageUrl: recipe.imageUrl,
+        imageHint: recipe.imageHint || 'recipe photo',
+      }
+    : PlaceHolderImages.find((p) => p.id === recipe.imageId);
 
-  const handleLike = (e: React.MouseEvent) => {
+  const stopLinkNavigation = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsLiked(!isLiked);
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
   };
 
   return (
@@ -53,26 +73,46 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
           <p className="text-sm text-muted-foreground mt-1">
             By {recipe.author.name}
           </p>
-           <div className="mt-4 flex items-center gap-4 text-sm">
-            <button
-                onClick={handleLike}
-                className={cn(
-                    "font-medium hover:underline",
-                    isLiked 
-                        ? "text-primary-foreground font-bold" 
-                        : "text-muted-foreground"
-                )}
-                aria-label="Like recipe"
+           <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+            <Button
+              type="button"
+              size="sm"
+              variant={isLiked ? "secondary" : "ghost"}
+              onClick={(event) => {
+                stopLinkNavigation(event);
+                void toggleLike();
+              }}
+              disabled={pendingAction === "like"}
+              aria-label="Like recipe"
             >
-                Like ({likeCount})
-            </button>
-             <button 
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* TODO: Add favorite logic */ }}
-                className="font-medium text-muted-foreground hover:underline"
-                aria-label="Favorite recipe"
+              Like ({likeCount})
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={isSaved ? "secondary" : "ghost"}
+              onClick={(event) => {
+                stopLinkNavigation(event);
+                void toggleSave();
+              }}
+              disabled={pendingAction === "save"}
+              aria-label="Save recipe"
             >
-                Favorite
-            </button>
+              {isSaved ? "Saved" : "Save"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={isFavorited ? "secondary" : "ghost"}
+              onClick={(event) => {
+                stopLinkNavigation(event);
+                void toggleFavorite();
+              }}
+              disabled={pendingAction === "favorite"}
+              aria-label="Favorite recipe"
+            >
+              Favorite ({favoriteCount})
+            </Button>
           </div>
         </CardContent>
       </Card>
