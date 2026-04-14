@@ -32,7 +32,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
     <Link href={`/recipes/${recipe.slug}`} className="group block">
       <div
         className={cn(
-          "relative overflow-hidden rounded-lg shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-card",
+          "relative overflow-hidden rounded-lg border border-border bg-card text-card-foreground transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1",
           className
         )}
       >
@@ -51,27 +51,28 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               <span className="text-muted-foreground">No Image</span>
             </div>
           )}
-          <Badge variant="secondary" className="absolute top-3 left-3 bg-secondary/80 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <Badge variant="secondary" className="absolute top-3 left-3">
             {recipe.category.name}
           </Badge>
         </div>
         <div className="p-4">
-          <h3 className="font-headline text-xl font-semibold truncate" title={recipe.title}>
+          <h3 className="font-headline text-2xl font-semibold leading-tight" title={recipe.title}>
             {recipe.title}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-2">
             By {recipe.author.name}
           </p>
           <div className="mt-4 flex items-center justify-between">
             <button
               onClick={handleLike}
-              className="flex items-center gap-1.5 text-muted-foreground hover:text-red-500 transition-colors"
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
               aria-label="Like recipe"
             >
               <Heart
                 className={cn(
-                  "h-5 w-5",
-                  isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                  "h-5 w-5 transition-colors",
+                  isLiked ? "fill-primary text-primary" : "text-muted-foreground"
                 )}
               />
               <span className="text-sm font-medium">{likeCount}</span>
