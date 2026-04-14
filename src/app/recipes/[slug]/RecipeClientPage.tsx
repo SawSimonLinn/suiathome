@@ -25,7 +25,7 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
       <article className="max-w-4xl mx-auto bg-card border shadow-paper p-6 md:p-10">
         <header className="mb-8 text-center">
           <Badge variant="secondary" className="mb-4">{recipe.category.name}</Badge>
-          <h1 className="font-headline text-4xl md:text-6xl font-bold !leading-tight tracking-tight mb-4">
+          <h1 className="font-headline text-4xl md:text-6xl !leading-tight tracking-tight mb-4">
             {recipe.title}
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{recipe.description}</p>
@@ -79,7 +79,7 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
 
         <div className="grid md:grid-cols-5 gap-8 lg:gap-12">
             <div className="md:col-span-2">
-                <h2 className="font-headline text-3xl font-bold mb-4 border-b-2 border-primary pb-2">Ingredients</h2>
+                <h2 className="font-headline text-3xl mb-4 border-b-2 border-primary pb-2">Ingredients</h2>
                 <ul className="space-y-3 text-base">
                     {recipe.ingredients.map((ing, index) => (
                     <li key={index} className="flex gap-3 items-start p-2">
@@ -93,7 +93,7 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
             </div>
             
             <div className="md:col-span-3">
-                <h2 className="font-headline text-3xl font-bold mb-4 border-b-2 border-primary pb-2">Instructions</h2>
+                <h2 className="font-headline text-3xl mb-4 border-b-2 border-primary pb-2">Instructions</h2>
                 <ol className="list-none space-y-6 text-base leading-loose">
                     {recipe.steps.map((step, index) => (
                     <li key={index} className="flex items-start gap-4">
@@ -124,7 +124,7 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
 
       {relatedPosts.length > 0 && (
         <section className="max-w-4xl mx-auto mt-16">
-            <h2 className="font-headline text-3xl md:text-4xl font-bold mb-8 text-center">Community Creations</h2>
+            <h2 className="font-headline text-3xl md:text-4xl mb-8 text-center">Community Creations</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {relatedPosts.map(post => (
                     <CommunityPostCard key={post.id} post={post} />
@@ -136,7 +136,7 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
       {relatedRecipes.length > 0 && (
         <section className="max-w-4xl mx-auto mt-16">
              <Separator className="my-12" />
-            <h2 className="font-headline text-3xl md:text-4xl font-bold mb-8 text-center">You May Also Like</h2>
+            <h2 className="font-headline text-3xl md:text-4xl mb-8 text-center">You May Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                 {relatedRecipes.map(relatedRecipe => (
                     <RecipeCard key={relatedRecipe.id} recipe={relatedRecipe} />

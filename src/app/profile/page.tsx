@@ -20,7 +20,7 @@ export default function ProfilePage() {
           </AvatarFallback>
         </Avatar>
         <div className="text-center md:text-left">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold">
+          <h1 className="font-headline text-4xl md:text-5xl">
             {user.name}
           </h1>
           <p className="text-muted-foreground mt-2 text-lg">
