@@ -1,4 +1,4 @@
-import type { Recipe, Category, User } from './types';
+import type { Recipe, Category, User, CommunityPost, CommunityComment } from './types';
 
 export const users: User[] = [
   { id: 'user-1', name: 'Sui', avatarUrl: 'https://i.pravatar.cc/150?u=user-1' },
@@ -216,6 +216,43 @@ export const recipes: Recipe[] = [
   }
 ];
 
+export const communityPosts: CommunityPost[] = [
+  {
+    id: 'comm-post-1',
+    user: users[1], // Alex
+    caption: 'Tried the Classic Spaghetti Carbonara and it was a hit! Added a little extra pecorino. 😉',
+    imageUrl: 'https://picsum.photos/seed/comm1/600/600',
+    imageHint: 'plate of carbonara',
+    likes: 42,
+    comments: [
+      { id: 'cc-1', text: 'Looks delicious!', user: users[2], createdAt: '2024-05-20T10:00:00Z' }
+    ],
+    createdAt: '2024-05-19T18:00:00Z',
+    linkedRecipe: recipes[0], // Classic Spaghetti Carbonara
+  },
+  {
+    id: 'comm-post-2',
+    user: users[2], // Maria
+    caption: 'My weekend baking project: the Chewy Chocolate Chip Cookies! They are seriously the best.',
+    imageUrl: 'https://picsum.photos/seed/comm2/600/600',
+    imageHint: 'cookies on a rack',
+    likes: 108,
+    comments: [],
+    createdAt: '2024-05-18T12:30:00Z',
+    linkedRecipe: recipes[1], // Chewy Chocolate Chip Cookies
+  },
+  {
+    id: 'comm-post-3',
+    user: users[0], // Sui
+    caption: 'Just experimenting with some plating for my beef tacos recipe. What do you all think?',
+    imageUrl: 'https://picsum.photos/seed/comm3/600/600',
+    imageHint: 'plated tacos',
+    likes: 95,
+    comments: [],
+    createdAt: '2024-05-17T09:00:00Z',
+    linkedRecipe: recipes[4], // Flavorful Beef Tacos
+  }
+];
 
 // Helper functions to get data
 export function getRecipeBySlug(slug: string): Recipe | undefined {
@@ -228,4 +265,8 @@ export function getLatestRecipes(count: number): Recipe[] {
 
 export function getPopularRecipes(count: number): Recipe[] {
   return [...recipes].sort((a, b) => b.likes - a.likes).slice(0, count);
+}
+
+export function getCommunityPosts(): CommunityPost[] {
+  return [...communityPosts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }

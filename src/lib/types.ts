@@ -36,3 +36,22 @@ export type Recipe = {
   createdAt: string;
   author: User;
 };
+
+export type CommunityComment = {
+  id: string;
+  text: string;
+  user: User;
+  createdAt: string;
+};
+
+export type CommunityPost = {
+  id: string;
+  user: User;
+  caption: string;
+  imageUrl: string;
+  imageHint: string;
+  likes: number;
+  comments: CommunityComment[];
+  createdAt: string;
+  linkedRecipe?: Recipe;
+};
