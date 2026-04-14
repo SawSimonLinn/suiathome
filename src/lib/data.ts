@@ -278,7 +278,24 @@ export function getCommunityPostsByRecipeId(recipeId: string, count: number): Co
 }
 
 export function getRelatedRecipes(currentRecipe: Recipe, count: number): Recipe[] {
-    return recipes
-        .filter(recipe => recipe.category.id === currentRecipe.category.id && recipe.id !== currentRecipe.id)
-        .slice(0, count);
+    // Find recipes in the same category, excluding the current one.
+    const relatedByCategory = recipes.filter(
+        (recipe) => recipe.category.id === currentRecipe.category.id && recipe.id !== currentRecipe.id
+    );
+
+    // If we have enough, return them, sorted by likes.
+    if (relatedByCategory.length >= count) {
+        return relatedByCategory.sort((a, b) => b.likes - a.likes).slice(0, count);
+    }
+
+    // If not, find more recipes from other categories, excluding ones we already have and the current one.
+    const otherRecipes = recipes.filter(
+        (recipe) => recipe.id !== currentRecipe.id && !relatedByCategory.some(r => r.id === recipe.id)
+    ).sort((a,b) => b.likes - a.likes);
+
+    // Combine related by category with other popular recipes.
+    const combined = [...relatedByCategory, ...otherRecipes];
+
+    // Return the required number of recipes.
+    return combined.slice(0, count);
 }
