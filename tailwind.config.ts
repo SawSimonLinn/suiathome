@@ -10,11 +10,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Cormorant Garamond', 'serif'],
+        body: ['Lato', 'sans-serif'],
+        headline: ['Poppins', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
+        charcoal: '#313131',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

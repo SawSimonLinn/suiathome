@@ -32,7 +32,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
     <Link href={`/recipes/${recipe.slug}`} className="group block">
       <div
         className={cn(
-          "relative overflow-hidden rounded-lg border border-border bg-card text-card-foreground transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1",
+          "overflow-hidden rounded-md border bg-card text-card-foreground transition-all duration-300 group-hover:border-primary shadow-none group-hover:shadow-lg",
           className
         )}
       >
@@ -42,7 +42,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               src={coverImage.imageUrl}
               alt={recipe.title}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-300"
               data-ai-hint={coverImage.imageHint}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
@@ -51,16 +51,15 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               <span className="text-muted-foreground">No Image</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           <Badge variant="secondary" className="absolute top-3 left-3">
             {recipe.category.name}
           </Badge>
         </div>
         <div className="p-4">
-          <h3 className="font-headline text-2xl font-semibold leading-tight" title={recipe.title}>
+          <h3 className="font-headline text-xl font-bold leading-tight truncate" title={recipe.title}>
             {recipe.title}
           </h3>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-1">
             By {recipe.author.name}
           </p>
           <div className="mt-4 flex items-center justify-between">
@@ -72,7 +71,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               <Heart
                 className={cn(
                   "h-5 w-5 transition-colors",
-                  isLiked ? "fill-primary text-primary" : "text-muted-foreground"
+                  isLiked ? "fill-primary text-primary" : ""
                 )}
               />
               <span className="text-sm font-medium">{likeCount}</span>
