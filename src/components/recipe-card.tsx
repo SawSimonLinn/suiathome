@@ -6,7 +6,6 @@ import { useState } from "react";
 import type { Recipe } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
-import { Heart, Bookmark, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -65,23 +64,20 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
           <div className="mt-4 flex items-center justify-between">
             <button
               onClick={handleLike}
-              className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+                isLiked ? "text-primary" : "text-muted-foreground"
+              )}
               aria-label="Like recipe"
             >
-              <Heart
-                className={cn(
-                  "h-5 w-5 transition-colors",
-                  isLiked ? "fill-primary text-primary" : ""
-                )}
-              />
-              <span className="text-sm font-medium">{likeCount}</span>
+              Like ({likeCount})
             </button>
             <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Favorite recipe">
-                    <Star className="h-5 w-5" />
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Favorite recipe">
+                    Favorite
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Save recipe">
-                    <Bookmark className="h-5 w-5" />
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Save recipe">
+                    Save
                 </Button>
             </div>
           </div>

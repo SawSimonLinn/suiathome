@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter } from "lucide-react";
 
 export default function RecipesPage() {
   return (
@@ -25,13 +24,11 @@ export default function RecipesPage() {
 
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input placeholder="Search recipes..." className="pl-10" />
+          <Input placeholder="Search recipes..." className="pl-3" />
         </div>
         <div className="flex items-center gap-4">
             <Select>
               <SelectTrigger className="w-full md:w-[180px]">
-                <Filter className="h-4 w-4 mr-2 text-muted-foreground"/>
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>

@@ -1,4 +1,3 @@
-import { Logo } from "@/components/icons/logo";
 import Link from "next/link";
 
 export function Footer() {
@@ -6,7 +5,6 @@ export function Footer() {
     <footer className="border-t border-border/50">
       <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-4 py-10 md:flex-row md:px-8">
         <div className="flex items-center gap-2">
-          <Logo className="h-6 w-6 text-primary" />
           <p className="text-center font-headline text-xl font-bold md:text-left">
             Sui at home
           </p>

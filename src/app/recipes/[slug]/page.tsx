@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, Bookmark, Star, Utensils, Clock, User, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function RecipeDetailPage({ params }: { params: { slug: string } }) {
@@ -60,17 +59,14 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
             <CardContent className="p-6">
                 <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                        <Clock className="mx-auto h-7 w-7 mb-2 text-primary" />
                         <p className="text-sm font-bold">Prep Time</p>
                         <p className="text-sm text-muted-foreground">{recipe.prepTime}</p>
                     </div>
                     <div>
-                        <Utensils className="mx-auto h-7 w-7 mb-2 text-primary" />
                         <p className="text-sm font-bold">Cook Time</p>
                         <p className="text-sm text-muted-foreground">{recipe.cookTime}</p>
                     </div>
                     <div>
-                        <User className="mx-auto h-7 w-7 mb-2 text-primary" />
                         <p className="text-sm font-bold">Servings</p>
                         <p className="text-sm text-muted-foreground">{recipe.servings}</p>
                     </div>
@@ -86,7 +82,6 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
             <Card className="border-2">
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl md:text-4xl font-bold flex items-center gap-3">
-                        <Sparkles className="text-accent"/>
                         Ingredients
                     </CardTitle>
                 </CardHeader>
@@ -108,7 +103,6 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
             <Card className="border-2">
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl md:text-4xl font-bold flex items-center gap-3">
-                         <Sparkles className="text-accent"/>
                          Instructions
                     </CardTitle>
                 </CardHeader>
@@ -131,13 +125,13 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
 
         <div className="flex justify-center items-center gap-4 md:gap-8 mb-12">
             <Button variant="outline" size="lg">
-            <Heart className="h-6 w-6 mr-2"/> {recipe.likes} Likes
+              Likes ({recipe.likes})
             </Button>
             <Button variant="outline" size="lg">
-            <Bookmark className="h-6 w-6 mr-2"/> Save
+              Save
             </Button>
             <Button variant="outline" size="lg">
-            <Star className="h-6 w-6 mr-2"/> Favorite
+              Favorite
             </Button>
         </div>
 

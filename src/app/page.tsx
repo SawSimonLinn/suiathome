@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { RecipeCard } from '@/components/recipe-card';
 import { getLatestRecipes, getPopularRecipes } from '@/lib/data';
-import { ArrowRight, Sparkles } from 'lucide-react';
 
 export default function Home() {
   const latestRecipes = getLatestRecipes(3);
@@ -12,18 +11,16 @@ export default function Home() {
     <div className="flex flex-col py-8 md:py-12">
       <section className="w-full text-center border-2 border-primary rounded-lg bg-secondary/30 p-8 md:p-12 mb-16 shadow-lg">
         <div className="flex items-center justify-center gap-2 md:gap-4 mb-4">
-          <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-accent" />
           <h1 className="font-headline text-5xl md:text-7xl font-bold text-primary">
             Sui at home
           </h1>
-          <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-accent" />
         </div>
         <p className="mt-2 max-w-2xl mx-auto text-lg md:text-xl text-foreground/90 font-semibold">
           From our kitchen to yours, discover recipes that are crafted with love, steeped in tradition, and waiting to be shared.
         </p>
         <Button asChild size="lg" className="mt-8">
           <Link href="/recipes">
-            Explore Recipes <ArrowRight className="ml-2 h-5 w-5" />
+            Explore Recipes
           </Link>
         </Button>
       </section>
