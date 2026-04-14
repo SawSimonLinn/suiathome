@@ -9,7 +9,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col py-8 md:py-12">
-      <section className="w-full text-center border-2 border-primary rounded-lg bg-secondary/30 p-8 md:p-12 mb-16 shadow-lg">
+      <section className="w-full text-center border border-primary rounded-lg bg-secondary/30 p-8 md:p-12 mb-16 shadow-lg">
         <div className="flex items-center justify-center gap-2 md:gap-4 mb-4">
           <h1 className="font-headline text-5xl md:text-7xl font-bold text-primary">
             Sui at home
@@ -42,7 +42,7 @@ export default function Home() {
         </div>
       </section>
       
-      <section className="py-12 mt-8 rounded-lg bg-card border-2 border-border">
+      <section className="py-12 mt-8 rounded-lg bg-card border border-border">
          <div className="text-center mb-12 px-4">
           <h2 className="font-headline text-4xl md:text-5xl font-bold">Community Favorites</h2>
           <p className="text-muted-foreground mt-3 max-w-2xl mx-auto font-semibold">These are the tried-and-true recipes that our community loves.</p>

@@ -20,7 +20,7 @@ export function Header() {
   const isLoggedIn = false;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b-2 border-border bg-background/90 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center px-4 md:px-8">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -55,7 +55,7 @@ export function Header() {
               <span className="sr-only">Toggle Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="pr-0 w-4/5 border-r-2 border-border">
+          <SheetContent side="left" className="pr-0 w-4/5 border-r border-border">
             <Link
               href="/"
               className="mb-6 flex items-center"

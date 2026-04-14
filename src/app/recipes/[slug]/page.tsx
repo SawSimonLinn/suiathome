@@ -40,7 +40,7 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
           </div>
         </header>
 
-        <Card className="overflow-hidden mb-8 border-2 border-primary shadow-[8px_8px_0px_hsl(var(--primary))]">
+        <Card className="overflow-hidden mb-8 border border-primary shadow-[8px_8px_0px_hsl(var(--primary))]">
           <div className="relative w-full aspect-video">
             {coverImage && (
               <Image
@@ -55,7 +55,7 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
           </div>
         </Card>
         
-        <Card className="mb-8 border-2">
+        <Card className="mb-8 border">
             <CardContent className="p-6">
                 <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
@@ -75,11 +75,11 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
         </Card>
 
         <div className="prose prose-lg max-w-none text-foreground prose-headings:font-headline prose-headings:text-foreground mb-8 text-center">
-            <p className="lead bg-accent/20 p-6 rounded-lg border-2 border-accent font-semibold">{recipe.story}</p>
+            <p className="lead bg-accent/20 p-6 rounded-lg border border-accent font-semibold">{recipe.story}</p>
         </div>
 
         <div className="space-y-8">
-            <Card className="border-2">
+            <Card className="border">
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl md:text-4xl font-bold flex items-center gap-3">
                         Ingredients
@@ -100,7 +100,7 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
                 </CardContent>
             </Card>
             
-            <Card className="border-2">
+            <Card className="border">
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl md:text-4xl font-bold flex items-center gap-3">
                          Instructions
@@ -110,7 +110,7 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
                     <ol className="list-none space-y-6">
                         {recipe.steps.map((step, index) => (
                         <li key={index} className="flex items-start gap-4">
-                            <div className="flex-shrink-0 mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 font-bold font-headline text-2xl text-primary border-2 border-primary">
+                            <div className="flex-shrink-0 mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 font-bold font-headline text-2xl text-primary border border-primary">
                             {index + 1}
                             </div>
                             <p className="pt-1.5 font-semibold">{step}</p>

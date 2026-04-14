@@ -31,11 +31,11 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
     <Link href={`/recipes/${recipe.slug}`} className="group block">
       <div
         className={cn(
-          "overflow-hidden rounded-lg border-2 bg-card text-card-foreground transition-all duration-300 group-hover:border-primary group-hover:shadow-[8px_8px_0px_hsl(var(--primary))]",
+          "overflow-hidden rounded-lg border bg-card text-card-foreground transition-all duration-300 group-hover:border-primary group-hover:shadow-[8px_8px_0px_hsl(var(--primary))]",
           className
         )}
       >
-        <div className="relative aspect-[4/3] w-full overflow-hidden border-b-2">
+        <div className="relative aspect-[4/3] w-full overflow-hidden border-b">
           {coverImage ? (
              <Image
               src={coverImage.imageUrl}
