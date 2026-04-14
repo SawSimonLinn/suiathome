@@ -1,13 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useState } from 'react';
 import type { CommunityPost } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Separator } from './ui/separator';
 
 interface CommunityPostCardProps {
   post: CommunityPost;
@@ -22,20 +20,13 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
     setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
   };
   
-  const timeAgo = (date: string) => {
-    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
-    let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + " years ago";
-    interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + " months ago";
-    interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + " days ago";
-    interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + " hours ago";
-    interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + " minutes ago";
-    return Math.floor(seconds) + " seconds ago";
-  }
+  const formatPostedDate = (date: string) =>
+    new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(date));
 
   return (
     <Card className="overflow-hidden">
@@ -47,7 +38,7 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
         <div className="grid gap-0.5">
           <p className="font-semibold">{post.user.name}</p>
           <p className="text-sm text-muted-foreground">
-            {timeAgo(post.createdAt)}
+            Posted {formatPostedDate(post.createdAt)}
           </p>
         </div>
       </CardHeader>
@@ -64,23 +55,6 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
           </div>
         )}
          <p className="p-4 text-base">{post.caption}</p>
-
-         {post.linkedRecipe && (
-            <>
-                <Separator />
-                <div className="p-4">
-                    <p className="text-sm text-muted-foreground mb-2">Inspired by:</p>
-                    <Link href={`/recipes/${post.linkedRecipe.slug}`} className="block">
-                        <div className="flex items-center gap-3 p-3 border bg-secondary/50 hover:bg-secondary transition-colors shadow-paper-sm">
-                            <div className="flex-grow">
-                                <p className="font-semibold">{post.linkedRecipe.title}</p>
-                                <p className="text-sm text-muted-foreground">{post.linkedRecipe.category.name}</p>
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-            </>
-         )}
 
       </CardContent>
       <CardFooter className="flex justify-between items-center p-2 border-t mt-2">

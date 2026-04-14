@@ -12,6 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { AccountMenu } from "@/components/layout/account-menu";
 import { SignOutButton } from "@/components/layout/sign-out-button";
 
 const navLinks = [
@@ -30,9 +31,12 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
   const pathname = usePathname();
 
   const isLoggedIn = Boolean(userEmail);
-  const mobileLinks = isAdmin
-    ? [...navLinks, { href: "/admin", label: "Admin" }]
-    : navLinks;
+  const mobileLinks = [
+    ...navLinks,
+    ...(isLoggedIn ? [{ href: "/profile", label: "Profile" }] : []),
+    ...(isLoggedIn ? [{ href: "/settings", label: "Settings" }] : []),
+    ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 backdrop-blur-sm">
@@ -102,19 +106,12 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
         <div className="flex flex-1 items-center justify-end space-x-2">
           {isLoggedIn ? (
             <>
-              {isAdmin ? (
-                <Button variant="ghost" asChild>
-                  <Link href="/admin">
-                    Admin
-                  </Link>
-                </Button>
-              ) : null}
-              <Button variant="ghost" asChild>
-                <Link href="/profile">
-                  Profile
-                </Link>
-              </Button>
-              <SignOutButton />
+              <div className="hidden md:block">
+                <AccountMenu userEmail={userEmail!} isAdmin={isAdmin} />
+              </div>
+              <div className="md:hidden">
+                <SignOutButton />
+              </div>
             </>
           ) : (
             <>

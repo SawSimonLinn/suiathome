@@ -7,20 +7,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { createClient } from '@/lib/supabase/client';
-import type { CommunityPost, Recipe, User } from '@/lib/types';
+import type { CommunityPost, User } from '@/lib/types';
 
 type CommunityPageClientProps = {
   initialPosts: CommunityPost[];
-  availableRecipes: Recipe[];
   currentUser: User | null;
 };
 
@@ -31,12 +23,10 @@ function createImagePath(userId: string, fileName: string) {
 
 export function CommunityPageClient({
   initialPosts,
-  availableRecipes,
   currentUser,
 }: CommunityPageClientProps) {
   const [posts, setPosts] = useState<CommunityPost[]>(initialPosts);
   const [caption, setCaption] = useState('');
-  const [selectedRecipe, setSelectedRecipe] = useState('none');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,24 +73,19 @@ export function CommunityPageClient({
         imageUrl = data.publicUrl;
       }
 
-      const linkedRecipeId =
-        selectedRecipe !== 'none' ? selectedRecipe : null;
-
       const { data: insertedPost, error } = await supabase
         .from('community_posts')
         .insert({
           user_id: currentUser.id,
-          linked_recipe_id: linkedRecipeId,
           caption: caption.trim(),
           image_path: imagePath,
           image_hint: selectedFile ? 'community food post' : null,
         })
-        .select('id, caption, created_at, linked_recipe_id, image_hint')
+        .select('id, caption, created_at, image_hint')
         .single<{
           id: string;
           caption: string;
           created_at: string;
-          linked_recipe_id: string | null;
           image_hint: string | null;
         }>();
 
@@ -119,14 +104,10 @@ export function CommunityPageClient({
           likes: 0,
           comments: [],
           createdAt: insertedPost.created_at,
-          linkedRecipe: insertedPost.linked_recipe_id
-            ? availableRecipes.find((recipe) => recipe.id === insertedPost.linked_recipe_id)
-            : undefined,
         },
         ...current,
       ]);
       setCaption('');
-      setSelectedRecipe('none');
       setSelectedFile(null);
     } finally {
       setIsSubmitting(false);
@@ -166,37 +147,22 @@ export function CommunityPageClient({
                 required
                 rows={3}
               />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="photo"
-                    className="text-sm font-medium text-muted-foreground"
-                  >
-                    Add a photo
-                  </label>
-                  <Input
-                    id="photo"
-                    type="file"
-                    className="mt-1"
-                    accept="image/*"
-                    onChange={(event) =>
-                      setSelectedFile(event.target.files?.[0] || null)
-                    }
-                  />
-                </div>
-                <Select value={selectedRecipe} onValueChange={setSelectedRecipe}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Link a recipe (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {availableRecipes.map((recipe) => (
-                      <SelectItem key={recipe.id} value={recipe.id}>
-                        {recipe.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div>
+                <label
+                  htmlFor="photo"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Add a photo
+                </label>
+                <Input
+                  id="photo"
+                  type="file"
+                  className="mt-1"
+                  accept="image/*"
+                  onChange={(event) =>
+                    setSelectedFile(event.target.files?.[0] || null)
+                  }
+                />
               </div>
 
               <div className="flex justify-end">
