@@ -7,6 +7,7 @@ export type User = {
   id: string;
   name: string;
   avatarUrl: string;
+  role?: 'user' | 'admin' | null;
 };
 
 export type Comment = {
@@ -35,7 +36,6 @@ export type Recipe = {
   likes: number;
   favorites: number;
   isLiked?: boolean;
-  isSaved?: boolean;
   isFavorited?: boolean;
   comments: Comment[];
   createdAt: string;
@@ -58,5 +58,6 @@ export type CommunityPost = {
   likes: number;
   comments: CommunityComment[];
   createdAt: string;
+  linkedRecipeId?: string | null;
   linkedRecipe?: Recipe;
 };

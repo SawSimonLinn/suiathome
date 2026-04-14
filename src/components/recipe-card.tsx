@@ -18,20 +18,21 @@ interface RecipeCardProps {
 export function RecipeCard({ recipe, className }: RecipeCardProps) {
   const {
     isLiked,
-    isSaved,
     isFavorited,
     likeCount,
     favoriteCount,
+    isSharing,
     pendingAction,
     toggleLike,
-    toggleSave,
     toggleFavorite,
+    shareRecipe,
   } = useRecipeInteractions({
     recipeId: recipe.id,
+    recipeSlug: recipe.slug,
+    recipeTitle: recipe.title,
     initialLikeCount: recipe.likes,
     initialFavoriteCount: recipe.favorites,
     initialLiked: recipe.isLiked ?? false,
-    initialSaved: recipe.isSaved ?? false,
     initialFavorited: recipe.isFavorited ?? false,
   });
 
@@ -90,19 +91,6 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
             <Button
               type="button"
               size="sm"
-              variant={isSaved ? "secondary" : "ghost"}
-              onClick={(event) => {
-                stopLinkNavigation(event);
-                void toggleSave();
-              }}
-              disabled={pendingAction === "save"}
-              aria-label="Save recipe"
-            >
-              {isSaved ? "Saved" : "Save"}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
               variant={isFavorited ? "secondary" : "ghost"}
               onClick={(event) => {
                 stopLinkNavigation(event);
@@ -112,6 +100,19 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               aria-label="Favorite recipe"
             >
               Favorite ({favoriteCount})
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={(event) => {
+                stopLinkNavigation(event);
+                void shareRecipe();
+              }}
+              disabled={isSharing}
+              aria-label="Share recipe"
+            >
+              {isSharing ? "Sharing..." : "Share"}
             </Button>
           </div>
         </CardContent>

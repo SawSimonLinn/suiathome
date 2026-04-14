@@ -1,18 +1,35 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { CommunityPostCard } from '@/components/community-post-card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { createClient } from '@/lib/supabase/client';
-import type { CommunityPost, User } from '@/lib/types';
+import type { CommunityPost, Recipe, User } from '@/lib/types';
 
 type CommunityPageClientProps = {
   initialPosts: CommunityPost[];
+  availableRecipes?: Recipe[];
   currentUser: User | null;
 };
 
@@ -23,15 +40,37 @@ function createImagePath(userId: string, fileName: string) {
 
 export function CommunityPageClient({
   initialPosts,
+  availableRecipes = [],
   currentUser,
 }: CommunityPageClientProps) {
+  const router = useRouter();
   const [posts, setPosts] = useState<CommunityPost[]>(initialPosts);
   const [caption, setCaption] = useState('');
+  const [selectedRecipeId, setSelectedRecipeId] = useState('none');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
+  const [editingCaption, setEditingCaption] = useState('');
+  const [editingRecipeId, setEditingRecipeId] = useState('none');
+  const [editErrorMessage, setEditErrorMessage] = useState<string | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const isLoggedIn = Boolean(currentUser);
+
+  const startEditingPost = (post: CommunityPost) => {
+    setEditingPost(post);
+    setEditingCaption(post.caption);
+    setEditingRecipeId(post.linkedRecipeId || 'none');
+    setEditErrorMessage(null);
+  };
+
+  const closeEditDialog = () => {
+    setEditingPost(null);
+    setEditingCaption('');
+    setEditingRecipeId('none');
+    setEditErrorMessage(null);
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -73,19 +112,24 @@ export function CommunityPageClient({
         imageUrl = data.publicUrl;
       }
 
+      const linkedRecipeId =
+        selectedRecipeId !== 'none' ? selectedRecipeId : null;
+
       const { data: insertedPost, error } = await supabase
         .from('community_posts')
         .insert({
           user_id: currentUser.id,
+          linked_recipe_id: linkedRecipeId,
           caption: caption.trim(),
           image_path: imagePath,
           image_hint: selectedFile ? 'community food post' : null,
         })
-        .select('id, caption, created_at, image_hint')
+        .select('id, caption, created_at, linked_recipe_id, image_hint')
         .single<{
           id: string;
           caption: string;
           created_at: string;
+          linked_recipe_id: string | null;
           image_hint: string | null;
         }>();
 
@@ -104,13 +148,75 @@ export function CommunityPageClient({
           likes: 0,
           comments: [],
           createdAt: insertedPost.created_at,
+          linkedRecipeId: insertedPost.linked_recipe_id,
         },
         ...current,
       ]);
       setCaption('');
+      setSelectedRecipeId('none');
       setSelectedFile(null);
+      router.refresh();
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEditSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!currentUser || !editingPost) {
+      setEditErrorMessage('Sign in before editing your post.');
+      return;
+    }
+
+    if (!editingCaption.trim()) {
+      setEditErrorMessage('Write a caption before saving.');
+      return;
+    }
+
+    setIsSavingEdit(true);
+    setEditErrorMessage(null);
+
+    try {
+      const supabase = createClient();
+      const linkedRecipeId =
+        editingRecipeId !== 'none' ? editingRecipeId : null;
+
+      const { data: updatedPost, error } = await supabase
+        .from('community_posts')
+        .update({
+          caption: editingCaption.trim(),
+          linked_recipe_id: linkedRecipeId,
+        })
+        .eq('id', editingPost.id)
+        .eq('user_id', currentUser.id)
+        .select('id, caption, linked_recipe_id')
+        .single<{
+          id: string;
+          caption: string;
+          linked_recipe_id: string | null;
+        }>();
+
+      if (error || !updatedPost) {
+        setEditErrorMessage(error?.message || 'Could not update post.');
+        return;
+      }
+
+      setPosts((currentPosts) =>
+        currentPosts.map((post) =>
+          post.id === updatedPost.id
+            ? {
+                ...post,
+                caption: updatedPost.caption,
+                linkedRecipeId: updatedPost.linked_recipe_id,
+              }
+            : post
+        )
+      );
+      closeEditDialog();
+      router.refresh();
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -149,6 +255,31 @@ export function CommunityPageClient({
               />
               <div>
                 <label
+                  htmlFor="recipe-link"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Tag a recipe
+                </label>
+                <Select value={selectedRecipeId} onValueChange={setSelectedRecipeId}>
+                  <SelectTrigger id="recipe-link" className="mt-1">
+                    <SelectValue placeholder="Select a recipe (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {availableRecipes.map((recipe) => (
+                      <SelectItem key={recipe.id} value={recipe.id}>
+                        {recipe.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Tagging a recipe makes this post show up on that recipe page.
+                </p>
+              </div>
+
+              <div>
+                <label
                   htmlFor="photo"
                   className="text-sm font-medium text-muted-foreground"
                 >
@@ -183,7 +314,15 @@ export function CommunityPageClient({
 
       <div className="space-y-8">
         {posts.length > 0 ? (
-          posts.map((post) => <CommunityPostCard key={post.id} post={post} />)
+          posts.map((post) => (
+            <CommunityPostCard
+              key={post.id}
+              post={post}
+              currentUser={currentUser}
+              canEdit={currentUser?.id === post.user.id}
+              onEdit={startEditingPost}
+            />
+          ))
         ) : (
           <Card>
             <CardContent className="p-6 text-center text-muted-foreground">
@@ -192,6 +331,61 @@ export function CommunityPageClient({
           </Card>
         )}
       </div>
+
+      <Dialog open={Boolean(editingPost)} onOpenChange={(open) => {
+        if (!open) {
+          closeEditDialog();
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Post</DialogTitle>
+            <DialogDescription>
+              Update your caption or retag the recipe for this post.
+            </DialogDescription>
+          </DialogHeader>
+          <form className="grid gap-4" onSubmit={handleEditSubmit}>
+            {editErrorMessage ? (
+              <p className="text-sm text-destructive">{editErrorMessage}</p>
+            ) : null}
+            <Textarea
+              value={editingCaption}
+              onChange={(event) => setEditingCaption(event.target.value)}
+              required
+              rows={4}
+            />
+            <div>
+              <label
+                htmlFor="edit-recipe-link"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                Tag a recipe
+              </label>
+              <Select value={editingRecipeId} onValueChange={setEditingRecipeId}>
+                <SelectTrigger id="edit-recipe-link" className="mt-1">
+                  <SelectValue placeholder="Select a recipe (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {availableRecipes.map((recipe) => (
+                    <SelectItem key={recipe.id} value={recipe.id}>
+                      {recipe.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={closeEditDialog}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSavingEdit}>
+                {isSavingEdit ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

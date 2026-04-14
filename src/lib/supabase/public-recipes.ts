@@ -29,6 +29,7 @@ type ProfileRow = {
   id: string;
   name: string | null;
   avatar_url: string | null;
+  role: 'user' | 'admin' | null;
 };
 
 type RecipeIngredientRow = {
@@ -82,7 +83,6 @@ type RecipeSummary = Pick<
   | 'author'
 > & {
   isLiked: boolean;
-  isSaved: boolean;
   isFavorited: boolean;
   comments: Comment[];
   ingredients: Recipe['ingredients'];
@@ -114,6 +114,7 @@ function buildUser(profile: ProfileRow | undefined): User {
     id: profile?.id || 'unknown-user',
     name: profile?.name?.trim() || 'Sui at home',
     avatarUrl: profile?.avatar_url || '',
+    role: profile?.role || null,
   };
 }
 
@@ -125,7 +126,6 @@ function mapSummaryRecipe(
   favoriteCounts: Map<string, number>,
   commentsByRecipeId: Map<string, Comment[]>,
   viewerLikedRecipeIds: Set<string>,
-  viewerSavedRecipeIds: Set<string>,
   viewerFavoritedRecipeIds: Set<string>
 ): RecipeSummary {
   return {
@@ -150,7 +150,6 @@ function mapSummaryRecipe(
     likes: likeCounts.get(recipe.id) || 0,
     favorites: favoriteCounts.get(recipe.id) || 0,
     isLiked: viewerLikedRecipeIds.has(recipe.id),
-    isSaved: viewerSavedRecipeIds.has(recipe.id),
     isFavorited: viewerFavoritedRecipeIds.has(recipe.id),
     comments: commentsByRecipeId.get(recipe.id) || [],
     createdAt: recipe.created_at,
@@ -176,7 +175,6 @@ async function getSupabaseRecipeData() {
     favoritesResult,
     commentsResult,
     viewerLikesResult,
-    viewerSavesResult,
     viewerFavoritesResult,
   ] = await Promise.all([
     supabase
@@ -188,7 +186,7 @@ async function getSupabaseRecipeData() {
     supabase.from('categories').select('id, name, slug').order('name', {
       ascending: true,
     }),
-    supabase.from('profiles').select('id, name, avatar_url'),
+    supabase.from('profiles').select('id, name, avatar_url, role'),
     supabase
       .from('recipe_ingredients')
       .select('recipe_id, position, quantity, name')
@@ -209,9 +207,6 @@ async function getSupabaseRecipeData() {
       .order('created_at', { ascending: true }),
     viewerId
       ? supabase.from('recipe_likes').select('recipe_id').eq('user_id', viewerId)
-      : Promise.resolve({ data: [], error: null }),
-    viewerId
-      ? supabase.from('recipe_saves').select('recipe_id').eq('user_id', viewerId)
       : Promise.resolve({ data: [], error: null }),
     viewerId
       ? supabase
@@ -235,7 +230,6 @@ async function getSupabaseRecipeData() {
   const favoriteRows = (favoritesResult.data as RecipeInteractionRow[]) ?? [];
   const commentRows = (commentsResult.data as RecipeCommentRow[]) ?? [];
   const viewerLikeRows = (viewerLikesResult.data as RecipeInteractionRow[]) ?? [];
-  const viewerSaveRows = (viewerSavesResult.data as RecipeInteractionRow[]) ?? [];
   const viewerFavoriteRows =
     (viewerFavoritesResult.data as RecipeInteractionRow[]) ?? [];
 
@@ -279,9 +273,6 @@ async function getSupabaseRecipeData() {
   const viewerLikedRecipeIds = new Set(
     viewerLikeRows.map((row) => row.recipe_id)
   );
-  const viewerSavedRecipeIds = new Set(
-    viewerSaveRows.map((row) => row.recipe_id)
-  );
   const viewerFavoritedRecipeIds = new Set(
     viewerFavoriteRows.map((row) => row.recipe_id)
   );
@@ -295,7 +286,6 @@ async function getSupabaseRecipeData() {
       favoriteCounts,
       commentsByRecipeId,
       viewerLikedRecipeIds,
-      viewerSavedRecipeIds,
       viewerFavoritedRecipeIds
     )
   );

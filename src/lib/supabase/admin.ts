@@ -9,7 +9,6 @@ export type AdminStat = {
 export type AnalyticsTrendPoint = {
   label: string;
   likes: number;
-  saves: number;
   comments: number;
   favorites: number;
 };
@@ -19,7 +18,6 @@ export type TopRecipeMetric = {
   title: string;
   slug: string;
   likes: number;
-  saves: number;
   comments: number;
   favorites: number;
   total: number;
@@ -115,7 +113,6 @@ function buildTrendPoints(days: number) {
     label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     key: date.toISOString().slice(0, 10),
     likes: 0,
-    saves: 0,
     comments: 0,
     favorites: 0,
   }));
@@ -124,7 +121,7 @@ function buildTrendPoints(days: number) {
 function incrementTrendPoints(
   trend: ReturnType<typeof buildTrendPoints>,
   rows: CountRow[],
-  field: 'likes' | 'saves' | 'comments' | 'favorites'
+  field: 'likes' | 'comments' | 'favorites'
 ) {
   const lookup = new Map(trend.map((point) => [point.key, point]));
 
@@ -210,28 +207,24 @@ export async function getAdminDashboardData() {
     totalUsers,
     totalRecipes,
     totalRecipeLikes,
-    totalRecipeSaves,
     totalRecipeFavorites,
     totalRecipeComments,
     totalCommunityPosts,
     recentProfiles,
     recipes,
     likeRows,
-    saveRows,
     favoriteRows,
     commentRows,
   ] = await Promise.all([
     getCount('profiles'),
     getCount('recipes'),
     getCount('recipe_likes'),
-    getCount('recipe_saves'),
     getCount('recipe_favorites'),
     getCount('recipe_comments'),
     getCount('community_posts'),
     getRecentProfiles(),
     getRecipeSummaries(),
     getInteractionRows('recipe_likes'),
-    getInteractionRows('recipe_saves'),
     getInteractionRows('recipe_favorites'),
     getInteractionRows('recipe_comments'),
   ]);
@@ -251,11 +244,6 @@ export async function getAdminDashboardData() {
       label: 'Recipe Likes',
       value: totalRecipeLikes,
       description: 'All likes across recipe cards and recipe detail pages.',
-    },
-    {
-      label: 'Saves',
-      value: totalRecipeSaves,
-      description: 'Recipes users saved to revisit later.',
     },
     {
       label: 'Favorites',
@@ -281,7 +269,6 @@ export async function getAdminDashboardData() {
       title: string;
       slug: string;
       likes: number;
-      saves: number;
       comments: number;
       favorites: number;
     }
@@ -291,7 +278,6 @@ export async function getAdminDashboardData() {
       {
         ...recipe,
         likes: 0,
-        saves: 0,
         comments: 0,
         favorites: 0,
       },
@@ -301,11 +287,6 @@ export async function getAdminDashboardData() {
   likeRows.forEach((row) => {
     const target = metricsByRecipe.get(row.recipe_id);
     if (target) target.likes += 1;
-  });
-
-  saveRows.forEach((row) => {
-    const target = metricsByRecipe.get(row.recipe_id);
-    if (target) target.saves += 1;
   });
 
   favoriteRows.forEach((row) => {
@@ -321,8 +302,7 @@ export async function getAdminDashboardData() {
   const topRecipes: TopRecipeMetric[] = [...metricsByRecipe.values()]
     .map((recipe) => ({
       ...recipe,
-      total:
-        recipe.likes + recipe.saves + recipe.comments + recipe.favorites,
+      total: recipe.likes + recipe.comments + recipe.favorites,
     }))
     .filter((recipe) => recipe.total > 0)
     .sort((left, right) => right.total - left.total)
@@ -330,7 +310,6 @@ export async function getAdminDashboardData() {
 
   const engagementTrendRaw = buildTrendPoints(14);
   incrementTrendPoints(engagementTrendRaw, likeRows, 'likes');
-  incrementTrendPoints(engagementTrendRaw, saveRows, 'saves');
   incrementTrendPoints(engagementTrendRaw, favoriteRows, 'favorites');
   incrementTrendPoints(engagementTrendRaw, commentRows, 'comments');
 

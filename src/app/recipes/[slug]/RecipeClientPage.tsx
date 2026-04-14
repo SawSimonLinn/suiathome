@@ -9,32 +9,40 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CommunityPostCard } from '@/components/community-post-card';
 import { RecipeCard } from '@/components/recipe-card';
-import type { Recipe, CommunityPost } from '@/lib/types';
+import type { Recipe, CommunityPost, User } from '@/lib/types';
+import { RecipeQaSection } from './RecipeQaSection';
 
 interface RecipeClientPageProps {
   recipe: Recipe;
   relatedPosts: CommunityPost[];
   relatedRecipes: Recipe[];
+  currentUser: User | null;
 }
 
 
-export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes }: RecipeClientPageProps) {
+export default function RecipeClientPage({
+  recipe,
+  relatedPosts,
+  relatedRecipes,
+  currentUser,
+}: RecipeClientPageProps) {
   const {
     isLiked,
-    isSaved,
     isFavorited,
     likeCount,
     favoriteCount,
+    isSharing,
     pendingAction,
     toggleLike,
-    toggleSave,
     toggleFavorite,
+    shareRecipe,
   } = useRecipeInteractions({
     recipeId: recipe.id,
+    recipeSlug: recipe.slug,
+    recipeTitle: recipe.title,
     initialLikeCount: recipe.likes,
     initialFavoriteCount: recipe.favorites,
     initialLiked: recipe.isLiked ?? false,
-    initialSaved: recipe.isSaved ?? false,
     initialFavorited: recipe.isFavorited ?? false,
   });
   const coverImage = recipe.imageUrl
@@ -142,28 +150,38 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
               Likes ({likeCount})
             </Button>
             <Button
-              variant={isSaved ? 'secondary' : 'outline'}
-              onClick={() => void toggleSave()}
-              disabled={pendingAction === 'save'}
-            >
-              {isSaved ? 'Saved' : 'Save'}
-            </Button>
-            <Button
               variant={isFavorited ? 'secondary' : 'outline'}
               onClick={() => void toggleFavorite()}
               disabled={pendingAction === 'favorite'}
             >
               Favorite ({favoriteCount})
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => void shareRecipe()}
+              disabled={isSharing}
+            >
+              {isSharing ? 'Sharing...' : 'Share'}
+            </Button>
         </div>
       </article>
+
+      <RecipeQaSection
+        recipeId={recipe.id}
+        initialComments={recipe.comments}
+        currentUser={currentUser}
+      />
 
       {relatedPosts.length > 0 && (
         <section className="max-w-4xl mx-auto mt-16">
             <h2 className="font-headline text-3xl md:text-4xl mb-8 text-center">Community Creations</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {relatedPosts.map(post => (
-                    <CommunityPostCard key={post.id} post={post} />
+                    <CommunityPostCard
+                      key={post.id}
+                      post={post}
+                      currentUser={currentUser}
+                    />
                 ))}
             </div>
         </section>

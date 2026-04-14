@@ -17,6 +17,7 @@ type CommunityProfileRow = {
   id: string;
   name: string | null;
   avatar_url: string | null;
+  role: 'user' | 'admin' | null;
 };
 
 type CommunityLikeRow = {
@@ -36,6 +37,7 @@ function buildUser(profile: CommunityProfileRow | undefined): User {
     id: profile?.id || 'unknown-user',
     name: profile?.name?.trim() || 'Sui at home',
     avatarUrl: profile?.avatar_url || '',
+    role: profile?.role || null,
   };
 }
 
@@ -86,7 +88,7 @@ async function getCommunityPostsFromSupabase({
   const [postsResult, profilesResult, likesResult, commentsResult] =
     await Promise.all([
       postsQuery,
-      supabase.from('profiles').select('id, name, avatar_url'),
+      supabase.from('profiles').select('id, name, avatar_url, role'),
       supabase.from('community_post_likes').select('post_id'),
       supabase
         .from('community_post_comments')
@@ -135,6 +137,7 @@ async function getCommunityPostsFromSupabase({
       likes: likeCounts.get(post.id) || 0,
       comments: commentsByPostId.get(post.id) || [],
       createdAt: post.created_at,
+      linkedRecipeId: post.linked_recipe_id,
     }))
   );
 }

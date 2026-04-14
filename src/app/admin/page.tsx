@@ -87,7 +87,7 @@ export default async function AdminPage() {
             <CardHeader>
               <CardTitle>Recipe Analytics</CardTitle>
               <CardDescription>
-                These charts summarize how many users like, save, favorite, and
+                These charts summarize how many users like, favorite, and
                 comment on recipes stored in Supabase.
               </CardDescription>
             </CardHeader>

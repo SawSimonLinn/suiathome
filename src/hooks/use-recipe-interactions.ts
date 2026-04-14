@@ -6,18 +6,16 @@ import { useState, useTransition } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/supabase/client';
 
-type RecipeInteractionKind = 'like' | 'save' | 'favorite';
-type RecipeInteractionTable =
-  | 'recipe_likes'
-  | 'recipe_saves'
-  | 'recipe_favorites';
+type RecipeInteractionKind = 'like' | 'favorite';
+type RecipeInteractionTable = 'recipe_likes' | 'recipe_favorites';
 
 type UseRecipeInteractionsOptions = {
   recipeId: string;
+  recipeSlug: string;
+  recipeTitle: string;
   initialLikeCount: number;
   initialFavoriteCount: number;
   initialLiked: boolean;
-  initialSaved: boolean;
   initialFavorited: boolean;
 };
 
@@ -31,10 +29,11 @@ type ToggleOptions = {
 
 export function useRecipeInteractions({
   recipeId,
+  recipeSlug,
+  recipeTitle,
   initialLikeCount,
   initialFavoriteCount,
   initialLiked,
-  initialSaved,
   initialFavorited,
 }: UseRecipeInteractionsOptions) {
   const router = useRouter();
@@ -42,10 +41,10 @@ export function useRecipeInteractions({
   const [pendingAction, setPendingAction] =
     useState<RecipeInteractionKind | null>(null);
   const [isLiked, setIsLiked] = useState(initialLiked);
-  const [isSaved, setIsSaved] = useState(initialSaved);
   const [isFavorited, setIsFavorited] = useState(initialFavorited);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount);
+  const [isSharing, setIsSharing] = useState(false);
 
   async function toggleInteraction({
     action,
@@ -79,7 +78,7 @@ export function useRecipeInteractions({
       toast({
         variant: 'destructive',
         title: 'Sign in required',
-        description: 'Log in to like, save, and favorite recipes.',
+        description: 'Log in to like and favorite recipes.',
       });
       return;
     }
@@ -126,13 +125,56 @@ export function useRecipeInteractions({
     setPendingAction(null);
   }
 
+  async function shareRecipe() {
+    setIsSharing(true);
+    const url = `${window.location.origin}/recipes/${recipeSlug}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: recipeTitle,
+          text: `Check out ${recipeTitle} on Sui at home.`,
+          url,
+        });
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        toast({
+          title: 'Link copied',
+          description: 'The recipe link is ready to paste and share.',
+        });
+      } else {
+        throw new Error('Sharing is not supported in this browser.');
+      }
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'AbortError'
+      ) {
+        return;
+      }
+
+      toast({
+        variant: 'destructive',
+        title: 'Could not share recipe',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Sharing is not supported in this browser.',
+      });
+    } finally {
+      setIsSharing(false);
+    }
+  }
+
   return {
     isLiked,
-    isSaved,
     isFavorited,
     likeCount,
     favoriteCount,
     isRefreshing: isPending,
+    isSharing,
     pendingAction,
     toggleLike: () =>
       toggleInteraction({
@@ -142,13 +184,6 @@ export function useRecipeInteractions({
         setActive: setIsLiked,
         adjustCount: setLikeCount,
       }),
-    toggleSave: () =>
-      toggleInteraction({
-        action: 'save',
-        table: 'recipe_saves',
-        active: isSaved,
-        setActive: setIsSaved,
-      }),
     toggleFavorite: () =>
       toggleInteraction({
         action: 'favorite',
@@ -157,5 +192,6 @@ export function useRecipeInteractions({
         setActive: setIsFavorited,
         adjustCount: setFavoriteCount,
       }),
+    shareRecipe,
   };
 }

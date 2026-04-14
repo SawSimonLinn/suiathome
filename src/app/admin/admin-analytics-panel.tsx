@@ -43,10 +43,6 @@ const engagementChartConfig = {
     label: 'Likes',
     color: '#F2C258',
   },
-  saves: {
-    label: 'Saves',
-    color: '#89C4CE',
-  },
   favorites: {
     label: 'Favorites',
     color: '#F0B593',
@@ -62,9 +58,9 @@ const recipeBreakdownConfig = {
     label: 'Likes',
     color: '#F2C258',
   },
-  saves: {
-    label: 'Saves',
-    color: '#89C4CE',
+  favorites: {
+    label: 'Favorites',
+    color: '#F0B593',
   },
   comments: {
     label: 'Comments',
@@ -83,7 +79,6 @@ export function AdminAnalyticsPanel({
   const hasTrendData = engagementTrend.some(
     (point) =>
       point.likes > 0 ||
-      point.saves > 0 ||
       point.comments > 0 ||
       point.favorites > 0
   );
@@ -118,13 +113,6 @@ export function AdminAnalyticsPanel({
                 />
                 <Line
                   type="monotone"
-                  dataKey="saves"
-                  stroke="var(--color-saves)"
-                  strokeWidth={3}
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
                   dataKey="favorites"
                   stroke="var(--color-favorites)"
                   strokeWidth={3}
@@ -141,7 +129,7 @@ export function AdminAnalyticsPanel({
             </ChartContainer>
           ) : (
             <div className="flex min-h-[320px] items-center justify-center border bg-card p-6 text-center text-sm text-muted-foreground shadow-paper">
-              Once users start liking, saving, and commenting on real Supabase-backed
+              Once users start liking, favoriting, and commenting on real Supabase-backed
               recipes, this engagement trend chart will populate automatically.
             </div>
           )}
@@ -171,7 +159,11 @@ export function AdminAnalyticsPanel({
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar dataKey="likes" fill="var(--color-likes)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="saves" fill="var(--color-saves)" radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="favorites"
+                  fill="var(--color-favorites)"
+                  radius={[4, 4, 0, 0]}
+                />
                 <Bar
                   dataKey="comments"
                   fill="var(--color-comments)"
@@ -181,7 +173,7 @@ export function AdminAnalyticsPanel({
             </ChartContainer>
           ) : (
             <div className="flex min-h-[320px] items-center justify-center border bg-card p-6 text-center text-sm text-muted-foreground shadow-paper">
-              Top-recipe analytics will appear here after the first likes, saves,
+              Top-recipe analytics will appear here after the first likes, favorites,
               and comments hit your database.
             </div>
           )}
@@ -194,9 +186,8 @@ export function AdminAnalyticsPanel({
             <TableRow>
               <TableHead>Recipe</TableHead>
               <TableHead>Likes</TableHead>
-              <TableHead>Saves</TableHead>
-              <TableHead>Comments</TableHead>
               <TableHead>Favorites</TableHead>
+              <TableHead>Comments</TableHead>
               <TableHead>Total</TableHead>
             </TableRow>
           </TableHeader>
@@ -208,20 +199,19 @@ export function AdminAnalyticsPanel({
                     <Link
                       href={`/recipes/${recipe.slug}`}
                       className="underline-offset-4 hover:underline"
-                    >
+                  >
                       {recipe.title}
                     </Link>
                   </TableCell>
                   <TableCell>{recipe.likes}</TableCell>
-                  <TableCell>{recipe.saves}</TableCell>
-                  <TableCell>{recipe.comments}</TableCell>
                   <TableCell>{recipe.favorites}</TableCell>
+                  <TableCell>{recipe.comments}</TableCell>
                   <TableCell>{recipe.total}</TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-muted-foreground">
+                <TableCell colSpan={5} className="text-muted-foreground">
                   No recipe engagement has been recorded yet.
                 </TableCell>
               </TableRow>
