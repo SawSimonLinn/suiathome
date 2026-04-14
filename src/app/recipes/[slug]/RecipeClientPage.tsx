@@ -22,7 +22,7 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
 
   return (
     <div className="py-8 md:py-12">
-      <article className="max-w-4xl mx-auto">
+      <article className="max-w-4xl mx-auto bg-card border shadow-paper p-6 md:p-10">
         <header className="mb-8 text-center">
           <Badge variant="secondary" className="mb-4">{recipe.category.name}</Badge>
           <h1 className="font-headline text-4xl md:text-6xl font-bold !leading-tight tracking-tight mb-4">
@@ -30,7 +30,7 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{recipe.description}</p>
           <div className="mt-6 flex items-center justify-center gap-4">
-            <Avatar>
+            <Avatar className="h-12 w-12">
               <AvatarImage src={recipe.author.avatarUrl} alt={recipe.author.name} />
               <AvatarFallback>{recipe.author.name.charAt(0)}</AvatarFallback>
             </Avatar>
@@ -44,7 +44,7 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
         </header>
 
         {coverImage && (
-          <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
+          <div className="relative w-full aspect-video border shadow-paper-sm mb-8">
             <Image
               src={coverImage.imageUrl}
               alt={recipe.title}
@@ -56,33 +56,33 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
           </div>
         )}
         
-        <div className="bg-card border rounded-lg p-6 mb-8">
+        <div className="border-y border-dashed border-border my-8 py-4">
             <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                     <p className="text-sm text-muted-foreground">Prep Time</p>
-                    <p className="font-semibold">{recipe.prepTime}</p>
+                    <p className="font-semibold text-lg">{recipe.prepTime}</p>
                 </div>
                 <div>
                     <p className="text-sm text-muted-foreground">Cook Time</p>
-                    <p className="font-semibold">{recipe.cookTime}</p>
+                    <p className="font-semibold text-lg">{recipe.cookTime}</p>
                 </div>
                 <div>
                     <p className="text-sm text-muted-foreground">Servings</p>
-                    <p className="font-semibold">{recipe.servings}</p>
+                    <p className="font-semibold text-lg">{recipe.servings}</p>
                 </div>
             </div>
         </div>
 
-        <div className="text-lg text-foreground/90 bg-accent/50 p-6 rounded-lg mb-8">
-            <p>{recipe.story}</p>
+        <div className="text-lg text-foreground/90 bg-secondary/50 p-6 my-8">
+            <p className="italic leading-relaxed">{recipe.story}</p>
         </div>
 
-        <div className="grid md:grid-cols-5 gap-8">
+        <div className="grid md:grid-cols-5 gap-8 lg:gap-12">
             <div className="md:col-span-2">
-                <h2 className="font-headline text-3xl font-bold mb-4">Ingredients</h2>
-                <ul className="space-y-3">
+                <h2 className="font-headline text-3xl font-bold mb-4 border-b-2 border-primary pb-2">Ingredients</h2>
+                <ul className="space-y-3 text-base">
                     {recipe.ingredients.map((ing, index) => (
-                    <li key={index} className="flex gap-3 items-start p-2 rounded-md bg-secondary/50">
+                    <li key={index} className="flex gap-3 items-start p-2">
                         <div>
                         <span className="font-semibold">{ing.quantity}</span>
                         <span className="text-muted-foreground"> {ing.name}</span>
@@ -93,14 +93,14 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
             </div>
             
             <div className="md:col-span-3">
-                <h2 className="font-headline text-3xl font-bold mb-4">Instructions</h2>
-                <ol className="list-none space-y-6">
+                <h2 className="font-headline text-3xl font-bold mb-4 border-b-2 border-primary pb-2">Instructions</h2>
+                <ol className="list-none space-y-6 text-base leading-loose">
                     {recipe.steps.map((step, index) => (
                     <li key={index} className="flex items-start gap-4">
-                        <div className="flex-shrink-0 mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold font-headline text-xl">
+                        <div className="flex-shrink-0 mt-1.5 flex h-8 w-8 items-center justify-center border-2 border-foreground rounded-full text-foreground font-bold font-headline text-lg">
                         {index + 1}
                         </div>
-                        <p className="pt-1.5">{step}</p>
+                        <p>{step}</p>
                     </li>
                     ))}
                 </ol>
@@ -120,7 +120,6 @@ export default function RecipeClientPage({ recipe, relatedPosts, relatedRecipes 
               Favorite
             </Button>
         </div>
-
       </article>
 
       {relatedPosts.length > 0 && (

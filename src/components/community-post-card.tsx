@@ -53,7 +53,7 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
       </CardHeader>
       <CardContent className="p-0">
         {post.imageUrl && (
-          <div className="relative w-full aspect-square">
+          <div className="relative w-full aspect-square border-y">
             <Image
               src={post.imageUrl}
               alt={post.caption}
@@ -63,7 +63,7 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
             />
           </div>
         )}
-         <p className="p-4">{post.caption}</p>
+         <p className="p-4 text-base">{post.caption}</p>
 
          {post.linkedRecipe && (
             <>
@@ -71,7 +71,7 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
                 <div className="p-4">
                     <p className="text-sm text-muted-foreground mb-2">Inspired by:</p>
                     <Link href={`/recipes/${post.linkedRecipe.slug}`} className="block">
-                        <div className="flex items-center gap-3 p-3 rounded-md border bg-secondary/50 hover:bg-secondary transition-colors">
+                        <div className="flex items-center gap-3 p-3 border bg-secondary/50 hover:bg-secondary transition-colors shadow-paper-sm">
                             <div className="flex-grow">
                                 <p className="font-semibold">{post.linkedRecipe.title}</p>
                                 <p className="text-sm text-muted-foreground">{post.linkedRecipe.category.name}</p>
@@ -83,7 +83,7 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
          )}
 
       </CardContent>
-      <CardFooter className="flex justify-between items-center p-2">
+      <CardFooter className="flex justify-between items-center p-2 border-t mt-2">
         <Button variant="ghost" onClick={handleLike}>
           {isLiked ? 'Unlike' : 'Like'} ({likeCount})
         </Button>

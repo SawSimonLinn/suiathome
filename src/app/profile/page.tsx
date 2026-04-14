@@ -12,7 +12,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 md:py-12">
-      <header className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-8 md:mb-12">
+      <header className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-8 md:mb-12 bg-card p-8 border shadow-paper">
         <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-primary/20">
           <AvatarImage src={user.avatarUrl} alt={user.name} />
           <AvatarFallback className="text-4xl">
@@ -23,7 +23,7 @@ export default function ProfilePage() {
           <h1 className="font-headline text-4xl md:text-5xl font-bold">
             {user.name}
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 text-lg">
             Your personal recipe collection.
           </p>
           <Button variant="outline" className="mt-4">
@@ -38,8 +38,7 @@ export default function ProfilePage() {
           <TabsTrigger value="favorited">Favorited</TabsTrigger>
         </TabsList>
         <TabsContent value="saved">
-          <Card>
-            <CardContent className="p-4 md:p-6">
+          <div className="p-1">
               {savedRecipes.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {savedRecipes.map((recipe) => (
@@ -47,23 +46,18 @@ export default function ProfilePage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
+                <div className="text-center py-12 bg-card border shadow-paper">
                   <h3 className="text-lg font-semibold">No Saved Recipes Yet</h3>
                   <p className="text-muted-foreground mt-1">Start exploring and save your favorites!</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+          </div>
         </TabsContent>
         <TabsContent value="favorited">
-          <Card>
-            <CardContent className="p-4 md:p-6">
-              <div className="text-center py-12">
-                <h3 className="text-lg font-semibold">No Favorited Recipes</h3>
-                <p className="text-muted-foreground mt-1">Your most-loved recipes will appear here.</p>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="text-center py-12 bg-card border shadow-paper">
+              <h3 className="text-lg font-semibold">No Favorited Recipes</h3>
+              <p className="text-muted-foreground mt-1">Your most-loved recipes will appear here.</p>
+            </div>
         </TabsContent>
       </Tabs>
     </div>

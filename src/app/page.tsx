@@ -10,17 +10,19 @@ export default function Home() {
   return (
     <div className="flex flex-col py-8 md:py-12">
       <section className="w-full text-center py-16 md:py-24">
-        <h1 className="font-headline text-5xl md:text-7xl font-bold text-foreground">
-          Sui at home
-        </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground">
-          From our kitchen to yours, discover recipes that are crafted with love, steeped in tradition, and waiting to be shared.
-        </p>
-        <Button asChild size="lg" className="mt-8">
-          <Link href="/recipes">
-            Explore Recipes
-          </Link>
-        </Button>
+        <div className="max-w-3xl mx-auto p-8 bg-card border shadow-paper">
+           <h1 className="font-headline text-5xl md:text-7xl font-black text-foreground">
+            Sui at home
+          </h1>
+          <p className="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground">
+            From our kitchen to yours, discover recipes that are crafted with love, steeped in tradition, and waiting to be shared.
+          </p>
+          <Button asChild size="lg" className="mt-8">
+            <Link href="/recipes">
+              Explore Recipes
+            </Link>
+          </Button>
+        </div>
       </section>
 
       <section className="py-12">

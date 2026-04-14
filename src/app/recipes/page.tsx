@@ -22,7 +22,7 @@ export default function RecipesPage() {
         </p>
       </header>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
+      <div className="flex flex-col md:flex-row gap-4 mb-8 max-w-2xl mx-auto">
         <div className="relative flex-grow">
           <Input placeholder="Search recipes..." className="pl-3" />
         </div>

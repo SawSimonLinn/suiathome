@@ -47,7 +47,7 @@ export default function CommunityPage() {
         <h1 className="font-headline text-4xl md:text-5xl font-bold">
           Community Feed
         </h1>
-        <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
+        <p className="text-muted-foreground mt-2 max-w-2xl mx-auto text-lg">
           See what fellow home cooks are creating and sharing!
         </p>
       </header>
@@ -55,7 +55,7 @@ export default function CommunityPage() {
       {isLoggedIn && (
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3">
+            <CardTitle className="flex items-center gap-3 text-2xl">
               <Avatar>
                 <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
                 <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>

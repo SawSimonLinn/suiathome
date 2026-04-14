@@ -22,20 +22,20 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 backdrop-blur-sm">
-      <div className="container mx-auto flex h-16 items-center px-4 md:px-8">
+      <div className="container mx-auto flex h-20 items-center px-4 md:px-8">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <span className="font-bold sm:inline-block font-headline text-2xl">
+          <span className="font-bold sm:inline-block font-headline text-3xl">
             Sui at home
           </span>
         </Link>
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+        <nav className="hidden md:flex items-center space-x-8 text-base">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
                 "transition-colors hover:text-primary",
-                pathname === link.href ? "text-primary" : "text-muted-foreground"
+                pathname === link.href ? "text-primary-foreground font-bold" : "text-muted-foreground"
               )}
             >
               {link.label}

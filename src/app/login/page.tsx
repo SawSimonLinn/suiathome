@@ -9,7 +9,7 @@ export default function LoginPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline">Login</CardTitle>
+          <CardTitle className="text-3xl font-headline">Login</CardTitle>
           <CardDescription>
             Enter your email below to login to your account.
           </CardDescription>
@@ -23,13 +23,13 @@ export default function LoginPage() {
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" required />
           </div>
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full mt-2">
             Sign in
           </Button>
         </CardContent>
         <div className="mb-6 mt-2 text-center text-sm">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="underline font-medium text-primary">
+          <Link href="/signup" className="underline font-medium text-primary-foreground hover:text-primary">
             Sign up
           </Link>
         </div>
