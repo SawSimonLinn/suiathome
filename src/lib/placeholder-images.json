@@ -1,3 +1,58 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-main",
+      "description": "Main hero image for the homepage",
+      "imageUrl": "https://picsum.photos/seed/hero-main/1920/1080",
+      "imageHint": "food platter"
+    },
+    {
+      "id": "spaghetti-carbonara",
+      "description": "A classic Italian pasta dish",
+      "imageUrl": "https://picsum.photos/seed/spaghetti/600/400",
+      "imageHint": "pasta dish"
+    },
+    {
+      "id": "chocolate-chip-cookies",
+      "description": "Classic homemade chocolate chip cookies",
+      "imageUrl": "https://picsum.photos/seed/cookies/600/400",
+      "imageHint": "cookies"
+    },
+    {
+      "id": "chicken-curry",
+      "description": "A rich and aromatic chicken curry",
+      "imageUrl": "https://picsum.photos/seed/curry/600/400",
+      "imageHint": "chicken curry"
+    },
+    {
+      "id": "avocado-toast",
+      "description": "Simple and healthy avocado toast",
+      "imageUrl": "https://picsum.photos/seed/avocado/600/400",
+      "imageHint": "avocado toast"
+    },
+    {
+      "id": "beef-tacos",
+      "description": "Flavorful and zesty beef tacos",
+      "imageUrl": "https://picsum.photos/seed/tacos/600/400",
+      "imageHint": "beef tacos"
+    },
+    {
+      "id": "tomato-soup",
+      "description": "Creamy and comforting tomato soup",
+      "imageUrl": "https://picsum.photos/seed/soup/600/400",
+      "imageHint": "tomato soup"
+    },
+    {
+      "id": "blueberry-pancakes",
+      "description": "Fluffy blueberry pancakes for breakfast",
+      "imageUrl": "https://picsum.photos/seed/pancakes/600/400",
+      "imageHint": "blueberry pancakes"
+    },
+    {
+      "id": "caesar-salad",
+      "description": "Classic Caesar salad with croutons",
+      "imageUrl": "https://picsum.photos/seed/salad/600/400",
+      "imageHint": "caesar salad"
+    }
+  ]
 }
