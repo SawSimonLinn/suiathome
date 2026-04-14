@@ -1,11 +1,15 @@
+'use client';
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { getRecipeBySlug } from '@/lib/data';
+import { getRecipeBySlug, getCommunityPostsByRecipeId, getRelatedRecipes } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { CommunityPostCard } from '@/components/community-post-card';
+import { RecipeCard } from '@/components/recipe-card';
 
 export default function RecipeDetailPage({ params }: { params: { slug: string } }) {
   const recipe = getRecipeBySlug(params.slug);
@@ -13,7 +17,9 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
   if (!recipe) {
     notFound();
   }
-
+  
+  const relatedPosts = getCommunityPostsByRecipeId(recipe.id, 2);
+  const relatedRecipes = getRelatedRecipes(recipe, 3);
   const coverImage = PlaceHolderImages.find((p) => p.id === recipe.imageId);
 
   return (
@@ -69,7 +75,7 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
             </div>
         </div>
 
-        <div className="text-lg text-foreground/90 bg-accent p-6 rounded-lg mb-8">
+        <div className="text-lg text-foreground/90 bg-accent/50 p-6 rounded-lg mb-8">
             <p>{recipe.story}</p>
         </div>
 
@@ -118,6 +124,30 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
         </div>
 
       </article>
+
+      {relatedPosts.length > 0 && (
+        <section className="max-w-4xl mx-auto mt-16">
+            <h2 className="font-headline text-3xl md:text-4xl font-bold mb-8 text-center">Community Creations</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {relatedPosts.map(post => (
+                    <CommunityPostCard key={post.id} post={post} />
+                ))}
+            </div>
+        </section>
+      )}
+
+      {relatedRecipes.length > 0 && (
+        <section className="max-w-4xl mx-auto mt-16">
+             <Separator className="my-12" />
+            <h2 className="font-headline text-3xl md:text-4xl font-bold mb-8 text-center">You May Also Like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                {relatedRecipes.map(relatedRecipe => (
+                    <RecipeCard key={relatedRecipe.id} recipe={relatedRecipe} />
+                ))}
+            </div>
+        </section>
+      )}
+
     </div>
   );
 }

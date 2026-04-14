@@ -270,3 +270,15 @@ export function getPopularRecipes(count: number): Recipe[] {
 export function getCommunityPosts(): CommunityPost[] {
   return [...communityPosts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
+
+export function getCommunityPostsByRecipeId(recipeId: string, count: number): CommunityPost[] {
+  return communityPosts
+    .filter(post => post.linkedRecipe?.id === recipeId)
+    .slice(0, count);
+}
+
+export function getRelatedRecipes(currentRecipe: Recipe, count: number): Recipe[] {
+    return recipes
+        .filter(recipe => recipe.category.id === currentRecipe.category.id && recipe.id !== currentRecipe.id)
+        .slice(0, count);
+}
