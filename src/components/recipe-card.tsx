@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { Recipe } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
-import { Heart, Bookmark } from "lucide-react";
+import { Heart, Bookmark, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -32,17 +32,17 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
     <Link href={`/recipes/${recipe.slug}`} className="group block">
       <div
         className={cn(
-          "overflow-hidden rounded-md border bg-card text-card-foreground transition-all duration-300 group-hover:border-primary shadow-none group-hover:shadow-lg",
+          "overflow-hidden rounded-lg border-2 bg-card text-card-foreground transition-all duration-300 group-hover:border-primary group-hover:shadow-[8px_8px_0px_hsl(var(--primary))]",
           className
         )}
       >
-        <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <div className="relative aspect-[4/3] w-full overflow-hidden border-b-2">
           {coverImage ? (
              <Image
               src={coverImage.imageUrl}
               alt={recipe.title}
               fill
-              className="object-cover transition-transform duration-300"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
               data-ai-hint={coverImage.imageHint}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
@@ -51,15 +51,15 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               <span className="text-muted-foreground">No Image</span>
             </div>
           )}
-          <Badge variant="secondary" className="absolute top-3 left-3">
+          <Badge variant="secondary" className="absolute top-3 left-3 !font-body font-semibold">
             {recipe.category.name}
           </Badge>
         </div>
         <div className="p-4">
-          <h3 className="font-headline text-xl font-bold leading-tight truncate" title={recipe.title}>
+          <h3 className="font-headline text-2xl font-bold leading-tight truncate" title={recipe.title}>
             {recipe.title}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1 font-semibold">
             By {recipe.author.name}
           </p>
           <div className="mt-4 flex items-center justify-between">
@@ -76,9 +76,14 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               />
               <span className="text-sm font-medium">{likeCount}</span>
             </button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Save recipe">
-              <Bookmark className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Favorite recipe">
+                    <Star className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={(e) => {e.preventDefault(); e.stopPropagation()}} aria-label="Save recipe">
+                    <Bookmark className="h-5 w-5" />
+                </Button>
+            </div>
           </div>
         </div>
       </div>

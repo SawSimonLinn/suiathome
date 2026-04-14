@@ -22,23 +22,23 @@ export function Header() {
   const isLoggedIn = false;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-border bg-background/90 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center px-4 md:px-8">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Logo className="h-6 w-6" />
-            <span className="hidden font-bold sm:inline-block font-headline">
+            <Logo className="h-8 w-8 text-primary" />
+            <span className="font-bold sm:inline-block font-headline text-2xl">
               Sui at home
             </span>
           </Link>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
+          <nav className="flex items-center space-x-6 text-lg font-bold">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "transition-colors hover:text-foreground/80",
-                  pathname === link.href ? "text-foreground" : "text-foreground/60"
+                  "transition-colors hover:text-primary",
+                  pathname === link.href ? "text-primary" : "text-foreground/80"
                 )}
               >
                 {link.label}
@@ -54,28 +54,28 @@ export function Header() {
               variant="ghost"
               className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="pr-0 w-4/5">
+          <SheetContent side="left" className="pr-0 w-4/5 border-r-2 border-border">
             <Link
               href="/"
-              className="mb-4 flex items-center"
+              className="mb-6 flex items-center"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Logo className="mr-2 h-5 w-5" />
-              <span className="font-bold font-headline">Sui at home</span>
+              <Logo className="mr-2 h-6 w-6" />
+              <span className="font-bold font-headline text-xl">Sui at home</span>
             </Link>
-            <div className="flex flex-col space-y-3">
+            <div className="flex flex-col space-y-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                    className={cn(
-                    "transition-colors hover:text-foreground/80",
-                    pathname === link.href ? "text-foreground" : "text-foreground/60"
+                    "transition-colors hover:text-primary text-lg font-bold",
+                    pathname === link.href ? "text-primary" : "text-foreground/80"
                   )}
                 >
                   {link.label}
@@ -88,18 +88,18 @@ export function Header() {
         {/* Mobile-only Centered Logo */}
         <div className="flex-1 flex justify-center md:hidden">
             <Link href="/" className="flex items-center space-x-2">
-                <Logo className="h-6 w-6" />
-                <span className="font-bold sm:inline-block font-headline">
+                <Logo className="h-8 w-8 text-primary" />
+                <span className="font-bold sm:inline-block font-headline text-2xl">
                     Sui at home
                 </span>
             </Link>
         </div>
         
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-1">
           {isLoggedIn ? (
             <Button variant="ghost" size="icon" asChild>
               <Link href="/profile">
-                <CircleUserRound className="h-5 w-5" />
+                <CircleUserRound className="h-6 w-6" />
                 <span className="sr-only">Profile</span>
               </Link>
             </Button>
