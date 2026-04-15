@@ -31,7 +31,7 @@ export default async function RecipesPage() {
         <div className="flex items-center gap-3">
             <Select>
               <SelectTrigger className="w-full sm:w-[160px] md:w-[180px]">
-                <SelectValue placeholder="All Categories" />
+                <SelectValue placeholder="🏷️ All Categories" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
@@ -42,7 +42,7 @@ export default async function RecipesPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button>Search</Button>
+            <Button>🔍 Search Recipes</Button>
         </div>
       </div>
 

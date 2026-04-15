@@ -85,10 +85,10 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link href="/login">Log In</Link>
+                <Link href="/login">🔑 Log In</Link>
               </Button>
               <Button asChild>
-                <Link href="/signup">Sign Up</Link>
+                <Link href="/signup">✨ Sign Up</Link>
               </Button>
             </>
           )}
@@ -165,7 +165,7 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
                         className="w-full"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        <Link href="/signup">Sign Up</Link>
+                        <Link href="/signup">✨ Sign Up</Link>
                       </Button>
                       <Button
                         variant="outline"
@@ -173,7 +173,7 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
                         className="w-full"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        <Link href="/login">Log In</Link>
+                        <Link href="/login">🔑 Log In</Link>
                       </Button>
                     </div>
                   )}

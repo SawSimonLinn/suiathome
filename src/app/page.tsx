@@ -110,7 +110,7 @@ export default async function Home() {
         )}
         <div className="text-center mt-12">
           <Button asChild variant="outline">
-            <Link href="/recipes">View All Recipes</Link>
+            <Link href="/recipes">🍽️ View All Recipes</Link>
           </Button>
         </div>
       </section>
@@ -169,7 +169,7 @@ export default async function Home() {
         )}
         <div className="text-center mt-10">
           <Button asChild variant="outline">
-            <Link href="/community">See All Community Posts</Link>
+            <Link href="/community">💌 See All Community Posts</Link>
           </Button>
         </div>
       </section>

@@ -6,13 +6,6 @@ import { useState } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/password-input';
@@ -26,7 +19,6 @@ function getNextPath(next: string | null) {
   if (!next || !next.startsWith('/')) {
     return '/profile';
   }
-
   return next;
 }
 
@@ -47,9 +39,7 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
     event.preventDefault();
 
     if (!supabaseReady) {
-      setErrorMessage(
-        'Add your Supabase URL and publishable key to .env.local or .env first.'
-      );
+      setErrorMessage('Add your Supabase URL and publishable key to .env.local or .env first.');
       return;
     }
 
@@ -58,10 +48,7 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
         setErrorMessage(error.message);
@@ -77,9 +64,7 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
 
   const handleGoogleSignIn = async () => {
     if (!supabaseReady) {
-      setErrorMessage(
-        'Add your Supabase URL and publishable key to .env.local or .env first.'
-      );
+      setErrorMessage('Add your Supabase URL and publishable key to .env.local or .env first.');
       return;
     }
 
@@ -107,21 +92,45 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-3xl font-headline">Login</CardTitle>
-          <CardDescription>
-            Sign in with your email and password, or continue with Google.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
+      <div className="w-full max-w-md border-2 border-foreground bg-paper paper-shadow relative overflow-hidden">
+
+        {/* Sage green top ribbon */}
+        <div className="w-full border-b-2 border-foreground py-2 px-4 flex items-center justify-center gap-2" style={{ backgroundColor: 'var(--sage)' }}>
+          <span className="text-sm font-medium tracking-widest uppercase" style={{ color: '#2d4a2a' }}>
+            🌿 &nbsp; Welcome back &nbsp; 🌿
+          </span>
+        </div>
+
+        {/* Tape strips */}
+        <div className="absolute top-[2.6rem] left-5 w-12 h-4 border border-foreground/60 rotate-[-3deg]" style={{ backgroundColor: 'var(--brass)', opacity: 0.6 }} aria-hidden="true" />
+        <div className="absolute top-[2.6rem] right-6 w-10 h-4 border border-foreground/60 rotate-[2deg]" style={{ backgroundColor: 'var(--blush)' }} aria-hidden="true" />
+
+        <div className="p-6 grid gap-4">
+          {/* Flower row */}
+          <div className="flex justify-center gap-2 mt-2" aria-hidden="true">
+            {['🌸', '🌼', '🌸', '🌼', '🌸'].map((f, i) => (
+              <span key={i} className="text-lg">{f}</span>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <h1 className="font-headline text-3xl" style={{ color: '#2d4a2a' }}>Login</h1>
+            {/* Squiggly underline */}
+            <div className="flex justify-center mt-2">
+              <svg width="100" height="10" viewBox="0 0 100 10" fill="none" aria-hidden="true">
+                <path d="M2 6 Q12 2 22 6 Q32 10 42 6 Q52 2 62 6 Q72 10 82 6 Q90 3 98 6" stroke="var(--sage-dark)" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.5"/>
+              </svg>
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              Sign in with your email and password, or continue with Google.
+            </p>
+          </div>
+
           {!supabaseReady ? (
             <Alert variant="destructive">
               <AlertTitle>Supabase keys are missing</AlertTitle>
               <AlertDescription>
-                Add `NEXT_PUBLIC_SUPABASE_URL` and
-                `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to `.env.local` or
-                `.env`.
+                Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to `.env.local` or `.env`.
               </AlertDescription>
             </Alert>
           ) : null}
@@ -169,35 +178,38 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
                 onChange={(event) => setPassword(event.target.value)}
               />
             </div>
-            <Button type="submit" className="w-full mt-2" disabled={isBusy}>
-              {isSigningIn ? 'Signing in...' : 'Sign in'}
+            <Button type="submit" className="w-full mt-2 border-2 border-foreground paper-btn font-semibold" style={{ backgroundColor: 'var(--sage)', color: '#1f3b1c' }} disabled={isBusy}>
+              {isSigningIn ? '🔄 Signing in...' : '🔑 Sign in'}
             </Button>
           </form>
 
           <div className="relative py-1 text-center text-sm text-muted-foreground">
-            <span className="bg-card px-2">or</span>
+            <span className="bg-paper px-2">or</span>
           </div>
 
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full border-2 border-foreground paper-btn font-semibold"
             onClick={handleGoogleSignIn}
             disabled={isBusy}
           >
-            {isStartingGoogle ? 'Redirecting...' : 'Continue with Google'}
+            {isStartingGoogle ? '🔄 Redirecting...' : '🌐 Continue with Google'}
           </Button>
-        </CardContent>
-        <div className="mb-6 mt-2 text-center text-sm">
-          Don&apos;t have an account?{' '}
-          <Link
-            href="/signup"
-            className="font-medium text-foreground underline hover:text-muted-foreground"
-          >
-            Sign up
-          </Link>
+
+          <p className="text-center text-sm">
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="font-medium text-foreground underline hover:text-muted-foreground">
+              Sign up
+            </Link>
+          </p>
         </div>
-      </Card>
+
+        {/* Bottom floral strip */}
+        <div className="w-full border-t-2 border-foreground py-2 flex justify-center gap-3 text-lg" style={{ backgroundColor: 'var(--blush-light)' }} aria-hidden="true">
+          <span>🌷</span><span>🌿</span><span>🫶</span><span>🌿</span><span>🌷</span>
+        </div>
+      </div>
     </div>
   );
 }

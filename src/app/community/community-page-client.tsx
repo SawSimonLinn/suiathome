@@ -372,7 +372,7 @@ export function CommunityPageClient({
                       Cancel
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? 'Posting...' : 'Post'}
+                      {isSubmitting ? '🔄 Posting...' : '📝 Post'}
                     </Button>
                   </div>
                 </form>

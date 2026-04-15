@@ -1,12 +1,5 @@
 import type { Metadata } from 'next';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { LEGAL_LAST_UPDATED } from '@/lib/legal';
 
 const sections = [
@@ -73,32 +66,57 @@ export const metadata: Metadata = {
 
 export default function TermsAndConditionsPage() {
   return (
-    <div className="mx-auto w-full max-w-4xl py-12">
-      <Card>
-        <CardHeader className="border-b-2 border-foreground bg-secondary">
-          <CardTitle className="text-3xl md:text-4xl">
-            Terms & Conditions
-          </CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">
-            Last updated {LEGAL_LAST_UPDATED}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-8 pt-6">
-          {sections.map((section) => (
-            <section key={section.title} className="space-y-3">
-              <h2 className="text-2xl">{section.title}</h2>
-              {section.paragraphs.map((paragraph) => (
-                <p
-                  key={paragraph}
-                  className="text-sm leading-7 text-muted-foreground md:text-base"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </section>
-          ))}
-        </CardContent>
-      </Card>
+    <div className="mx-auto w-full max-w-4xl py-12 px-4">
+      <div className="border-2 border-foreground bg-paper paper-shadow relative overflow-hidden">
+
+        {/* Sage green top ribbon */}
+        <div className="w-full border-b-2 border-foreground py-2 px-4 flex items-center justify-center gap-2" style={{ backgroundColor: 'var(--sage)' }}>
+          <span className="text-sm font-medium tracking-widest uppercase" style={{ color: '#2d4a2a' }}>
+            🌿 &nbsp; Sui at Home &nbsp; 🌿
+          </span>
+        </div>
+
+        {/* Tape strips */}
+        <div className="absolute top-[2.6rem] left-5 w-14 h-4 border border-foreground/60 rotate-[-2deg]" style={{ backgroundColor: 'var(--lavender)', opacity: 0.8 }} aria-hidden="true" />
+        <div className="absolute top-[2.6rem] right-7 w-12 h-4 border border-foreground/60 rotate-[1.5deg]" style={{ backgroundColor: 'var(--brass)', opacity: 0.6 }} aria-hidden="true" />
+
+        <div className="p-6 md:p-10">
+          {/* Flower row */}
+          <div className="flex justify-center gap-2 mb-5" aria-hidden="true">
+            {['🌸', '🌼', '🌸', '🌼', '🌸'].map((f, i) => (
+              <span key={i} className="text-xl">{f}</span>
+            ))}
+          </div>
+
+          <div className="text-center mb-8">
+            <h1 className="font-headline text-3xl md:text-4xl" style={{ color: '#2d4a2a' }}>Terms & Conditions</h1>
+            <div className="flex justify-center mt-3">
+              <svg width="140" height="10" viewBox="0 0 140 10" fill="none" aria-hidden="true">
+                <path d="M2 6 Q12 2 22 6 Q32 10 42 6 Q52 2 62 6 Q72 10 82 6 Q92 2 102 6 Q112 10 122 6 Q130 3 138 6" stroke="var(--sage-dark)" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.5"/>
+              </svg>
+            </div>
+            <p className="text-sm text-muted-foreground mt-3">Last updated {LEGAL_LAST_UPDATED}</p>
+          </div>
+
+          <div className="space-y-8">
+            {sections.map((section) => (
+              <section key={section.title} className="space-y-3">
+                <h2 className="text-2xl font-headline border-b-2 border-dashed border-foreground/30 pb-2">{section.title}</h2>
+                {section.paragraphs.map((paragraph) => (
+                  <p key={paragraph} className="text-sm leading-7 text-muted-foreground md:text-base">
+                    {paragraph}
+                  </p>
+                ))}
+              </section>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom floral strip */}
+        <div className="w-full border-t-2 border-foreground py-2 flex justify-center gap-3 text-lg" style={{ backgroundColor: 'var(--blush-light)' }} aria-hidden="true">
+          <span>🌷</span><span>🌿</span><span>🫶</span><span>🌿</span><span>🌷</span>
+        </div>
+      </div>
     </div>
   );
 }
