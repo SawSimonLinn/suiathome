@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { hasSupabaseEnv } from '@/lib/supabase/config';
 import { getAuthContext } from '@/lib/supabase/auth';
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: 'Sui at home',
@@ -45,6 +46,7 @@ export default async function RootLayout({
           <Footer />
         </div>
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );
