@@ -46,7 +46,7 @@ export default async function RecipesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+      <div className="mx-auto grid w-full max-w-[78rem] grid-cols-[repeat(auto-fit,minmax(min(100%,17rem),18rem))] justify-center gap-6 md:gap-8">
         {recipes.length > 0 ? (
           recipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />

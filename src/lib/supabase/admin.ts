@@ -29,6 +29,31 @@ export type AdminCategory = {
   slug: string;
 };
 
+export type AdminRecipeListItem = {
+  id: string;
+  title: string;
+  slug: string;
+  categoryName: string;
+  createdAt: string;
+};
+
+export type AdminEditableRecipe = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  story: string;
+  imageHint: string;
+  imageUrls: string[];
+  prepTime: string;
+  cookTime: string;
+  servings: number;
+  categoryId: string;
+  ingredients: { quantity: string; name: string }[];
+  steps: string[];
+  tips: string[];
+};
+
 export type ModerationComment = {
   id: string;
   body: string;
@@ -337,6 +362,136 @@ export async function getAdminCategories() {
   }
 
   return (data as AdminCategory[]) ?? [];
+}
+
+export async function getAdminRecipeList(limit = 100) {
+  const supabase = await createClient();
+  const [recipesResult, categoriesResult] = await Promise.all([
+    supabase
+      .from('recipes')
+      .select('id, title, slug, category_id, created_at')
+      .order('created_at', { ascending: false })
+      .limit(limit),
+    supabase.from('categories').select('id, name'),
+  ]);
+
+  if (recipesResult.error || !recipesResult.data) {
+    return [] as AdminRecipeListItem[];
+  }
+
+  const categoriesById = new Map(
+    (((categoriesResult.data as { id: string; name: string }[] | null) ?? [])).map(
+      (category) => [category.id, category.name]
+    )
+  );
+
+  return (
+    (recipesResult.data as {
+      id: string;
+      title: string;
+      slug: string;
+      category_id: string;
+      created_at: string;
+    }[]).map((recipe) => ({
+      id: recipe.id,
+      title: recipe.title,
+      slug: recipe.slug,
+      categoryName: categoriesById.get(recipe.category_id) || 'Uncategorized',
+      createdAt: recipe.created_at,
+    })) ?? []
+  );
+}
+
+export async function getAdminRecipeForEdit(recipeId: string) {
+  const supabase = await createClient();
+  const [
+    recipeResult,
+    ingredientResult,
+    stepResult,
+    tipResult,
+    imageResult,
+  ] = await Promise.all([
+    supabase
+      .from('recipes')
+      .select(
+        'id, title, slug, description, story, image_url, image_hint, prep_time, cook_time, servings, category_id'
+      )
+      .eq('id', recipeId)
+      .maybeSingle(),
+    supabase
+      .from('recipe_ingredients')
+      .select('quantity, name, position')
+      .eq('recipe_id', recipeId)
+      .order('position', { ascending: true }),
+    supabase
+      .from('recipe_steps')
+      .select('body, position')
+      .eq('recipe_id', recipeId)
+      .order('position', { ascending: true }),
+    supabase
+      .from('recipe_tips')
+      .select('body, position')
+      .eq('recipe_id', recipeId)
+      .order('position', { ascending: true }),
+    supabase
+      .from('recipe_images')
+      .select('url, position')
+      .eq('recipe_id', recipeId)
+      .order('position', { ascending: true }),
+  ]);
+
+  if (recipeResult.error || !recipeResult.data) {
+    return null as AdminEditableRecipe | null;
+  }
+
+  const recipe = recipeResult.data as {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    story: string;
+    image_url: string | null;
+    image_hint: string | null;
+    prep_time: string;
+    cook_time: string;
+    servings: number;
+    category_id: string;
+  };
+
+  const extraImages =
+    ((imageResult.data as { url: string; position: number }[] | null) ?? []).map(
+      (image) => image.url
+    );
+
+  return {
+    id: recipe.id,
+    title: recipe.title,
+    slug: recipe.slug,
+    description: recipe.description,
+    story: recipe.story,
+    imageHint: recipe.image_hint || '',
+    imageUrls: [recipe.image_url, ...extraImages].filter(
+      (url): url is string => Boolean(url)
+    ),
+    prepTime: recipe.prep_time,
+    cookTime: recipe.cook_time,
+    servings: recipe.servings,
+    categoryId: recipe.category_id,
+    ingredients: (
+      (ingredientResult.data as
+        | { quantity: string; name: string; position: number }[]
+        | null) ?? []
+    ).map((ingredient) => ({
+      quantity: ingredient.quantity,
+      name: ingredient.name,
+    })),
+    steps: (
+      (stepResult.data as { body: string; position: number }[] | null) ?? []
+    ).map((step) => step.body),
+    tips: (
+      (tipResult.data as { body: string; position: number }[] | null) ?? []
+    ).map((tip) => tip.body),
+  };
 }
 
 async function getProfilesByIds(userIds: string[]) {

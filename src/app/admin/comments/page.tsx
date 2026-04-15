@@ -1,8 +1,7 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
+import { AdminNav } from '@/components/layout/admin-nav';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -36,23 +35,20 @@ export default async function AdminCommentsPage() {
   return (
     <div className="py-8 md:py-12">
       <div className="mx-auto max-w-6xl space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-3">
-            <Badge variant="secondary">Admin Moderation</Badge>
-            <div>
-              <h1 className="font-headline text-4xl md:text-5xl">
-                Comment Controls
-              </h1>
-              <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
-                This is where comment removal and hide/unhide controls live for
-                recipe pages and community posts.
-              </p>
-            </div>
+        <div className="space-y-3">
+          <Badge variant="secondary">Admin Moderation</Badge>
+          <div>
+            <h1 className="font-headline text-4xl md:text-5xl">
+              Comment Controls
+            </h1>
+            <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
+              This is where comment removal and hide/unhide controls live for
+              recipe pages and community posts.
+            </p>
           </div>
-          <Button asChild variant="outline">
-            <Link href="/admin">Back to dashboard</Link>
-          </Button>
         </div>
+
+        <AdminNav />
 
         <Card>
           <CardHeader>

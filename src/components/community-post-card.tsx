@@ -312,14 +312,14 @@ export function CommunityPostCard({
           <>
             <button
               type="button"
-              className="group relative flex w-full justify-center border-y bg-secondary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="group relative block aspect-video w-full overflow-hidden border-y bg-secondary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               onClick={() => void handleImageOpen()}
               aria-label="Open full image"
             >
               <img
                 src={post.imageUrl}
                 alt={post.caption}
-                className="block h-auto max-h-[720px] w-auto max-w-full transition-transform duration-200 group-hover:scale-[1.01]"
+                className="block h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.01]"
                 loading="lazy"
               />
               <span className="absolute bottom-3 right-3 border-2 border-foreground bg-paper px-2 py-1 text-xs font-semibold uppercase tracking-wide opacity-0 transition-opacity group-hover:opacity-100">

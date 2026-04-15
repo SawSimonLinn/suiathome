@@ -1,10 +1,17 @@
+import { LoaderCircle } from 'lucide-react';
+
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function RecipeLoading() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <div className="mx-auto max-w-4xl py-10" aria-live="polite" aria-busy="true">
+      <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        <LoaderCircle className="h-4 w-4 animate-spin" />
+        Loading recipe
+      </div>
+
       {/* Cover image */}
-      <Skeleton className="h-72 w-full md:h-96" />
+      <Skeleton className="mt-8 h-72 w-full md:h-96" />
 
       <div className="mt-8 grid gap-4">
         {/* Category badge */}
@@ -41,6 +48,6 @@ export default function RecipeLoading() {
           </div>
         ))}
       </div>
-    </main>
+    </div>
   );
 }

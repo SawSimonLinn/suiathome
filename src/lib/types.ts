@@ -28,6 +28,7 @@ export type Recipe = {
   imageId?: string;
   imageUrl?: string;
   imageHint?: string;
+  galleryImages?: { url: string; position: number }[];
   category: Category;
   prepTime: string;
   cookTime: string;

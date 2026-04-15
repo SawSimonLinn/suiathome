@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CommunityPostCard } from '@/components/community-post-card';
 import { CreateCommunityPostCard } from '@/components/create-community-post-card';
+import { ImageStripLightbox } from '@/components/image-strip-lightbox';
 import { RecipeCard } from '@/components/recipe-card';
 import { RecipeImageCard } from '@/components/recipe-image-card';
 import type { Recipe, CommunityPost, User } from '@/lib/types';
@@ -158,6 +159,23 @@ export default function RecipeClientPage({
                 </ol>
             </div>
         </div>
+
+        {recipe.galleryImages && recipe.galleryImages.length > 0 ? (
+          <>
+            <Separator className="my-12" />
+            <section>
+              <h2 className="mb-4 font-headline text-3xl">More Photos</h2>
+              <ImageStripLightbox
+                dialogTitle={`${recipe.title} photos`}
+                dialogDescription={`Large preview for the additional images in ${recipe.title}.`}
+                images={recipe.galleryImages.map((image, index) => ({
+                  alt: `${recipe.title} photo ${index + 2}`,
+                  src: image.url,
+                }))}
+              />
+            </section>
+          </>
+        ) : null}
         
         <Separator className="my-12" />
 
@@ -195,21 +213,24 @@ export default function RecipeClientPage({
         currentUser={currentUser}
       />
 
-      <section className="max-w-5xl mx-auto mt-16">
+      <section className="max-w-6xl mx-auto mt-16 px-4">
         <h2 className="font-headline text-3xl md:text-4xl mb-8 text-center">Community Creations</h2>
-        <div className="mx-auto flex max-w-3xl flex-col gap-8">
-          <CreateCommunityPostCard
-            recipeId={recipe.id}
-            recipeTitle={recipe.title}
-            currentUser={currentUser}
-          />
+        <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
           {relatedPosts.map(post => (
-            <CommunityPostCard
-              key={post.id}
-              post={post}
+            <div key={post.id} className="w-[min(88vw,420px)] shrink-0 snap-start">
+              <CommunityPostCard
+                post={post}
+                currentUser={currentUser}
+              />
+            </div>
+          ))}
+          <div className="w-[min(85vw,360px)] shrink-0 snap-start">
+            <CreateCommunityPostCard
+              recipeId={recipe.id}
+              recipeTitle={recipe.title}
               currentUser={currentUser}
             />
-          ))}
+          </div>
         </div>
       </section>
 

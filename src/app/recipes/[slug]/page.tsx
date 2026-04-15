@@ -5,6 +5,12 @@ import { getPublicCommunityPostsByRecipeId } from '@/lib/supabase/public-communi
 import type { User } from '@/lib/types';
 import RecipeClientPage from './RecipeClientPage';
 
+type RecipeDetailPageProps = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
+
 function buildCurrentUser(authContext: AuthContext): User | null {
   if (!authContext.isLoggedIn || !authContext.userId) {
     return null;
@@ -21,8 +27,11 @@ function buildCurrentUser(authContext: AuthContext): User | null {
   };
 }
 
-export default async function RecipeDetailPage({ params }: { params: { slug:string } }) {
-  const recipe = await getPublicRecipeBySlug(params.slug);
+export default async function RecipeDetailPage({
+  params,
+}: RecipeDetailPageProps) {
+  const { slug } = await params;
+  const recipe = await getPublicRecipeBySlug(slug);
 
   if (!recipe) {
     notFound();

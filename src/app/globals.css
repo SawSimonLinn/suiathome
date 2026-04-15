@@ -60,6 +60,16 @@
 }
 .paper-btn-dark:hover { box-shadow: none; transform: translate(3px, 3px); }
 
+@keyframes sui-loading-bar {
+  0% { transform: translateX(-120%); }
+  55% { transform: translateX(10%); }
+  100% { transform: translateX(220%); }
+}
+
+.sui-loading-bar {
+  animation: sui-loading-bar 1.1s ease-in-out infinite;
+}
+
 /* Enforce the paper rules across existing Tailwind utility usage */
 *, *::before, *::after { border-radius: 0 !important; }
 .border { border-width: 2px; }

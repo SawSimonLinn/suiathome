@@ -51,6 +51,12 @@ type RecipeTipRow = {
   body: string;
 };
 
+type RecipeImageRow = {
+  recipe_id: string;
+  position: number;
+  url: string;
+};
+
 type RecipeCommentRow = {
   id: string;
   recipe_id: string;
@@ -75,6 +81,7 @@ type RecipeSummary = Pick<
   | 'imageId'
   | 'imageUrl'
   | 'imageHint'
+  | 'galleryImages'
   | 'category'
   | 'prepTime'
   | 'cookTime'
@@ -141,6 +148,7 @@ function mapSummaryRecipe(
     imageId: '',
     imageUrl: recipe.image_url || undefined,
     imageHint: recipe.image_hint || undefined,
+    galleryImages: [],
     category: categoriesById.get(recipe.category_id) || {
       id: recipe.category_id,
       name: 'Uncategorized',
@@ -176,6 +184,7 @@ async function getSupabaseRecipeData() {
     ingredientsResult,
     stepsResult,
     tipsResult,
+    recipeImagesResult,
     likesResult,
     favoritesResult,
     commentsResult,
@@ -204,6 +213,10 @@ async function getSupabaseRecipeData() {
     supabase
       .from('recipe_tips')
       .select('recipe_id, position, body')
+      .order('position', { ascending: true }),
+    supabase
+      .from('recipe_images')
+      .select('recipe_id, position, url')
       .order('position', { ascending: true }),
     supabase.from('recipe_likes').select('recipe_id'),
     supabase.from('recipe_favorites').select('recipe_id'),
@@ -234,6 +247,7 @@ async function getSupabaseRecipeData() {
   const ingredientRows = (ingredientsResult.data as RecipeIngredientRow[]) ?? [];
   const stepRows = (stepsResult.data as RecipeStepRow[]) ?? [];
   const tipRows = (tipsResult.data as RecipeTipRow[]) ?? [];
+  const recipeImageRows = (recipeImagesResult.data as RecipeImageRow[]) ?? [];
   const likeRows = (likesResult.data as RecipeInteractionRow[]) ?? [];
   const favoriteRows = (favoritesResult.data as RecipeInteractionRow[]) ?? [];
   const commentRows = (commentsResult.data as RecipeCommentRow[]) ?? [];
@@ -343,6 +357,15 @@ async function getSupabaseRecipeData() {
     const recipe = summaryRecipesById.get(tip.recipe_id);
     if (!recipe) return;
     recipe.tips.push(tip.body);
+  });
+
+  recipeImageRows.forEach((image) => {
+    const recipe = summaryRecipesById.get(image.recipe_id);
+    if (!recipe) return;
+    recipe.galleryImages?.push({
+      url: image.url,
+      position: image.position,
+    });
   });
 
   return {

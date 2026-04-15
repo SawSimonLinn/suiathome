@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { AdminAnalyticsPanel } from '@/app/admin/admin-analytics-panel';
+import { AdminNav } from '@/components/layout/admin-nav';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,28 +44,20 @@ export default async function AdminPage() {
   return (
     <div className="py-8 md:py-12">
       <section className="mx-auto max-w-6xl">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-3">
-            <Badge variant="secondary">Admin Dashboard</Badge>
-            <div>
-              <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">
-                Control Center
-              </h1>
-              <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
-                Track recipe engagement, publish new content, moderate comments,
-                and manage the editorial side of Sui at home from one place.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild>
-              <Link href="/admin/recipes/new">Upload Recipe</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/admin/comments">Moderate Comments</Link>
-            </Button>
+        <div className="space-y-3">
+          <Badge variant="secondary">Admin Dashboard</Badge>
+          <div>
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">
+              Control Center
+            </h1>
+            <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
+              Track recipe engagement, publish new content, moderate comments,
+              and manage the editorial side of Sui at home from one place.
+            </p>
           </div>
         </div>
+
+        <AdminNav />
 
         <div className="mt-8 grid gap-4 grid-cols-2 lg:grid-cols-4">
           {dashboardData.stats.map((stat) => (
@@ -154,11 +147,24 @@ export default async function AdminPage() {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Admin Workflows</CardTitle>
-                <CardDescription>
-                  This is where the admin-facing editing and moderation controls live.
-                </CardDescription>
+              <CardHeader className="gap-4">
+                <div>
+                  <CardTitle>Admin Workflows</CardTitle>
+                  <CardDescription>
+                    This is where the admin-facing editing and moderation controls live.
+                  </CardDescription>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild>
+                    <Link href="/admin/recipes/new">Upload Recipe</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/admin/recipes">Edit Uploaded Recipes</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/admin/comments">Moderate Comments</Link>
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="grid gap-4 text-sm text-muted-foreground">
                 <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
@@ -188,6 +194,19 @@ export default async function AdminPage() {
                   </p>
                 </div>
                 <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
+                  <p className="font-medium text-foreground">Edit uploaded recipes</p>
+                  <p className="mt-1">
+                    Use
+                    {' '}
+                    <Link href="/admin/recipes" className="underline hover:text-foreground">
+                      /admin/recipes
+                    </Link>
+                    {' '}
+                    to review existing recipes, open them in the editor, and save updated copy,
+                    ingredients, steps, tips, and images.
+                  </p>
+                </div>
+                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
                   <p className="font-medium text-foreground">Enable admin policies</p>
                   <p className="mt-1">
                     Run `docs/supabase-admin-upgrade.sql` in Supabase if you
@@ -198,9 +217,9 @@ export default async function AdminPage() {
                 <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
                   <p className="font-medium text-foreground">More detail features</p>
                   <p className="mt-1">
-                    The new recipe form already captures description, story, prep
-                    time, cook time, servings, image info, ingredients, steps,
-                    and tips. Next up can be edit pages, drafts, and image uploads.
+                    The admin recipe tools now cover create, review, and edit flows
+                    with multi-image previews. Next up can be drafts, image
+                    cleanup, and richer version history.
                   </p>
                 </div>
               </CardContent>
