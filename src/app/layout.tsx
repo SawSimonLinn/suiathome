@@ -7,6 +7,7 @@ import { Footer } from '@/components/layout/footer';
 import { hasSupabaseEnv } from '@/lib/supabase/config';
 import { getAuthContext } from '@/lib/supabase/auth';
 import { Analytics } from "@vercel/analytics/next"
+import { CustomCursor } from '@/components/custom-cursor'
 
 export const metadata: Metadata = {
   title: 'Sui at home',
@@ -120,6 +121,7 @@ export default async function RootLayout({
           <main className="flex-1 container mx-auto px-4 md:px-8">{children}</main>
           <Footer />
         </div>
+        <CustomCursor />
         <Toaster />
         <Analytics />
       </body>
