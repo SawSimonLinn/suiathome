@@ -47,7 +47,7 @@ export default async function AdminPage() {
           <div className="space-y-3">
             <Badge variant="secondary">Admin Dashboard</Badge>
             <div>
-              <h1 className="font-headline text-4xl md:text-5xl">
+              <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">
                 Control Center
               </h1>
               <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
@@ -66,7 +66,7 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-8 grid gap-4 grid-cols-2 lg:grid-cols-4">
           {dashboardData.stats.map((stat) => (
             <Card key={stat.label}>
               <CardHeader>
@@ -99,7 +99,7 @@ export default async function AdminPage() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.05fr_0.95fr]">
             <Card>
               <CardHeader>
                 <CardTitle>Recent Profiles</CardTitle>

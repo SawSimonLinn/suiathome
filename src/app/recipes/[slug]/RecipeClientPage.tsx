@@ -74,10 +74,10 @@ export default function RecipeClientPage({
 
   return (
     <div className="py-8 md:py-12">
-      <article className="mx-auto max-w-5xl border-2 border-foreground bg-paper p-6 paper-shadow md:p-10">
+      <article className="mx-auto max-w-5xl border-2 border-foreground bg-paper p-4 sm:p-6 paper-shadow md:p-10">
         <header className="mb-8 text-center">
           <Badge variant="secondary" className="mb-4">{recipe.category.name}</Badge>
-          <h1 className="font-headline text-4xl md:text-6xl !leading-tight tracking-tight mb-4">
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-6xl !leading-tight tracking-tight mb-4">
             {recipe.title}
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{recipe.description}</p>
@@ -129,7 +129,7 @@ export default function RecipeClientPage({
             <p className="italic leading-relaxed">{recipe.story}</p>
         </div>
 
-        <div className="grid md:grid-cols-5 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 lg:gap-12">
             <div className="md:col-span-2">
                 <h2 className="mb-4 border-b-2 border-foreground pb-2 font-headline text-3xl">Ingredients</h2>
                 <ul className="space-y-3 text-base">
@@ -219,7 +219,7 @@ export default function RecipeClientPage({
           <h2 className="font-headline text-3xl md:text-4xl mb-8 text-center">You May Also Like</h2>
           <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
             {relatedRecipes.map(relatedRecipe => (
-              <div key={relatedRecipe.id} className="w-[320px] shrink-0 snap-start">
+              <div key={relatedRecipe.id} className="w-[min(85vw,320px)] shrink-0 snap-start">
                 <RecipeImageCard recipe={relatedRecipe} />
               </div>
             ))}

@@ -218,7 +218,7 @@ export function SettingsForm({
   };
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.9fr)]">
+    <div className="grid gap-8 md:grid-cols-[2fr_1fr] lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.9fr)]">
       <Card>
         <CardHeader>
           <CardTitle className="font-headline text-3xl">Profile Settings</CardTitle>

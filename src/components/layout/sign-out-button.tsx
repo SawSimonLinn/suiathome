@@ -3,10 +3,19 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { Button, type ButtonProps } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 
-export function SignOutButton() {
+type SignOutButtonProps = Omit<ButtonProps, 'onClick'> & {
+  onSignedOut?: () => void;
+};
+
+export function SignOutButton({
+  children,
+  disabled,
+  onSignedOut,
+  ...buttonProps
+}: SignOutButtonProps) {
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -16,6 +25,7 @@ export function SignOutButton() {
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
+      onSignedOut?.();
       router.push('/');
       router.refresh();
     } finally {
@@ -24,8 +34,13 @@ export function SignOutButton() {
   };
 
   return (
-    <Button variant="ghost" onClick={handleSignOut} disabled={isSigningOut}>
-      {isSigningOut ? 'Signing out...' : 'Sign Out'}
+    <Button
+      variant="ghost"
+      onClick={handleSignOut}
+      disabled={disabled || isSigningOut}
+      {...buttonProps}
+    >
+      {isSigningOut ? 'Signing out...' : children ?? 'Sign Out'}
     </Button>
   );
 }

@@ -265,7 +265,7 @@ export function CommunityPageClient({
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 md:py-12">
       <header className="text-center mb-8 md:mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl">Community Feed</h1>
+        <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">Community Feed</h1>
         <p className="text-muted-foreground mt-2 max-w-2xl mx-auto text-lg">
           See what fellow home cooks are creating and sharing.
         </p>
@@ -388,7 +388,7 @@ export function CommunityPageClient({
         </Card>
       )}
 
-      <div className="mx-auto mb-6 grid max-w-4xl gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_220px_220px]">
+      <div className="mx-auto mb-6 grid max-w-4xl gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_220px_220px]">
         <Input
           placeholder="Search posts..."
           value={searchQuery}

@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Menu } from "lucide-react";
 import { useState } from "react";
+
+import { AccountMenu } from "@/components/layout/account-menu";
+import { SignOutButton } from "@/components/layout/sign-out-button";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,8 +16,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { AccountMenu } from "@/components/layout/account-menu";
-import { SignOutButton } from "@/components/layout/sign-out-button";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -31,88 +33,55 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
   const pathname = usePathname();
 
   const isLoggedIn = Boolean(userEmail);
-  const mobileLinks = [
-    ...navLinks,
+  const accountLinks = [
     ...(isLoggedIn ? [{ href: "/profile", label: "Profile" }] : []),
     ...(isLoggedIn ? [{ href: "/settings", label: "Settings" }] : []),
     ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
   ];
 
+  const isActiveLink = (href: string) =>
+    href === "/"
+      ? pathname === href
+      : pathname === href || pathname.startsWith(`${href}/`);
+
+  const mobileLinkClassName = (href: string) =>
+    cn(
+      "flex items-center justify-between border-2 border-foreground px-4 py-3 text-sm font-semibold uppercase tracking-wide transition-colors",
+      isActiveLink(href)
+        ? "bg-primary text-primary-foreground paper-btn-dark"
+        : "bg-background text-foreground paper-btn"
+    );
+
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-foreground bg-background">
-      <div className="container mx-auto flex h-20 items-center px-4 md:px-8">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <span className="font-bold sm:inline-block font-headline text-3xl">
-            Sui at home
-          </span>
-        </Link>
-        <nav className="hidden md:flex items-center space-x-8 text-base">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "transition-colors hover:text-foreground",
-                pathname === link.href ? "text-foreground font-bold" : "text-muted-foreground"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Mobile Menu Trigger */}
-        <div className="md:hidden flex-1">
-          <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-              >
-                <span className="font-bold">Menu</span>
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="pr-0 w-4/5 border-r">
-              <SheetHeader>
-                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
-              </SheetHeader>
+      <div className="container mx-auto flex h-16 items-center justify-between gap-3 px-4 md:h-20 md:px-8">
+        <div className="flex min-w-0 items-center gap-4 md:gap-6">
+          <Link href="/" className="flex items-center">
+            <span className="font-headline text-xl font-bold leading-none md:text-3xl">
+              Sui at home
+            </span>
+          </Link>
+          <nav className="hidden items-center space-x-8 text-base md:flex">
+            {navLinks.map((link) => (
               <Link
-                href="/"
-                className="mb-6 flex items-center"
-                onClick={() => setMobileMenuOpen(false)}
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "transition-colors hover:text-foreground",
+                  isActiveLink(link.href)
+                    ? "font-bold text-foreground"
+                    : "text-muted-foreground"
+                )}
               >
-                <span className="font-bold font-headline text-xl">Sui at home</span>
+                {link.label}
               </Link>
-              <div className="flex flex-col space-y-3">
-                {mobileLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      "transition-colors hover:text-primary text-lg",
-                      pathname === link.href ? "text-foreground font-semibold" : "text-muted-foreground"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </SheetContent>
-          </Sheet>
+            ))}
+          </nav>
         </div>
-        
-        <div className="flex flex-1 items-center justify-end space-x-2">
+
+        <div className="hidden items-center gap-2 md:flex">
           {isLoggedIn ? (
-            <>
-              <div className="hidden md:block">
-                <AccountMenu userEmail={userEmail!} isAdmin={isAdmin} />
-              </div>
-              <div className="md:hidden">
-                <SignOutButton />
-              </div>
-            </>
+            <AccountMenu userEmail={userEmail!} isAdmin={isAdmin} />
           ) : (
             <>
               <Button variant="ghost" asChild>
@@ -123,6 +92,95 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
               </Button>
             </>
           )}
+        </div>
+
+        <div className="md:hidden">
+          <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0"
+                aria-label="Open navigation menu"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="w-[min(88vw,24rem)] border-l-2 border-foreground px-5 pt-4"
+            >
+              <SheetHeader className="pr-14 text-left">
+                <SheetTitle className="font-headline text-2xl leading-none">
+                  Sui at home
+                </SheetTitle>
+              </SheetHeader>
+              <div className="mt-8 flex flex-col gap-6">
+                <nav className="flex flex-col gap-3">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={mobileLinkClassName(link.href)}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+
+                <div className="border-t-2 border-foreground pt-6">
+                  {isLoggedIn ? (
+                    <>
+                      <div className="mb-4 space-y-1">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                          Signed in
+                        </p>
+                        <p className="break-words text-sm font-medium">
+                          {userEmail}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        {accountLinks.map((link) => (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={mobileLinkClassName(link.href)}
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
+                        <SignOutButton
+                          className="w-full"
+                          onSignedOut={() => setMobileMenuOpen(false)}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      <Button
+                        asChild
+                        className="w-full"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Link href="/signup">Sign Up</Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        asChild
+                        className="w-full"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Link href="/login">Log In</Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

@@ -190,8 +190,8 @@ export default async function ProfilePage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 md:py-12">
       {/* Profile header */}
-      <header className="mb-10 flex flex-col items-center gap-6 border-2 border-foreground bg-paper p-8 paper-shadow md:flex-row md:items-start md:gap-8">
-        <Avatar className="h-24 w-24 shrink-0 md:h-32 md:w-32">
+      <header className="mb-10 flex flex-col items-center gap-4 border-2 border-foreground bg-paper p-6 sm:p-8 paper-shadow md:flex-row md:items-start md:gap-8">
+        <Avatar className="h-20 w-20 shrink-0 sm:h-24 sm:w-24 md:h-32 md:w-32">
           <AvatarImage src={avatarUrl} alt={displayName} />
           <AvatarFallback className="text-4xl">
             {getInitials(displayName)}
@@ -199,7 +199,7 @@ export default async function ProfilePage() {
         </Avatar>
         <div className="flex-1 text-center md:text-left">
           <div className="flex flex-col items-center gap-3 md:flex-row md:items-start md:justify-between">
-            <h1 className="font-headline text-4xl md:text-5xl">{displayName}</h1>
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">{displayName}</h1>
             <Button variant="outline" size="sm" asChild>
               <Link href="/settings">Edit Profile</Link>
             </Button>
@@ -243,7 +243,7 @@ export default async function ProfilePage() {
       <section className="mb-12 space-y-4">
         <h2 className="font-headline text-3xl md:text-4xl">Favorite Recipes</h2>
         {favoritedRecipes.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-6">
             {favoritedRecipes.map((recipe) => (
               <RecipeImageCard key={recipe.id} recipe={recipe} />
             ))}

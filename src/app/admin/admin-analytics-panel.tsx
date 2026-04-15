@@ -86,7 +86,7 @@ export function AdminAnalyticsPanel({
 
   return (
     <div className="grid gap-6">
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div>
           {hasTrendData ? (
             <ChartContainer

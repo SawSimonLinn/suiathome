@@ -24,13 +24,13 @@ export default async function RecipesPage() {
         </p>
       </header>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row gap-3 mb-8">
         <div className="relative flex-grow">
           <Input placeholder="Search recipes..." className="pl-3" />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
             <Select>
-              <SelectTrigger className="w-full md:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[160px] md:w-[180px]">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
