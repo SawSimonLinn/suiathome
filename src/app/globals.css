@@ -4,26 +4,27 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --paper: 48 100% 98%;
-    --foreground: 0 0% 4%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 4%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 4%;
-    --primary: 0 0% 4%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 4%;
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 94%;
-    --accent-foreground: 0 0% 4%;
+    /* ── Kitchen palette: cottage / sage / blush ── */
+    --background: 38 80% 95%;       /* warm cream  #fdf4e7 */
+    --paper: 40 100% 97%;           /* warm paper  #fdfaf2 */
+    --foreground: 116 26% 20%;      /* forest green #284525 */
+    --card: 38 80% 95%;
+    --card-foreground: 116 26% 20%;
+    --popover: 38 80% 95%;
+    --popover-foreground: 116 26% 20%;
+    --primary: 116 18% 44%;         /* sage green  #647e61 */
+    --primary-foreground: 40 100% 97%;
+    --secondary: 345 75% 94%;       /* blush light #fce8ef */
+    --secondary-foreground: 116 26% 20%;
+    --muted: 113 22% 88%;           /* light sage  #d4e6d1 */
+    --muted-foreground: 113 14% 38%; /* sage-gray  #4a5e47 */
+    --accent: 278 26% 80%;          /* lavender    #c9b8d8 */
+    --accent-foreground: 116 26% 20%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 85%;
-    --input: 0 0% 85%;
-    --ring: 0 0% 4%;
+    --border: 116 20% 65%;          /* sage border #94b890 */
+    --input: 113 22% 90%;
+    --ring: 116 26% 20%;
     --radius: 0rem;
   }
 
@@ -53,21 +54,21 @@
   --cream-warm:  #fdf4e7;
 }
 
-/* Hard offset shadows — core paper effect */
-.paper-shadow-sm  { box-shadow: 2px 2px 0px 0px #111111; }
-.paper-shadow     { box-shadow: 4px 4px 0px 0px #111111; }
-.paper-shadow-lg  { box-shadow: 6px 6px 0px 0px #111111; }
-.paper-shadow-xl  { box-shadow: 8px 8px 0px 0px #111111; }
+/* Hard offset shadows — forest green instead of black */
+.paper-shadow-sm  { box-shadow: 2px 2px 0px 0px #284525; }
+.paper-shadow     { box-shadow: 4px 4px 0px 0px #284525; }
+.paper-shadow-lg  { box-shadow: 6px 6px 0px 0px #284525; }
+.paper-shadow-xl  { box-shadow: 8px 8px 0px 0px #284525; }
 
-/* Press buttons — shadow collapses on hover */
+/* Press buttons */
 .paper-btn {
-  box-shadow: 3px 3px 0px 0px #111111;
+  box-shadow: 3px 3px 0px 0px #284525;
   transition: box-shadow 0.1s ease, transform 0.1s ease;
 }
 .paper-btn:hover { box-shadow: none; transform: translate(3px, 3px); }
 
 .paper-btn-dark {
-  box-shadow: 3px 3px 0px 0px rgba(0,0,0,0.4);
+  box-shadow: 3px 3px 0px 0px rgba(40,69,37,0.5);
   transition: box-shadow 0.1s ease, transform 0.1s ease;
 }
 .paper-btn-dark:hover { box-shadow: none; transform: translate(3px, 3px); }

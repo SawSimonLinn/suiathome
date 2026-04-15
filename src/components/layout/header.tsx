@@ -53,7 +53,7 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
     );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b-2 border-foreground bg-background">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-foreground" style={{ backgroundColor: 'var(--sage)' }}>
       <div className="container mx-auto flex h-16 items-center justify-between gap-3 px-4 md:h-20 md:px-8">
         <div className="flex min-w-0 items-center gap-4 md:gap-6">
           <Link href="/" className="flex items-center">
