@@ -91,17 +91,19 @@ export function AdminAnalyticsPanel({
           {hasTrendData ? (
             <ChartContainer
               config={engagementChartConfig}
-              className="min-h-[320px] w-full"
+              className="min-h-[200px] sm:min-h-[320px] w-full"
             >
-              <LineChart data={engagementTrend} margin={{ left: 12, right: 12 }}>
+              <LineChart data={engagementTrend} margin={{ left: 4, right: 4 }}>
                 <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="label"
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
+                  tick={{ fontSize: 11 }}
+                  interval="preserveStartEnd"
                 />
-                <YAxis allowDecimals={false} width={28} />
+                <YAxis allowDecimals={false} width={24} tick={{ fontSize: 11 }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Line
@@ -128,7 +130,7 @@ export function AdminAnalyticsPanel({
               </LineChart>
             </ChartContainer>
           ) : (
-            <div className="flex min-h-[320px] items-center justify-center border-2 border-foreground bg-paper p-6 text-center text-sm text-muted-foreground paper-shadow">
+            <div className="flex min-h-[200px] sm:min-h-[320px] items-center justify-center border-2 border-foreground bg-paper p-6 text-center text-sm text-muted-foreground paper-shadow">
               Once users start liking, favoriting, and commenting on real Supabase-backed
               recipes, this engagement trend chart will populate automatically.
             </div>
@@ -139,14 +141,14 @@ export function AdminAnalyticsPanel({
           {hasTopRecipes ? (
             <ChartContainer
               config={recipeBreakdownConfig}
-              className="min-h-[320px] w-full"
+              className="min-h-[200px] sm:min-h-[320px] w-full"
             >
               <BarChart
                 data={topRecipes.map((recipe) => ({
                   ...recipe,
                   shortTitle: truncateTitle(recipe.title),
                 }))}
-                margin={{ left: 12, right: 12, top: 8 }}
+                margin={{ left: 4, right: 4, top: 8 }}
               >
                 <CartesianGrid vertical={false} />
                 <XAxis
@@ -154,8 +156,13 @@ export function AdminAnalyticsPanel({
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
+                  tick={{ fontSize: 10 }}
+                  interval={0}
+                  angle={-25}
+                  textAnchor="end"
+                  height={48}
                 />
-                <YAxis allowDecimals={false} width={28} />
+                <YAxis allowDecimals={false} width={24} tick={{ fontSize: 11 }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar dataKey="likes" fill="var(--color-likes)" radius={0} />

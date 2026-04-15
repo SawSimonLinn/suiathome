@@ -74,13 +74,14 @@ export default async function AdminRecipesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Created</TableHead>
+                  <TableHead className="hidden sm:table-cell">Category</TableHead>
+                  <TableHead className="hidden md:table-cell">Slug</TableHead>
+                  <TableHead className="hidden sm:table-cell">Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -88,18 +89,18 @@ export default async function AdminRecipesPage() {
                 {recipes.length > 0 ? (
                   recipes.map((recipe) => (
                     <TableRow key={recipe.id}>
-                      <TableCell className="font-medium">{recipe.title}</TableCell>
-                      <TableCell>{recipe.categoryName}</TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="font-medium max-w-[140px] truncate">{recipe.title}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{recipe.categoryName}</TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground max-w-[160px] truncate">
                         /{recipe.slug}
                       </TableCell>
-                      <TableCell>{formatDate(recipe.createdAt)}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{formatDate(recipe.createdAt)}</TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-2">
                           <Button asChild size="sm">
                             <Link href={`/admin/recipes/${recipe.id}/edit`}>Edit</Link>
                           </Button>
-                          <Button asChild size="sm" variant="outline">
+                          <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
                             <Link href={`/recipes/${recipe.slug}`}>View Live</Link>
                           </Button>
                         </div>
@@ -115,6 +116,7 @@ export default async function AdminRecipesPage() {
                 )}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

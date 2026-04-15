@@ -129,14 +129,15 @@ export function CommentModerationPanel({
     kind: 'recipe' | 'community',
     emptyLabel: string
   ) => (
+    <div className="overflow-x-auto">
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Author</TableHead>
-          <TableHead>Target</TableHead>
+          <TableHead className="hidden sm:table-cell">Target</TableHead>
           <TableHead>Comment</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Created</TableHead>
+          <TableHead className="hidden md:table-cell">Status</TableHead>
+          <TableHead className="hidden lg:table-cell">Created</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -144,21 +145,21 @@ export function CommentModerationPanel({
         {comments.length > 0 ? (
           comments.map((comment) => (
             <TableRow key={comment.id}>
-              <TableCell className="font-medium">{comment.userName}</TableCell>
-              <TableCell className="max-w-[220px] truncate">
+              <TableCell className="font-medium whitespace-nowrap">{comment.userName}</TableCell>
+              <TableCell className="hidden sm:table-cell max-w-[160px] truncate">
                 {comment.parentLabel}
               </TableCell>
-              <TableCell className="max-w-[340px] whitespace-normal text-sm text-muted-foreground">
+              <TableCell className="max-w-[200px] sm:max-w-[280px] whitespace-normal text-sm text-muted-foreground">
                 {comment.body}
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden md:table-cell">
                 <Badge variant={comment.isHidden ? 'secondary' : 'outline'}>
                   {comment.isHidden ? 'Hidden' : 'Visible'}
                 </Badge>
               </TableCell>
-              <TableCell>{formatTimestamp(comment.createdAt)}</TableCell>
+              <TableCell className="hidden lg:table-cell whitespace-nowrap">{formatTimestamp(comment.createdAt)}</TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-1 sm:gap-2">
                   <Button
                     type="button"
                     variant="outline"
@@ -199,6 +200,7 @@ export function CommentModerationPanel({
         )}
       </TableBody>
     </Table>
+    </div>
   );
 
   return (

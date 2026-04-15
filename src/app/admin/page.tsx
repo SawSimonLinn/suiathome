@@ -64,7 +64,7 @@ export default async function AdminPage() {
             <Card key={stat.label}>
               <CardHeader>
                 <CardDescription>{stat.label}</CardDescription>
-                <CardTitle className="text-4xl">
+                <CardTitle className="text-2xl sm:text-4xl">
                   {stat.value === null ? 'Not Ready' : stat.value.toLocaleString()}
                 </CardTitle>
               </CardHeader>
@@ -101,6 +101,7 @@ export default async function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -143,6 +144,7 @@ export default async function AdminPage() {
                     )}
                   </TableBody>
                 </Table>
+                </div>
               </CardContent>
             </Card>
 
