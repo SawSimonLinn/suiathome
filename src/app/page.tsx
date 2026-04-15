@@ -126,22 +126,45 @@ export default async function Home() {
           <TriedItCarousel posts={triedItPosts} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            {triedItPosts.map((post) => (
-              <div key={post.id} className="border-2 border-foreground bg-paper paper-shadow flex flex-col overflow-hidden">
-                {post.imageUrl ? (
-                  <div className="aspect-square overflow-hidden bg-secondary/20">
-                    <img src={post.imageUrl} alt={post.caption} className="w-full h-full object-cover" loading="lazy" />
+            {triedItPosts.map((post) => {
+              const STICKERS = ['🍳', '🥘', '🫕', '🥗', '🍜', '🧆', '🥙', '🍲', '🥣', '🍱'];
+              const TAPE_COLORS = ['var(--brass)', 'var(--blush)', 'var(--sage)', 'var(--lavender)'];
+              const code = post.id.split('').reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0);
+              const sticker = STICKERS[code % STICKERS.length];
+              const tapeColor = TAPE_COLORS[code % TAPE_COLORS.length];
+              const tapeRot = (code % 2 === 0 ? 1 : -1) * (1 + (code % 4));
+              const stickerRot = (code % 2 === 0 ? 1 : -1) * (6 + (code % 10));
+              return (
+                <div key={post.id} className="border-2 border-foreground bg-paper paper-shadow flex flex-col overflow-hidden relative">
+                  {/* Tape strip */}
+                  <div
+                    className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-4 border border-foreground/60 z-10"
+                    style={{ backgroundColor: tapeColor, opacity: 0.65, rotate: `${tapeRot}deg` }}
+                    aria-hidden="true"
+                  />
+                  {post.imageUrl ? (
+                    <div className="aspect-square overflow-hidden bg-secondary/20 relative">
+                      <img src={post.imageUrl} alt={post.caption} className="w-full h-full object-cover" loading="lazy" />
+                      <span
+                        className="absolute bottom-2 right-2 text-2xl select-none pointer-events-none drop-shadow-sm"
+                        style={{ rotate: `${stickerRot}deg` }}
+                        aria-hidden="true"
+                      >{sticker}</span>
+                    </div>
+                  ) : (
+                    <div className="aspect-square bg-secondary/20 flex items-center justify-center">
+                      <span className="text-4xl" aria-hidden="true">{sticker}</span>
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <svg width="100%" height="8" viewBox="0 0 200 8" preserveAspectRatio="none" aria-hidden="true" className="mb-2">
+                      <path d="M0 4 Q10 1 20 4 Q30 7 40 4 Q50 1 60 4 Q70 7 80 4 Q90 1 100 4 Q110 7 120 4 Q130 1 140 4 Q150 7 160 4 Q170 1 180 4 Q190 7 200 4" stroke="var(--sage-dark, #4a7a40)" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.3"/>
+                    </svg>
+                    <p className="text-sm line-clamp-3">{post.caption}</p>
                   </div>
-                ) : (
-                  <div className="aspect-square bg-secondary/20 flex items-center justify-center">
-                    <span className="text-muted-foreground text-sm">No photo</span>
-                  </div>
-                )}
-                <div className="p-4">
-                  <p className="text-sm line-clamp-3">{post.caption}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         <div className="text-center mt-10">

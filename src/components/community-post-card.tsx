@@ -279,8 +279,22 @@ export function CommunityPostCard({
     }
   };
 
+  const CUTE_STICKERS = ['🌸', '🍓', '🌷', '✨', '🧁', '🌼', '🍰', '🌺', '🫶', '🌿'];
+  const TAPE_COLORS = ['var(--brass)', 'var(--blush)', 'var(--sage)', 'var(--lavender)'];
+  const code = post.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const headerSticker = CUTE_STICKERS[code % CUTE_STICKERS.length];
+  const tapeColor = TAPE_COLORS[code % TAPE_COLORS.length];
+  const tapeRot = (code % 2 === 0 ? 1 : -1) * (1 + (code % 3));
+  const imgStickerRot = (code % 2 === 0 ? 1 : -1) * (6 + (code % 10));
+
   return (
-    <Card className="self-start overflow-hidden">
+    <Card className="self-start overflow-hidden border-2 border-foreground bg-paper paper-shadow relative">
+      {/* Tape strip */}
+      <div
+        className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-4 border border-foreground/60 z-10"
+        style={{ backgroundColor: tapeColor, opacity: 0.65, rotate: `${tapeRot}deg` }}
+        aria-hidden="true"
+      />
       <CardHeader className="flex flex-row items-center gap-3 p-4">
         <Avatar>
           <AvatarImage src={post.user.avatarUrl} alt={post.user.name} />
@@ -297,10 +311,10 @@ export function CommunityPostCard({
             Posted {formatPostedDate(post.createdAt)}
           </p>
         </div>
+        <span className="ml-auto text-xl select-none pointer-events-none" aria-hidden="true">{headerSticker}</span>
         {canEdit && onEdit ? (
           <Button
             variant="ghost"
-            className="ml-auto"
             onClick={() => onEdit(post)}
           >
             Edit
@@ -322,6 +336,14 @@ export function CommunityPostCard({
                 className="block h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.01]"
                 loading="lazy"
               />
+              {/* Cute sticker on image */}
+              <span
+                className="absolute top-2 right-2 text-2xl select-none pointer-events-none drop-shadow-sm"
+                style={{ rotate: `${imgStickerRot}deg` }}
+                aria-hidden="true"
+              >
+                {CUTE_STICKERS[(code + 5) % CUTE_STICKERS.length]}
+              </span>
               <span className="absolute bottom-3 right-3 border-2 border-foreground bg-paper px-2 py-1 text-xs font-semibold uppercase tracking-wide opacity-0 transition-opacity group-hover:opacity-100">
                 View Full Image
               </span>
@@ -345,6 +367,9 @@ export function CommunityPostCard({
           </>
         )}
         <div className="p-4">
+          <svg width="100%" height="8" viewBox="0 0 200 8" preserveAspectRatio="none" aria-hidden="true" className="mb-3">
+            <path d="M0 4 Q10 1 20 4 Q30 7 40 4 Q50 1 60 4 Q70 7 80 4 Q90 1 100 4 Q110 7 120 4 Q130 1 140 4 Q150 7 160 4 Q170 1 180 4 Q190 7 200 4" stroke="var(--sage-dark, #4a7a40)" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.3"/>
+          </svg>
           <p
             ref={captionRef}
             className={cn(
