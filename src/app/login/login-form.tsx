@@ -107,7 +107,7 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-3xl font-headline">Login</CardTitle>
           <CardDescription>

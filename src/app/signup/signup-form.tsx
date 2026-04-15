@@ -41,16 +41,13 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [hasAcceptedPrivacyPolicy, setHasAcceptedPrivacyPolicy] =
-    useState(false);
-  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
+  const [hasAcceptedLegal, setHasAcceptedLegal] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSigningUp, setIsSigningUp] = useState(false);
   const [isStartingGoogle, setIsStartingGoogle] = useState(false);
 
   const next = getNextPath(searchParams.get('next'));
-  const hasAcceptedLegalDocuments =
-    hasAcceptedPrivacyPolicy && hasAcceptedTerms;
+  const hasAcceptedLegalDocuments = hasAcceptedLegal;
 
   useEffect(() => {
     if (hasAcceptedLegalDocuments && errorMessage === LEGAL_ACCEPTANCE_ERROR) {
@@ -159,7 +156,7 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-3xl font-headline">Sign Up</CardTitle>
           <CardDescription>
@@ -218,60 +215,38 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
                   onChange={(event) => setPassword(event.target.value)}
                 />
               </div>
-              <div className="grid gap-3 rounded-md border-2 border-foreground bg-background p-4">
-                <p className="text-sm text-muted-foreground">
-                  Accept both agreements to create your account.
-                </p>
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="privacy-policy"
-                    checked={hasAcceptedPrivacyPolicy}
-                    onCheckedChange={(checked) =>
-                      setHasAcceptedPrivacyPolicy(checked === true)
-                    }
-                  />
-                  <div className="space-y-1">
-                    <Label
-                      htmlFor="privacy-policy"
-                      className="text-sm font-normal leading-6"
-                    >
-                      I agree to the Privacy Policy.
-                    </Label>
-                    <Link
-                      href="/privacy-policy"
-                      className="text-sm font-medium text-foreground underline hover:text-muted-foreground"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Read Privacy Policy
-                    </Link>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="terms-and-conditions"
-                    checked={hasAcceptedTerms}
-                    onCheckedChange={(checked) =>
-                      setHasAcceptedTerms(checked === true)
-                    }
-                  />
-                  <div className="space-y-1">
-                    <Label
-                      htmlFor="terms-and-conditions"
-                      className="text-sm font-normal leading-6"
-                    >
-                      I agree to the Terms &amp; Conditions.
-                    </Label>
-                    <Link
-                      href="/terms-and-conditions"
-                      className="text-sm font-medium text-foreground underline hover:text-muted-foreground"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Read Terms &amp; Conditions
-                    </Link>
-                  </div>
-                </div>
+              <div className="flex items-start gap-3 rounded-md border-2 border-foreground bg-background p-4">
+                <Checkbox
+                  id="legal"
+                  checked={hasAcceptedLegal}
+                  onCheckedChange={(checked) =>
+                    setHasAcceptedLegal(checked === true)
+                  }
+                />
+                <Label
+                  htmlFor="legal"
+                  className="text-sm font-normal leading-6"
+                >
+                  I agree to the{' '}
+                  <Link
+                    href="/privacy-policy"
+                    className="font-medium text-foreground underline hover:text-muted-foreground"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Privacy Policy
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    href="/terms-and-conditions"
+                    className="font-medium text-foreground underline hover:text-muted-foreground"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Terms &amp; Conditions
+                  </Link>
+                  .
+                </Label>
               </div>
               <Button type="submit" className="w-full mt-2" disabled={isBusy}>
                 {isSigningUp ? 'Creating account...' : 'Create an account'}
