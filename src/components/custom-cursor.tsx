@@ -5,8 +5,14 @@ import { useEffect, useState } from 'react';
 export function CustomCursor() {
   const [pos, setPos] = useState({ x: -100, y: -100 });
   const [visible, setVisible] = useState(false);
+  const [isTouch, setIsTouch] = useState(true);
 
   useEffect(() => {
+    setIsTouch(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
+
+  useEffect(() => {
+    if (isTouch) return;
     const onMove = (e: MouseEvent) => {
       setPos({ x: e.clientX, y: e.clientY });
       setVisible(true);
@@ -23,6 +29,8 @@ export function CustomCursor() {
       document.removeEventListener('mouseenter', onEnter);
     };
   }, []);
+
+  if (isTouch) return null;
 
   return (
     <>

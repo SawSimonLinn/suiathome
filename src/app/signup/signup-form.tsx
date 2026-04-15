@@ -101,8 +101,6 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
       return;
     }
 
-    if (!validateLegalAcceptance()) return;
-
     setIsStartingGoogle(true);
     setErrorMessage(null);
 

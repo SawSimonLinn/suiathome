@@ -28,7 +28,12 @@ export async function updateSession(request: NextRequest) {
         });
 
         cookiesToSet.forEach(({ name, value, options }) => {
-          response.cookies.set(name, value, options);
+          response.cookies.set(name, value, {
+            ...options,
+            // Keep auth cookies alive for 1 year so users stay logged in
+            // unless they explicitly sign out.
+            maxAge: options?.maxAge ?? 60 * 60 * 24 * 365,
+          });
         });
       },
     },
