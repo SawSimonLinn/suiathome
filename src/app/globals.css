@@ -41,6 +41,18 @@
   }
 }
 
+/* Kitchen palette — cottage / sage / blush */
+:root {
+  --sage:        #a8c1a0;
+  --sage-light:  #d4e6d1;
+  --sage-dark:   #6a9165;
+  --blush:       #f2b8c6;
+  --blush-light: #fce8ef;
+  --lavender:    #c9b8d8;
+  --brass:       #d4a853;
+  --cream-warm:  #fdf4e7;
+}
+
 /* Hard offset shadows — core paper effect */
 .paper-shadow-sm  { box-shadow: 2px 2px 0px 0px #111111; }
 .paper-shadow     { box-shadow: 4px 4px 0px 0px #111111; }

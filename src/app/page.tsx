@@ -14,19 +14,83 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col py-8 md:py-12">
-      <section className="w-full text-center py-12 md:py-24">
-        <div className="mx-auto max-w-3xl border-2 border-foreground bg-paper p-6 sm:p-8 paper-shadow">
-           <h1 className="font-headline text-4xl sm:text-5xl md:text-7xl text-foreground">
-            Sui at home
-          </h1>
-          <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-muted-foreground">
-            From our kitchen to yours, discover recipes that are crafted with love, steeped in tradition, and waiting to be shared.
-          </p>
-          <Button asChild size="lg" className="mt-8">
-            <Link href="/recipes">
-              Explore Recipes
-            </Link>
-          </Button>
+      <section className="w-full text-center py-12 md:py-24 relative overflow-hidden">
+
+        {/* Floating botanical side decorations */}
+        <div className="pointer-events-none select-none absolute inset-0 flex items-center justify-between px-2 sm:px-8 md:px-12" aria-hidden="true">
+          <div className="flex flex-col gap-5 text-3xl sm:text-4xl opacity-40">
+            <span>🌸</span>
+            <span>🌿</span>
+            <span>🌷</span>
+            <span>🪴</span>
+          </div>
+          <div className="flex flex-col gap-5 text-3xl sm:text-4xl opacity-40">
+            <span>🌺</span>
+            <span>🌱</span>
+            <span>💐</span>
+            <span>🫙</span>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-3xl border-2 border-foreground paper-shadow relative" style={{ backgroundColor: 'var(--cream-warm)' }}>
+
+          {/* Sage green top ribbon */}
+          <div className="w-full border-b-2 border-foreground py-2 px-4 flex items-center justify-center gap-2" style={{ backgroundColor: 'var(--sage)' }}>
+            <span className="text-sm font-medium tracking-widest uppercase" style={{ color: '#2d4a2a' }}>
+              🌿 &nbsp; Homemade with love &nbsp; 🌿
+            </span>
+          </div>
+
+          <div className="p-6 sm:p-10">
+            {/* Tape strips */}
+            <div className="absolute top-[3.2rem] left-6 w-14 h-5 border border-foreground opacity-70 rotate-[-3deg]" style={{ backgroundColor: 'var(--brass)', opacity: 0.6 }} />
+            <div className="absolute top-[3.2rem] right-8 w-12 h-5 border border-foreground opacity-70 rotate-[2deg]" style={{ backgroundColor: 'var(--blush)' }} />
+
+            {/* Blush flower accent row */}
+            <div className="flex justify-center gap-2 mb-4" aria-hidden="true">
+              {['🌸','🌼','🌸','🌼','🌸'].map((f, i) => (
+                <span key={i} className="text-xl">{f}</span>
+              ))}
+            </div>
+
+            <h1 className="font-headline text-4xl sm:text-5xl md:text-7xl leading-tight" style={{ color: '#2d4a2a' }}>
+              Sui at Home
+            </h1>
+
+            {/* Sage squiggly underline */}
+            <div className="mt-3 flex justify-center">
+              <svg width="180" height="12" viewBox="0 0 180 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 8 Q14 2 26 8 Q38 14 50 8 Q62 2 74 8 Q86 14 98 8 Q110 2 122 8 Q134 14 146 8 Q158 2 170 8 Q176 11 178 8" stroke="var(--sage-dark)" strokeWidth="3" strokeLinecap="round" fill="none"/>
+              </svg>
+            </div>
+
+            <p className="mt-5 sm:mt-6 max-w-xl mx-auto text-base sm:text-lg md:text-xl leading-relaxed" style={{ color: '#4a5e47' }}>
+              From our kitchen to yours — recipes crafted with love, steeped in tradition, and made to be shared.
+            </p>
+
+            {/* Lavender stripe divider */}
+            <div className="mx-auto mt-7 mb-7 h-[3px] w-24 border-0" style={{ backgroundColor: 'var(--lavender)' }} />
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button asChild size="lg" className="border-2 border-foreground paper-btn font-semibold" style={{ backgroundColor: 'var(--sage)', color: '#1f3b1c' }}>
+                <Link href="/recipes">
+                  🍽️ Explore Recipes
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="border-2 border-foreground paper-btn font-semibold" style={{ backgroundColor: 'var(--blush-light)', color: '#5c2d3a' }}>
+                <Link href="/community">
+                  💌 See What&apos;s Cooking
+                </Link>
+              </Button>
+            </div>
+
+            <p className="mt-6 text-xs italic" style={{ color: 'var(--sage-dark)' }}>✨ new recipes every week</p>
+          </div>
+
+          {/* Bottom floral strip */}
+          <div className="w-full border-t-2 border-foreground py-2 flex justify-center gap-3 text-lg" style={{ backgroundColor: 'var(--blush-light)' }} aria-hidden="true">
+            <span>🌷</span><span>🌿</span><span>🫶</span><span>🌿</span><span>🌷</span>
+          </div>
         </div>
       </section>
 
