@@ -4,62 +4,68 @@
 
 @layer base {
   :root {
-    --background: 30 50% 98%; /* Creamy white */
-    --foreground: 25 25% 20%; /* Dark Brown/Charcoal */
-    --card: 30 50% 100%; /* Pure white for contrast */
-    --card-foreground: 25 25% 20%;
-    --popover: 30 50% 100%;
-    --popover-foreground: 25 25% 20%;
-    --primary: 30 80% 80%; /* Muted pink/terracotta */
-    --primary-foreground: 25 25% 15%;
-    --secondary: 30 30% 94%;
-    --secondary-foreground: 25 25% 27%;
-    --muted: 30 30% 90%;
-    --muted-foreground: 25 15% 45%;
-    --accent: 30 30% 94%;
-    --accent-foreground: 25 25% 27%;
+    --background: 0 0% 100%;
+    --paper: 48 100% 98%;
+    --foreground: 0 0% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+    --primary: 0 0% 4%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 4%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 4%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 30 20% 88%;
-    --input: 30 20% 92%;
-    --ring: 30 80% 80%;
-    --radius: 0.2rem;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 4%;
+    --radius: 0rem;
   }
 
-  .dark {
-    /* Keeping dark mode simple for now, can be adjusted if requested */
-    --background: 25 25% 15%;
-    --foreground: 30 30% 94%;
-    --card: 25 25% 20%;
-    --card-foreground: 30 30% 94%;
-    --popover: 25 25% 20%;
-    --popover-foreground: 30 30% 94%;
-    --primary: 30 80% 80%;
-    --primary-foreground: 25 25% 15%;
-    --secondary: 30 15% 25%;
-    --secondary-foreground: 30 30% 94%;
-    --muted: 30 15% 25%;
-    --muted-foreground: 30 15% 65%;
-    --accent: 30 15% 25%;
-    --accent-foreground: 30 30% 94%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 30 30% 94%;
-    --border: 30 15% 30%;
-    --input: 30 15% 30%;
-    --ring: 30 80% 80%;
+  * {
+    @apply border-border;
   }
-}
 
-@layer base {
   body {
     @apply bg-background text-foreground;
-    background-image:
-      linear-gradient(rgba(180, 160, 140, 0.05) .05em, transparent .05em),
-      linear-gradient(90deg, rgba(180, 160, 140, 0.05) .05em, transparent .05em);
-    background-size: 1.5em 1.5em;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-bold tracking-tight;
+    @apply font-headline;
   }
 }
+
+/* Hard offset shadows — core paper effect */
+.paper-shadow-sm  { box-shadow: 2px 2px 0px 0px #111111; }
+.paper-shadow     { box-shadow: 4px 4px 0px 0px #111111; }
+.paper-shadow-lg  { box-shadow: 6px 6px 0px 0px #111111; }
+.paper-shadow-xl  { box-shadow: 8px 8px 0px 0px #111111; }
+
+/* Press buttons — shadow collapses on hover */
+.paper-btn {
+  box-shadow: 3px 3px 0px 0px #111111;
+  transition: box-shadow 0.1s ease, transform 0.1s ease;
+}
+.paper-btn:hover { box-shadow: none; transform: translate(3px, 3px); }
+
+.paper-btn-dark {
+  box-shadow: 3px 3px 0px 0px rgba(0,0,0,0.4);
+  transition: box-shadow 0.1s ease, transform 0.1s ease;
+}
+.paper-btn-dark:hover { box-shadow: none; transform: translate(3px, 3px); }
+
+/* Enforce the paper rules across existing Tailwind utility usage */
+*, *::before, *::after { border-radius: 0 !important; }
+.border { border-width: 2px; }
+.border-x { border-left-width: 2px; border-right-width: 2px; }
+.border-y { border-top-width: 2px; border-bottom-width: 2px; }
+.border-t { border-top-width: 2px; }
+.border-r { border-right-width: 2px; }
+.border-b { border-bottom-width: 2px; }
+.border-l { border-left-width: 2px; }

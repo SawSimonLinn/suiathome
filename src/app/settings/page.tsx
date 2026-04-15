@@ -36,6 +36,8 @@ export default async function SettingsPage() {
         role={authContext.profile?.role || 'user'}
         initialName={displayName}
         initialAvatarUrl={authContext.profile?.avatar_url || ''}
+        initialBio={authContext.profile?.bio || ''}
+        initialSocialLinks={authContext.profile?.social_links || []}
       />
     </div>
   );

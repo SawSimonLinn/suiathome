@@ -7,22 +7,42 @@ import { cn } from "@/lib/utils"
 
 type FieldType = "text" | "email" | "password" | "textarea" | "select"
 
-export interface FormField {
-  name: string
+type SelectOption = {
+  label: string
+  value: string
+}
+
+export interface FormField<Name extends string = string> {
+  name: Name
   label: string
   type?: FieldType
   placeholder?: string
   required?: boolean
-  options?: { label: string; value: string }[] // for select
+  options?: SelectOption[]
 }
 
-export interface PaperFormProps {
-  fields: FormField[]
-  onSubmit: (values: Record<string, string>) => void | Promise<void>
+export type PaperFormValues<TFields extends readonly FormField[]> = {
+  [Field in TFields[number] as Field["name"]]: string
+}
+
+type PaperFormKey<TFields extends readonly FormField[]> = Extract<
+  keyof PaperFormValues<TFields>,
+  string
+>
+
+export interface PaperFormProps<TFields extends readonly FormField[]> {
+  fields: TFields
+  onSubmit: (values: PaperFormValues<TFields>) => void | Promise<void>
   submitLabel?: string
   title?: string
   description?: string
   className?: string
+}
+
+function getInitialValues<TFields extends readonly FormField[]>(
+  fields: TFields
+): PaperFormValues<TFields> {
+  return Object.fromEntries(fields.map((field) => [field.name, ""])) as PaperFormValues<TFields>
 }
 
 // ── Sub-components ───────────────────────────────────────────────────────────
@@ -50,10 +70,22 @@ function PaperTextarea({ id, className, ...props }: React.TextareaHTMLAttributes
   return <textarea id={id} rows={4} className={cn(inputBase, "resize-none", className)} {...props} />
 }
 
-function PaperSelect({ id, options, className, ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { id: string; options: { label: string; value: string }[] }) {
+function PaperSelect({
+  id,
+  options,
+  className,
+  placeholder = "Select...",
+  ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement> & {
+  id: string
+  options: SelectOption[]
+  placeholder?: string
+}) {
   return (
     <select id={id} className={cn(inputBase, "cursor-pointer appearance-none bg-background", className)} {...props}>
-      <option value="">Select…</option>
+      <option value="" disabled={props.required}>
+        {placeholder}
+      </option>
       {options.map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>
       ))}
@@ -63,21 +95,34 @@ function PaperSelect({ id, options, className, ...props }: React.SelectHTMLAttri
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-export function PaperForm({
+export function PaperForm<const TFields extends readonly FormField[]>({
   fields,
   onSubmit,
   submitLabel = "Submit",
   title,
   description,
   className,
-}: PaperFormProps) {
-  const [values, setValues] = React.useState<Record<string, string>>(
-    () => Object.fromEntries(fields.map((f) => [f.name, ""]))
+}: PaperFormProps<TFields>) {
+  const [values, setValues] = React.useState<PaperFormValues<TFields>>(() =>
+    getInitialValues(fields)
   )
   const [loading, setLoading] = React.useState(false)
 
-  function handleChange(name: string, value: string) {
-    setValues((prev) => ({ ...prev, [name]: value }))
+  React.useEffect(() => {
+    setValues((prev) => {
+      const nextValues = getInitialValues(fields)
+
+      for (const field of fields) {
+        const key = field.name as PaperFormKey<TFields>
+        nextValues[key] = ((prev[key] as string | undefined) ?? "") as PaperFormValues<TFields>[PaperFormKey<TFields>]
+      }
+
+      return nextValues
+    })
+  }, [fields])
+
+  function handleChange(name: PaperFormKey<TFields>, value: string) {
+    setValues((prev) => ({ ...prev, [name]: value }) as PaperFormValues<TFields>)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -91,7 +136,7 @@ export function PaperForm({
   }
 
   return (
-    <div className={cn("border-2 border-foreground bg-background paper-shadow", className)}>
+    <div className={cn("border-2 border-foreground bg-paper paper-shadow", className)}>
       {(title || description) && (
         <div className="border-b-2 border-foreground px-6 py-4">
           {title && <h2 className="font-headline text-xl font-bold">{title}</h2>}
@@ -100,48 +145,57 @@ export function PaperForm({
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5 px-6 py-6">
-        {fields.map((field) => (
-          <div key={field.name} className="flex flex-col gap-1.5">
-            <PaperLabel htmlFor={field.name} required={field.required}>
-              {field.label}
-            </PaperLabel>
+        {fields.map((field) => {
+          const fieldName = field.name as PaperFormKey<TFields>
+          const fieldValue = (values[fieldName] as string | undefined) ?? ""
 
-            {field.type === "textarea" ? (
-              <PaperTextarea
-                id={field.name}
-                name={field.name}
-                placeholder={field.placeholder}
-                required={field.required}
-                value={values[field.name]}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-              />
-            ) : field.type === "select" && field.options ? (
-              <PaperSelect
-                id={field.name}
-                name={field.name}
-                required={field.required}
-                options={field.options}
-                value={values[field.name]}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-              />
-            ) : (
-              <PaperInput
-                id={field.name}
-                name={field.name}
-                type={field.type ?? "text"}
-                placeholder={field.placeholder}
-                required={field.required}
-                value={values[field.name]}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-              />
-            )}
-          </div>
-        ))}
+          return (
+            <div key={field.name} className="flex flex-col gap-1.5">
+              <PaperLabel htmlFor={field.name} required={field.required}>
+                {field.label}
+              </PaperLabel>
+
+              {field.type === "textarea" ? (
+                <PaperTextarea
+                  id={field.name}
+                  name={field.name}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  value={fieldValue}
+                  disabled={loading}
+                  onChange={(e) => handleChange(fieldName, e.target.value)}
+                />
+              ) : field.type === "select" && field.options ? (
+                <PaperSelect
+                  id={field.name}
+                  name={field.name}
+                  required={field.required}
+                  options={field.options}
+                  placeholder={field.placeholder}
+                  value={fieldValue}
+                  disabled={loading}
+                  onChange={(e) => handleChange(fieldName, e.target.value)}
+                />
+              ) : (
+                <PaperInput
+                  id={field.name}
+                  name={field.name}
+                  type={field.type ?? "text"}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  value={fieldValue}
+                  disabled={loading}
+                  onChange={(e) => handleChange(fieldName, e.target.value)}
+                />
+              )}
+            </div>
+          )
+        })}
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 border-2 border-foreground bg-foreground px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-primary-foreground paper-btn-dark disabled:opacity-50"
+          className="paper-btn-dark mt-2 border-2 border-foreground bg-foreground px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-background disabled:opacity-50"
         >
           {loading ? "…" : submitLabel}
         </button>

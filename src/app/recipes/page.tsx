@@ -24,7 +24,7 @@ export default async function RecipesPage() {
         </p>
       </header>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-8 max-w-2xl mx-auto">
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
         <div className="relative flex-grow">
           <Input placeholder="Search recipes..." className="pl-3" />
         </div>
@@ -52,7 +52,7 @@ export default async function RecipesPage() {
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))
         ) : (
-          <div className="col-span-full rounded-lg border bg-card p-8 text-center text-muted-foreground shadow-paper">
+          <div className="col-span-full border-2 border-foreground bg-paper p-8 text-center text-muted-foreground paper-shadow">
             No recipes are published yet.
           </div>
         )}

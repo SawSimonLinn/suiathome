@@ -1,14 +1,25 @@
 'use client';
+import { Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/supabase/client';
+import { hasSupabaseEnv } from '@/lib/supabase/config';
 import { UserRoleBadge } from '@/components/user-role-badge';
+import { cn } from '@/lib/utils';
 import type { CommunityPost, User } from '@/lib/types';
 
 interface CommunityPostCardProps {
@@ -25,17 +36,175 @@ export function CommunityPostCard({
   onEdit,
 }: CommunityPostCardProps) {
   const router = useRouter();
-  const [isLiked, setIsLiked] = useState(false);
+  const captionRef = useRef<HTMLParagraphElement | null>(null);
+  const [isLiked, setIsLiked] = useState(post.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(post.likes);
+  const [viewCount, setViewCount] = useState(post.views);
   const [comments, setComments] = useState(post.comments);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [isImageOpen, setIsImageOpen] = useState(false);
+  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
+  const [canExpandCaption, setCanExpandCaption] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [commentError, setCommentError] = useState<string | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [isTogglingLike, setIsTogglingLike] = useState(false);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+  useEffect(() => {
+    setIsLiked(post.isLiked ?? false);
+    setLikeCount(post.likes);
+    setViewCount(post.views);
+    setComments(post.comments);
+  }, [post.comments, post.isLiked, post.likes, post.views]);
+
+  useEffect(() => {
+    setIsCaptionExpanded(false);
+    setCanExpandCaption(false);
+  }, [post.caption]);
+
+  useEffect(() => {
+    const captionElement = captionRef.current;
+
+    if (!captionElement) {
+      return;
+    }
+
+    const updateCaptionClamp = () => {
+      if (isCaptionExpanded) {
+        return;
+      }
+
+      setCanExpandCaption(captionElement.scrollHeight > captionElement.clientHeight + 1);
+    };
+
+    if (typeof window === 'undefined') {
+      updateCaptionClamp();
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(updateCaptionClamp);
+
+    if (typeof ResizeObserver === 'undefined') {
+      return () => {
+        window.cancelAnimationFrame(frameId);
+      };
+    }
+
+    const observer = new ResizeObserver(updateCaptionClamp);
+    observer.observe(captionElement);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      observer.disconnect();
+    };
+  }, [isCaptionExpanded, post.caption]);
+
+  async function recordImageView() {
+    if (!post.imageUrl || !hasSupabaseEnv()) {
+      return;
+    }
+
+    const storageKey = `community-post-image-view:${post.id}`;
+
+    try {
+      if (window.sessionStorage.getItem(storageKey)) {
+        return;
+      }
+    } catch {
+      // Ignore sessionStorage issues and continue with the insert attempt.
+    }
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('community_post_views')
+        .insert({ post_id: post.id });
+
+      if (error) {
+        return;
+      }
+
+      try {
+        window.sessionStorage.setItem(storageKey, '1');
+      } catch {
+        // Ignore sessionStorage issues after a successful insert.
+      }
+
+      setViewCount((current) => current + 1);
+    } catch {
+      // Ignore view insert errors so the image dialog still opens.
+    }
+  }
+
+  const handleImageOpen = async () => {
+    setIsImageOpen(true);
+    await recordImageView();
+  };
+
+  const handleLike = async () => {
+    let supabase;
+
+    try {
+      supabase = createClient();
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Supabase is not configured',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Add your Supabase URL and publishable key first.',
+      });
+      return;
+    }
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      toast({
+        variant: 'destructive',
+        title: 'Sign in required',
+        description: 'Log in to like community posts.',
+      });
+      return;
+    }
+
+    setIsTogglingLike(true);
+
+    const previousLiked = isLiked;
+    setIsLiked(!previousLiked);
+    setLikeCount((current) => current + (previousLiked ? -1 : 1));
+
+    const query = previousLiked
+      ? supabase
+          .from('community_post_likes')
+          .delete()
+          .eq('post_id', post.id)
+          .eq('user_id', user.id)
+      : supabase.from('community_post_likes').insert({
+          post_id: post.id,
+          user_id: user.id,
+        });
+
+    const { error } = await query;
+
+    if (error) {
+      setIsLiked(previousLiked);
+      setLikeCount((current) => current + (previousLiked ? 1 : -1));
+      toast({
+        variant: 'destructive',
+        title: 'Could not update like',
+        description: error.message,
+      });
+      setIsTogglingLike(false);
+      return;
+    }
+
+    router.refresh();
+    setIsTogglingLike(false);
   };
 
   const formatPostedDate = (date: string) =>
@@ -111,7 +280,7 @@ export function CommunityPostCard({
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="self-start overflow-hidden">
       <CardHeader className="flex flex-row items-center gap-3 p-4">
         <Avatar>
           <AvatarImage src={post.user.avatarUrl} alt={post.user.name} />
@@ -119,7 +288,9 @@ export function CommunityPostCard({
         </Avatar>
         <div className="grid gap-0.5">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-semibold">{post.user.name}</p>
+            <Link href={`/profile/${post.user.id}`} className="font-semibold hover:underline">
+              {post.user.name}
+            </Link>
             <UserRoleBadge user={post.user} />
           </div>
           <p className="text-sm text-muted-foreground">
@@ -138,21 +309,82 @@ export function CommunityPostCard({
       </CardHeader>
       <CardContent className="p-0">
         {post.imageUrl && (
-          <div className="flex justify-center border-y bg-secondary/20">
-            <img
-              src={post.imageUrl}
-              alt={post.caption}
-              className="block h-auto max-h-[720px] w-auto max-w-full"
-              loading="lazy"
-            />
-          </div>
+          <>
+            <button
+              type="button"
+              className="group relative flex w-full justify-center border-y bg-secondary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              onClick={() => void handleImageOpen()}
+              aria-label="Open full image"
+            >
+              <img
+                src={post.imageUrl}
+                alt={post.caption}
+                className="block h-auto max-h-[720px] w-auto max-w-full transition-transform duration-200 group-hover:scale-[1.01]"
+                loading="lazy"
+              />
+              <span className="absolute bottom-3 right-3 border-2 border-foreground bg-paper px-2 py-1 text-xs font-semibold uppercase tracking-wide opacity-0 transition-opacity group-hover:opacity-100">
+                View Full Image
+              </span>
+            </button>
+
+            <Dialog open={isImageOpen} onOpenChange={setIsImageOpen}>
+              <DialogContent className="w-[min(94vw,1100px)] max-w-[1100px] bg-background p-3 sm:p-4">
+                <DialogTitle className="sr-only">Community post image</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Full-size view of the selected community post image.
+                </DialogDescription>
+                <div className="flex justify-center overflow-hidden border-2 border-foreground bg-secondary/20">
+                  <img
+                    src={post.imageUrl}
+                    alt={post.caption}
+                    className="block h-auto max-h-[80vh] w-auto max-w-full object-contain"
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </>
         )}
-        <p className="p-4 text-base">{post.caption}</p>
+        <div className="p-4">
+          <p
+            ref={captionRef}
+            className={cn(
+              'text-base leading-7',
+              !isCaptionExpanded &&
+                'overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]'
+            )}
+          >
+            {post.caption}
+          </p>
+          {canExpandCaption ? (
+            <Button
+              type="button"
+              variant="link"
+              className="mt-2 h-auto p-0 text-sm"
+              onClick={() => setIsCaptionExpanded((current) => !current)}
+            >
+              {isCaptionExpanded ? 'See less' : 'See more'}
+            </Button>
+          ) : null}
+        </div>
       </CardContent>
-      <CardFooter className="flex items-center justify-between border-t p-2">
-        <Button variant="ghost" onClick={handleLike}>
+      <CardFooter className="flex items-center justify-between gap-3 border-t p-2">
+        <Button
+          variant={isLiked ? 'secondary' : 'ghost'}
+          onClick={() => void handleLike()}
+          disabled={isTogglingLike}
+        >
           {isLiked ? 'Unlike' : 'Like'} ({likeCount})
         </Button>
+        {post.imageUrl ? (
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <Eye className="h-4 w-4" />
+            <span>
+              {viewCount} {viewCount === 1 ? 'view' : 'views'}
+            </span>
+          </div>
+        ) : (
+          <div />
+        )}
         <Button variant="ghost" onClick={() => setIsCommentsOpen((open) => !open)}>
           {isCommentsOpen ? 'Hide Comments' : 'Comment'} ({comments.length})
         </Button>
@@ -164,7 +396,7 @@ export function CommunityPostCard({
               comments.map((comment) => (
                 <div
                   key={comment.id}
-                  className="rounded-lg border bg-background p-3 shadow-paper-sm"
+                  className="border-2 border-foreground bg-paper p-3 paper-shadow-sm"
                 >
                   <div className="flex items-start gap-3">
                     <Avatar className="h-9 w-9">
@@ -178,7 +410,9 @@ export function CommunityPostCard({
                     </Avatar>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium">{comment.user.name}</p>
+                        <Link href={`/profile/${comment.user.id}`} className="font-medium hover:underline">
+                          {comment.user.name}
+                        </Link>
                         <UserRoleBadge user={comment.user} />
                         <p className="text-xs text-muted-foreground">
                           {formatPostedDate(comment.createdAt)}

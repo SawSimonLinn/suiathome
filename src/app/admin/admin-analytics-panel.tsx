@@ -128,7 +128,7 @@ export function AdminAnalyticsPanel({
               </LineChart>
             </ChartContainer>
           ) : (
-            <div className="flex min-h-[320px] items-center justify-center border bg-card p-6 text-center text-sm text-muted-foreground shadow-paper">
+            <div className="flex min-h-[320px] items-center justify-center border-2 border-foreground bg-paper p-6 text-center text-sm text-muted-foreground paper-shadow">
               Once users start liking, favoriting, and commenting on real Supabase-backed
               recipes, this engagement trend chart will populate automatically.
             </div>
@@ -158,21 +158,21 @@ export function AdminAnalyticsPanel({
                 <YAxis allowDecimals={false} width={28} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
-                <Bar dataKey="likes" fill="var(--color-likes)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="likes" fill="var(--color-likes)" radius={0} />
                 <Bar
                   dataKey="favorites"
                   fill="var(--color-favorites)"
-                  radius={[4, 4, 0, 0]}
+                  radius={0}
                 />
                 <Bar
                   dataKey="comments"
                   fill="var(--color-comments)"
-                  radius={[4, 4, 0, 0]}
+                  radius={0}
                 />
               </BarChart>
             </ChartContainer>
           ) : (
-            <div className="flex min-h-[320px] items-center justify-center border bg-card p-6 text-center text-sm text-muted-foreground shadow-paper">
+            <div className="flex min-h-[320px] items-center justify-center border-2 border-foreground bg-paper p-6 text-center text-sm text-muted-foreground paper-shadow">
               Top-recipe analytics will appear here after the first likes, favorites,
               and comments hit your database.
             </div>
@@ -180,7 +180,7 @@ export function AdminAnalyticsPanel({
         </div>
       </div>
 
-      <ScrollArea className="w-full whitespace-nowrap rounded-md border bg-card shadow-paper">
+      <ScrollArea className="w-full whitespace-nowrap border-2 border-foreground bg-paper paper-shadow">
         <Table>
           <TableHeader>
             <TableRow>

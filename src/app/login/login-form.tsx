@@ -157,7 +157,7 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
                 <Label htmlFor="password">Password</Label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm underline font-medium text-primary-foreground hover:text-primary"
+                  className="text-sm font-medium text-foreground underline hover:text-muted-foreground"
                 >
                   Forgot password?
                 </Link>
@@ -192,7 +192,7 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
           Don&apos;t have an account?{' '}
           <Link
             href="/signup"
-            className="underline font-medium text-primary-foreground hover:text-primary"
+            className="font-medium text-foreground underline hover:text-muted-foreground"
           >
             Sign up
           </Link>

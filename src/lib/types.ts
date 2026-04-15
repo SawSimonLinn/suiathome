@@ -15,6 +15,8 @@ export type Comment = {
   text: string;
   user: User;
   createdAt: string;
+  replies: Comment[];
+  isPinned?: boolean;
 };
 
 export type Recipe = {
@@ -35,6 +37,7 @@ export type Recipe = {
   tips: string[];
   likes: number;
   favorites: number;
+  views: number;
   isLiked?: boolean;
   isFavorited?: boolean;
   comments: Comment[];
@@ -56,6 +59,8 @@ export type CommunityPost = {
   imageUrl: string;
   imageHint: string;
   likes: number;
+  views: number;
+  isLiked?: boolean;
   comments: CommunityComment[];
   createdAt: string;
   linkedRecipeId?: string | null;

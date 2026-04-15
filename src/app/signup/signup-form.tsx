@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -13,9 +13,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/password-input';
+import { createLegalConsentMetadata } from '@/lib/legal';
 import { createClient } from '@/lib/supabase/client';
 
 type SignupFormProps = {
@@ -30,17 +32,40 @@ function getNextPath(next: string | null) {
   return next;
 }
 
+const LEGAL_ACCEPTANCE_ERROR =
+  'Please accept the Privacy Policy and Terms & Conditions to continue.';
+
 export function SignupForm({ supabaseReady }: SignupFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [hasAcceptedPrivacyPolicy, setHasAcceptedPrivacyPolicy] =
+    useState(false);
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSigningUp, setIsSigningUp] = useState(false);
   const [isStartingGoogle, setIsStartingGoogle] = useState(false);
 
   const next = getNextPath(searchParams.get('next'));
+  const hasAcceptedLegalDocuments =
+    hasAcceptedPrivacyPolicy && hasAcceptedTerms;
+
+  useEffect(() => {
+    if (hasAcceptedLegalDocuments && errorMessage === LEGAL_ACCEPTANCE_ERROR) {
+      setErrorMessage(null);
+    }
+  }, [errorMessage, hasAcceptedLegalDocuments]);
+
+  const validateLegalAcceptance = () => {
+    if (hasAcceptedLegalDocuments) {
+      return true;
+    }
+
+    setErrorMessage(LEGAL_ACCEPTANCE_ERROR);
+    return false;
+  };
 
   const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -49,6 +74,10 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
       setErrorMessage(
         'Add your Supabase URL and publishable key to .env.local or .env first.'
       );
+      return;
+    }
+
+    if (!validateLegalAcceptance()) {
       return;
     }
 
@@ -63,6 +92,7 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
         options: {
           data: {
             name,
+            ...createLegalConsentMetadata(),
           },
           emailRedirectTo: window.location.origin,
         },
@@ -96,15 +126,24 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
       return;
     }
 
+    if (!validateLegalAcceptance()) {
+      return;
+    }
+
     setIsStartingGoogle(true);
     setErrorMessage(null);
 
     try {
       const supabase = createClient();
+      const redirectUrl = new URL('/auth/callback', window.location.origin);
+      redirectUrl.searchParams.set('next', next);
+      redirectUrl.searchParams.set('privacyAccepted', 'true');
+      redirectUrl.searchParams.set('termsAccepted', 'true');
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+          redirectTo: redirectUrl.toString(),
         },
       });
 
@@ -179,6 +218,61 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
                   onChange={(event) => setPassword(event.target.value)}
                 />
               </div>
+              <div className="grid gap-3 rounded-md border-2 border-foreground bg-background p-4">
+                <p className="text-sm text-muted-foreground">
+                  Accept both agreements to create your account.
+                </p>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="privacy-policy"
+                    checked={hasAcceptedPrivacyPolicy}
+                    onCheckedChange={(checked) =>
+                      setHasAcceptedPrivacyPolicy(checked === true)
+                    }
+                  />
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor="privacy-policy"
+                      className="text-sm font-normal leading-6"
+                    >
+                      I agree to the Privacy Policy.
+                    </Label>
+                    <Link
+                      href="/privacy-policy"
+                      className="text-sm font-medium text-foreground underline hover:text-muted-foreground"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Read Privacy Policy
+                    </Link>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="terms-and-conditions"
+                    checked={hasAcceptedTerms}
+                    onCheckedChange={(checked) =>
+                      setHasAcceptedTerms(checked === true)
+                    }
+                  />
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor="terms-and-conditions"
+                      className="text-sm font-normal leading-6"
+                    >
+                      I agree to the Terms &amp; Conditions.
+                    </Label>
+                    <Link
+                      href="/terms-and-conditions"
+                      className="text-sm font-medium text-foreground underline hover:text-muted-foreground"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Read Terms &amp; Conditions
+                    </Link>
+                  </div>
+                </div>
+              </div>
               <Button type="submit" className="w-full mt-2" disabled={isBusy}>
                 {isSigningUp ? 'Creating account...' : 'Create an account'}
               </Button>
@@ -202,7 +296,7 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
             Already have an account?{' '}
             <Link
               href="/login"
-              className="underline font-medium text-primary-foreground hover:text-primary"
+              className="font-medium text-foreground underline hover:text-muted-foreground"
             >
               Sign in
             </Link>

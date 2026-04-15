@@ -1,14 +1,18 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useRecipeInteractions } from '@/hooks/use-recipe-interactions';
+import { createClient } from '@/lib/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CommunityPostCard } from '@/components/community-post-card';
+import { CreateCommunityPostCard } from '@/components/create-community-post-card';
 import { RecipeCard } from '@/components/recipe-card';
+import { RecipeImageCard } from '@/components/recipe-image-card';
 import type { Recipe, CommunityPost, User } from '@/lib/types';
 import { RecipeQaSection } from './RecipeQaSection';
 
@@ -26,6 +30,22 @@ export default function RecipeClientPage({
   relatedRecipes,
   currentUser,
 }: RecipeClientPageProps) {
+  const [viewCount, setViewCount] = useState(recipe.views);
+
+  useEffect(() => {
+    async function trackView() {
+      try {
+        const supabase = createClient();
+        await supabase.from('recipe_views').insert({ recipe_id: recipe.id });
+        setViewCount((c) => c + 1);
+      } catch {
+        // silently ignore — view tracking is non-critical
+      }
+    }
+    void trackView();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipe.id]);
+
   const {
     isLiked,
     isFavorited,
@@ -54,7 +74,7 @@ export default function RecipeClientPage({
 
   return (
     <div className="py-8 md:py-12">
-      <article className="max-w-4xl mx-auto bg-card border shadow-paper p-6 md:p-10">
+      <article className="mx-auto max-w-5xl border-2 border-foreground bg-paper p-6 paper-shadow md:p-10">
         <header className="mb-8 text-center">
           <Badge variant="secondary" className="mb-4">{recipe.category.name}</Badge>
           <h1 className="font-headline text-4xl md:text-6xl !leading-tight tracking-tight mb-4">
@@ -76,7 +96,7 @@ export default function RecipeClientPage({
         </header>
 
         {coverImage && (
-          <div className="relative w-full aspect-video border shadow-paper-sm mb-8">
+          <div className="relative mb-8 aspect-video w-full border-2 border-foreground paper-shadow-sm">
             <Image
               src={coverImage.imageUrl}
               alt={recipe.title}
@@ -88,7 +108,7 @@ export default function RecipeClientPage({
           </div>
         )}
         
-        <div className="border-y border-dashed border-border my-8 py-4">
+        <div className="my-8 border-y-2 border-dashed border-foreground py-4">
             <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                     <p className="text-sm text-muted-foreground">Prep Time</p>
@@ -105,13 +125,13 @@ export default function RecipeClientPage({
             </div>
         </div>
 
-        <div className="text-lg text-foreground/90 bg-secondary/50 p-6 my-8">
+        <div className="my-8 border-2 border-foreground bg-secondary p-6 text-lg text-foreground/90 paper-shadow-sm">
             <p className="italic leading-relaxed">{recipe.story}</p>
         </div>
 
         <div className="grid md:grid-cols-5 gap-8 lg:gap-12">
             <div className="md:col-span-2">
-                <h2 className="font-headline text-3xl mb-4 border-b-2 border-primary pb-2">Ingredients</h2>
+                <h2 className="mb-4 border-b-2 border-foreground pb-2 font-headline text-3xl">Ingredients</h2>
                 <ul className="space-y-3 text-base">
                     {recipe.ingredients.map((ing, index) => (
                     <li key={index} className="flex gap-3 items-start p-2">
@@ -125,11 +145,11 @@ export default function RecipeClientPage({
             </div>
             
             <div className="md:col-span-3">
-                <h2 className="font-headline text-3xl mb-4 border-b-2 border-primary pb-2">Instructions</h2>
+                <h2 className="mb-4 border-b-2 border-foreground pb-2 font-headline text-3xl">Instructions</h2>
                 <ol className="list-none space-y-6 text-base leading-loose">
                     {recipe.steps.map((step, index) => (
                     <li key={index} className="flex items-start gap-4">
-                        <div className="flex-shrink-0 mt-1.5 flex h-8 w-8 items-center justify-center border-2 border-foreground rounded-full text-foreground font-bold font-headline text-lg">
+                        <div className="mt-1.5 flex h-8 w-8 flex-shrink-0 items-center justify-center border-2 border-foreground text-foreground font-bold font-headline text-lg">
                         {index + 1}
                         </div>
                         <p>{step}</p>
@@ -141,7 +161,7 @@ export default function RecipeClientPage({
         
         <Separator className="my-12" />
 
-        <div className="flex justify-center items-center gap-4">
+        <div className="flex justify-center items-center gap-4 flex-wrap">
             <Button
               variant={isLiked ? 'secondary' : 'outline'}
               onClick={() => void toggleLike()}
@@ -163,6 +183,9 @@ export default function RecipeClientPage({
             >
               {isSharing ? 'Sharing...' : 'Share'}
             </Button>
+            <span className="text-sm text-muted-foreground">
+              {viewCount} {viewCount === 1 ? 'view' : 'views'}
+            </span>
         </div>
       </article>
 
@@ -172,30 +195,35 @@ export default function RecipeClientPage({
         currentUser={currentUser}
       />
 
-      {relatedPosts.length > 0 && (
-        <section className="max-w-4xl mx-auto mt-16">
-            <h2 className="font-headline text-3xl md:text-4xl mb-8 text-center">Community Creations</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {relatedPosts.map(post => (
-                    <CommunityPostCard
-                      key={post.id}
-                      post={post}
-                      currentUser={currentUser}
-                    />
-                ))}
-            </div>
-        </section>
-      )}
+      <section className="max-w-5xl mx-auto mt-16">
+        <h2 className="font-headline text-3xl md:text-4xl mb-8 text-center">Community Creations</h2>
+        <div className="mx-auto flex max-w-3xl flex-col gap-8">
+          <CreateCommunityPostCard
+            recipeId={recipe.id}
+            recipeTitle={recipe.title}
+            currentUser={currentUser}
+          />
+          {relatedPosts.map(post => (
+            <CommunityPostCard
+              key={post.id}
+              post={post}
+              currentUser={currentUser}
+            />
+          ))}
+        </div>
+      </section>
 
       {relatedRecipes.length > 0 && (
-        <section className="max-w-4xl mx-auto mt-16">
-             <Separator className="my-12" />
-            <h2 className="font-headline text-3xl md:text-4xl mb-8 text-center">You May Also Like</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                {relatedRecipes.map(relatedRecipe => (
-                    <RecipeCard key={relatedRecipe.id} recipe={relatedRecipe} />
-                ))}
-            </div>
+        <section className="max-w-6xl mx-auto mt-16 px-4">
+          <Separator className="mb-12" />
+          <h2 className="font-headline text-3xl md:text-4xl mb-8 text-center">You May Also Like</h2>
+          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
+            {relatedRecipes.map(relatedRecipe => (
+              <div key={relatedRecipe.id} className="w-[320px] shrink-0 snap-start">
+                <RecipeImageCard recipe={relatedRecipe} />
+              </div>
+            ))}
+          </div>
         </section>
       )}
 

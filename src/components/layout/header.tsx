@@ -39,7 +39,7 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-foreground bg-background">
       <div className="container mx-auto flex h-20 items-center px-4 md:px-8">
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <span className="font-bold sm:inline-block font-headline text-3xl">
@@ -52,8 +52,8 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
               key={link.href}
               href={link.href}
               className={cn(
-                "transition-colors hover:text-primary",
-                pathname === link.href ? "text-primary-foreground font-bold" : "text-muted-foreground"
+                "transition-colors hover:text-foreground",
+                pathname === link.href ? "text-foreground font-bold" : "text-muted-foreground"
               )}
             >
               {link.label}

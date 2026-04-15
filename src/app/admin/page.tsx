@@ -161,7 +161,7 @@ export default async function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 text-sm text-muted-foreground">
-                <div className="rounded-lg border p-4">
+                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
                   <p className="font-medium text-foreground">Upload recipes</p>
                   <p className="mt-1">
                     Use
@@ -174,7 +174,7 @@ export default async function AdminPage() {
                     tips, and category details.
                   </p>
                 </div>
-                <div className="rounded-lg border p-4">
+                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
                   <p className="font-medium text-foreground">Remove or hide comments</p>
                   <p className="mt-1">
                     Use
@@ -187,7 +187,7 @@ export default async function AdminPage() {
                     admin upgrade SQL is applied.
                   </p>
                 </div>
-                <div className="rounded-lg border p-4">
+                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
                   <p className="font-medium text-foreground">Enable admin policies</p>
                   <p className="mt-1">
                     Run `docs/supabase-admin-upgrade.sql` in Supabase if you
@@ -195,7 +195,7 @@ export default async function AdminPage() {
                     recipe management and hidden comment moderation.
                   </p>
                 </div>
-                <div className="rounded-lg border p-4">
+                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
                   <p className="font-medium text-foreground">More detail features</p>
                   <p className="mt-1">
                     The new recipe form already captures description, story, prep

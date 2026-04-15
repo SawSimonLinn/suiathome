@@ -164,7 +164,7 @@ export function ResetPasswordForm({
           <div className="text-center text-sm">
             <Link
               href="/forgot-password"
-              className="underline font-medium text-primary-foreground hover:text-primary"
+              className="font-medium text-foreground underline hover:text-muted-foreground"
             >
               Need a new reset email?
             </Link>

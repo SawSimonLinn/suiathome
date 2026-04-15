@@ -50,22 +50,23 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
 
   return (
     <Link href={`/recipes/${recipe.slug}`} className="group block">
-      <Card className={cn("overflow-hidden transition-shadow duration-300 group-hover:shadow-lg", className)}>
-        {coverImage ? (
-           <Image
-            src={coverImage.imageUrl}
-            alt={recipe.title}
-            width={400}
-            height={300}
-            className="w-full object-cover aspect-[4/3]"
-            data-ai-hint={coverImage.imageHint}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center aspect-[4/3]">
-            <span className="text-muted-foreground">No Image</span>
-          </div>
-        )}
+      <Card className={cn("overflow-hidden", className)}>
+        <div className="relative w-full aspect-[4/3]">
+          {coverImage ? (
+            <Image
+              src={coverImage.imageUrl}
+              alt={recipe.title}
+              fill
+              className="object-cover"
+              data-ai-hint={coverImage.imageHint}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <span className="text-muted-foreground">No Image</span>
+            </div>
+          )}
+        </div>
         <CardContent className="p-4">
           <Badge variant="outline" className="mb-2">{recipe.category.name}</Badge>
            <h3 className="font-headline text-xl font-bold leading-tight" title={recipe.title}>
@@ -115,6 +116,9 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               {isSharing ? "Sharing..." : "Share"}
             </Button>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {recipe.views} {recipe.views === 1 ? 'view' : 'views'}
+          </p>
         </CardContent>
       </Card>
     </Link>

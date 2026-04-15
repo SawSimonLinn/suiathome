@@ -79,8 +79,9 @@ export function NewRecipeForm({ categories }: NewRecipeFormProps) {
   const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');
   const [story, setStory] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
   const [imageHint, setImageHint] = useState('');
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [prepTime, setPrepTime] = useState('');
   const [cookTime, setCookTime] = useState('');
   const [servings, setServings] = useState('4');
@@ -94,6 +95,18 @@ export function NewRecipeForm({ categories }: NewRecipeFormProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleImageFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (files.length === 0) return;
+    setImageFiles(files);
+    setImagePreviews(files.map((f) => URL.createObjectURL(f)));
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
@@ -141,6 +154,23 @@ export function NewRecipeForm({ categories }: NewRecipeFormProps) {
       if (!user) {
         setErrorMessage('You need to be signed in as an admin to publish recipes.');
         return;
+      }
+
+      // Upload images to Supabase Storage
+      const uploadedUrls: string[] = [];
+      for (let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+        const ext = file.name.split('.').pop();
+        const path = `${normalizedSlug}/${i}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('recipe-images')
+          .upload(path, file, { upsert: true });
+        if (uploadError) {
+          setErrorMessage(`Image upload failed: ${uploadError.message}`);
+          return;
+        }
+        const { data } = supabase.storage.from('recipe-images').getPublicUrl(path);
+        uploadedUrls.push(data.publicUrl);
       }
 
       let resolvedCategoryId = categoryId;
@@ -192,7 +222,7 @@ export function NewRecipeForm({ categories }: NewRecipeFormProps) {
           title: title.trim(),
           description: description.trim(),
           story: story.trim(),
-          image_url: imageUrl.trim() || null,
+          image_url: uploadedUrls[0] ?? null,
           image_hint: imageHint.trim() || null,
           prep_time: prepTime.trim(),
           cook_time: cookTime.trim(),
@@ -206,6 +236,24 @@ export function NewRecipeForm({ categories }: NewRecipeFormProps) {
           getFriendlyAdminError(recipeError?.message || 'Could not create recipe.')
         );
         return;
+      }
+
+      // Insert additional images (index > 0) into recipe_images table
+      if (uploadedUrls.length > 1) {
+        const extraImages = uploadedUrls.slice(1).map((url, i) => ({
+          recipe_id: recipe.id,
+          url,
+          position: i + 1,
+        }));
+        const { error: imagesError } = await supabase
+          .from('recipe_images')
+          .insert(extraImages);
+        if (imagesError) {
+          setErrorMessage(
+            `Recipe created, but extra images failed to save: ${getFriendlyAdminError(imagesError.message)}`
+          );
+          return;
+        }
       }
 
       const ingredientRows = normalizedIngredients.map((line, index) => {
@@ -426,13 +474,48 @@ export function NewRecipeForm({ categories }: NewRecipeFormProps) {
                 <Separator />
 
                 <div className="grid gap-2">
-                  <Label htmlFor="imageUrl">Cover Image URL</Label>
+                  <Label htmlFor="imageFiles">
+                    Recipe Images
+                    <span className="ml-1 font-normal text-muted-foreground">
+                      (first = cover)
+                    </span>
+                  </Label>
                   <Input
-                    id="imageUrl"
-                    value={imageUrl}
-                    onChange={(event) => setImageUrl(event.target.value)}
-                    placeholder="https://..."
+                    id="imageFiles"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageFiles}
+                    className="cursor-pointer"
                   />
+                  {imagePreviews.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {imagePreviews.map((src, i) => (
+                        <div key={src} className="relative">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={src}
+                            alt={`Preview ${i + 1}`}
+                            className="h-20 w-20 rounded border object-cover overflow-hidden"
+                            style={{ display: 'block' }}
+                          />
+                          {i === 0 ? (
+                            <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-center text-[10px] text-white">
+                              Cover
+                            </span>
+                          ) : null}
+                          <button
+                            type="button"
+                            onClick={() => removeImage(i)}
+                            className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-white"
+                            aria-label="Remove image"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="grid gap-2">

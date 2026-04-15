@@ -33,6 +33,8 @@ type CommunityPageClientProps = {
   currentUser: User | null;
 };
 
+type CommunitySortOption = 'newest' | 'oldest' | 'most-viewed';
+
 function createImagePath(userId: string, fileName: string) {
   const sanitizedName = fileName.replace(/[^a-zA-Z0-9.-]/g, '-');
   return `${userId}/${Date.now()}-${sanitizedName}`;
@@ -57,6 +59,43 @@ export function CommunityPageClient({
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const isLoggedIn = Boolean(currentUser);
+  const [isCreateExpanded, setIsCreateExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterRecipeId, setFilterRecipeId] = useState('all');
+  const [sortOption, setSortOption] = useState<CommunitySortOption>('newest');
+
+  const filteredPosts = posts.filter((post) => {
+    const matchesSearch =
+      searchQuery.trim() === '' ||
+      post.caption.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.user.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter =
+      filterRecipeId === 'all' || post.linkedRecipeId === filterRecipeId;
+    return matchesSearch && matchesFilter;
+  });
+
+  const sortedPosts = [...filteredPosts].sort((left, right) => {
+    if (sortOption === 'oldest') {
+      return (
+        new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()
+      );
+    }
+
+    if (sortOption === 'most-viewed') {
+      if (right.views !== left.views) {
+        return right.views - left.views;
+      }
+
+      return (
+        new Date(right.createdAt).getTime() -
+        new Date(left.createdAt).getTime()
+      );
+    }
+
+    return (
+      new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+    );
+  });
 
   const startEditingPost = (post: CommunityPost) => {
     setEditingPost(post);
@@ -146,6 +185,8 @@ export function CommunityPageClient({
           imageUrl,
           imageHint: insertedPost.image_hint || 'community food post',
           likes: 0,
+          views: 0,
+          isLiked: false,
           comments: [],
           createdAt: insertedPost.created_at,
           linkedRecipeId: insertedPost.linked_recipe_id,
@@ -155,6 +196,7 @@ export function CommunityPageClient({
       setCaption('');
       setSelectedRecipeId('none');
       setSelectedFile(null);
+      setIsCreateExpanded(false);
       router.refresh();
     } finally {
       setIsSubmitting(false);
@@ -221,7 +263,7 @@ export function CommunityPageClient({
   };
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-8 md:py-12">
+    <div className="container mx-auto max-w-6xl px-4 py-8 md:py-12">
       <header className="text-center mb-8 md:mb-12">
         <h1 className="font-headline text-4xl md:text-5xl">Community Feed</h1>
         <p className="text-muted-foreground mt-2 max-w-2xl mx-auto text-lg">
@@ -230,91 +272,162 @@ export function CommunityPageClient({
       </header>
 
       {isLoggedIn && currentUser ? (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-2xl">
-              <Avatar>
-                <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
-                <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              Create a post
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="grid gap-4">
-              {errorMessage ? (
-                <p className="text-sm text-destructive">{errorMessage}</p>
-              ) : null}
+        <Card className="mb-8 mx-auto max-w-2xl">
+          {!isCreateExpanded ? (
+            <CardContent className="p-4">
+              <button
+                type="button"
+                onClick={() => setIsCreateExpanded(true)}
+                className="flex w-full items-center gap-3 text-left"
+              >
+                <Avatar>
+                  <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                  <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className="flex-1 rounded-full border bg-muted px-4 py-2 text-sm text-muted-foreground hover:bg-muted/80 transition-colors">
+                  What did you make?
+                </span>
+              </button>
+            </CardContent>
+          ) : (
+            <>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Avatar>
+                    <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  Create a post
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="grid gap-4">
+                  {errorMessage ? (
+                    <p className="text-sm text-destructive">{errorMessage}</p>
+                  ) : null}
 
-              <Textarea
-                placeholder="What did you make?"
-                value={caption}
-                onChange={(event) => setCaption(event.target.value)}
-                required
-                rows={3}
-              />
-              <div>
-                <label
-                  htmlFor="recipe-link"
-                  className="text-sm font-medium text-muted-foreground"
-                >
-                  Tag a recipe
-                </label>
-                <Select value={selectedRecipeId} onValueChange={setSelectedRecipeId}>
-                  <SelectTrigger id="recipe-link" className="mt-1">
-                    <SelectValue placeholder="Select a recipe (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {availableRecipes.map((recipe) => (
-                      <SelectItem key={recipe.id} value={recipe.id}>
-                        {recipe.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Tagging a recipe makes this post show up on that recipe page.
-                </p>
-              </div>
+                  <Textarea
+                    placeholder="What did you make?"
+                    value={caption}
+                    onChange={(event) => setCaption(event.target.value)}
+                    required
+                    rows={3}
+                    autoFocus
+                  />
+                  <div>
+                    <label
+                      htmlFor="recipe-link"
+                      className="text-sm font-medium text-muted-foreground"
+                    >
+                      Tag a recipe
+                    </label>
+                    <Select value={selectedRecipeId} onValueChange={setSelectedRecipeId}>
+                      <SelectTrigger id="recipe-link" className="mt-1">
+                        <SelectValue placeholder="Select a recipe (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {availableRecipes.map((recipe) => (
+                          <SelectItem key={recipe.id} value={recipe.id}>
+                            {recipe.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Tagging a recipe makes this post show up on that recipe page.
+                    </p>
+                  </div>
 
-              <div>
-                <label
-                  htmlFor="photo"
-                  className="text-sm font-medium text-muted-foreground"
-                >
-                  Add a photo
-                </label>
-                <Input
-                  id="photo"
-                  type="file"
-                  className="mt-1"
-                  accept="image/*"
-                  onChange={(event) =>
-                    setSelectedFile(event.target.files?.[0] || null)
-                  }
-                />
-              </div>
+                  <div>
+                    <label
+                      htmlFor="photo"
+                      className="text-sm font-medium text-muted-foreground"
+                    >
+                      Add a photo
+                    </label>
+                    <Input
+                      id="photo"
+                      type="file"
+                      className="mt-1"
+                      accept="image/*"
+                      onChange={(event) =>
+                        setSelectedFile(event.target.files?.[0] || null)
+                      }
+                    />
+                  </div>
 
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Posting...' : 'Post'}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setIsCreateExpanded(false);
+                        setCaption('');
+                        setSelectedRecipeId('none');
+                        setSelectedFile(null);
+                        setErrorMessage(null);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? 'Posting...' : 'Post'}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </>
+          )}
         </Card>
       ) : (
-        <Card className="mb-8">
+        <Card className="mb-8 mx-auto max-w-2xl">
           <CardContent className="p-6 text-center text-sm text-muted-foreground">
             Sign in to create community posts and join the conversation.
           </CardContent>
         </Card>
       )}
 
-      <div className="space-y-8">
-        {posts.length > 0 ? (
-          posts.map((post) => (
+      <div className="mx-auto mb-6 grid max-w-4xl gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_220px_220px]">
+        <Input
+          placeholder="Search posts..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full"
+        />
+        <Select value={filterRecipeId} onValueChange={setFilterRecipeId}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Filter by recipe" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All recipes</SelectItem>
+            {availableRecipes.map((recipe) => (
+              <SelectItem key={recipe.id} value={recipe.id}>
+                {recipe.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={sortOption}
+          onValueChange={(value) =>
+            setSortOption(value as CommunitySortOption)
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Sort posts" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest</SelectItem>
+            <SelectItem value="oldest">Oldest</SelectItem>
+            <SelectItem value="most-viewed">Most viewed</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="mx-auto flex max-w-3xl flex-col gap-6">
+        {sortedPosts.length > 0 ? (
+          sortedPosts.map((post) => (
             <CommunityPostCard
               key={post.id}
               post={post}
@@ -324,11 +437,15 @@ export function CommunityPageClient({
             />
           ))
         ) : (
-          <Card>
-            <CardContent className="p-6 text-center text-muted-foreground">
-              No community posts yet.
-            </CardContent>
-          </Card>
+          <div>
+            <Card>
+              <CardContent className="p-6 text-center text-muted-foreground">
+                {searchQuery || filterRecipeId !== 'all'
+                  ? 'No posts match your search.'
+                  : 'No community posts yet.'}
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
 

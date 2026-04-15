@@ -50,9 +50,10 @@ export const recipes: Recipe[] = [
     ],
     likes: 256,
     favorites: 120,
+    views: 0,
     comments: [
-      { id: 'comment-1', text: 'This was amazing! So easy to make.', user: users[1], createdAt: '2024-05-10T12:00:00Z' },
-      { id: 'comment-2', text: 'My family loved it. Will make again!', user: users[2], createdAt: '2024-05-11T14:30:00Z' },
+      { id: 'comment-1', text: 'This was amazing! So easy to make.', user: users[1], createdAt: '2024-05-10T12:00:00Z', replies: [] },
+      { id: 'comment-2', text: 'My family loved it. Will make again!', user: users[2], createdAt: '2024-05-11T14:30:00Z', replies: [] },
     ],
     createdAt: '2024-05-10T10:00:00Z',
     author: users[0],
@@ -95,6 +96,7 @@ export const recipes: Recipe[] = [
     ],
     likes: 512,
     favorites: 350,
+    views: 0,
     comments: [],
     createdAt: '2024-05-09T10:00:00Z',
     author: users[0],
@@ -136,6 +138,7 @@ export const recipes: Recipe[] = [
     ],
     likes: 480,
     favorites: 280,
+    views: 0,
     comments: [],
     createdAt: '2024-05-08T10:00:00Z',
     author: users[0],
@@ -173,6 +176,7 @@ export const recipes: Recipe[] = [
     ],
     likes: 350,
     favorites: 180,
+    views: 0,
     comments: [],
     createdAt: '2024-05-07T10:00:00Z',
     author: users[0],
@@ -210,6 +214,7 @@ export const recipes: Recipe[] = [
     ],
     likes: 415,
     favorites: 210,
+    views: 0,
     comments: [],
     createdAt: '2024-05-06T10:00:00Z',
     author: users[0],
@@ -224,6 +229,7 @@ export const communityPosts: CommunityPost[] = [
     imageUrl: 'https://picsum.photos/seed/comm1/600/600',
     imageHint: 'plate of carbonara',
     likes: 42,
+    views: 124,
     comments: [
       { id: 'cc-1', text: 'Looks delicious!', user: users[2], createdAt: '2024-05-20T10:00:00Z' }
     ],
@@ -237,6 +243,7 @@ export const communityPosts: CommunityPost[] = [
     imageUrl: 'https://picsum.photos/seed/comm2/600/600',
     imageHint: 'cookies on a rack',
     likes: 108,
+    views: 209,
     comments: [],
     createdAt: '2024-05-18T12:30:00Z',
     linkedRecipe: recipes[1], // Chewy Chocolate Chip Cookies
@@ -248,6 +255,7 @@ export const communityPosts: CommunityPost[] = [
     imageUrl: 'https://picsum.photos/seed/comm3/600/600',
     imageHint: 'plated tacos',
     likes: 95,
+    views: 176,
     comments: [],
     createdAt: '2024-05-17T09:00:00Z',
     linkedRecipe: recipes[4], // Flavorful Beef Tacos

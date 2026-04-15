@@ -102,6 +102,12 @@ create table if not exists public.community_post_likes (
   primary key (post_id, user_id)
 );
 
+create table if not exists public.community_post_views (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references public.community_posts(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
 create index if not exists recipes_created_at_idx on public.recipes (created_at desc);
 create index if not exists recipes_author_id_idx on public.recipes (author_id);
 create index if not exists recipes_category_id_idx on public.recipes (category_id);
@@ -109,6 +115,8 @@ create index if not exists recipe_comments_recipe_id_idx on public.recipe_commen
 create index if not exists community_posts_created_at_idx on public.community_posts (created_at desc);
 create index if not exists community_posts_recipe_id_idx on public.community_posts (linked_recipe_id);
 create index if not exists community_post_comments_post_id_idx on public.community_post_comments (post_id, created_at desc);
+create index if not exists community_post_likes_user_id_idx on public.community_post_likes (user_id, post_id);
+create index if not exists community_post_views_post_id_idx on public.community_post_views (post_id, created_at desc);
 
 alter table public.categories enable row level security;
 alter table public.recipes enable row level security;
@@ -122,6 +130,7 @@ alter table public.recipe_favorites enable row level security;
 alter table public.community_posts enable row level security;
 alter table public.community_post_comments enable row level security;
 alter table public.community_post_likes enable row level security;
+alter table public.community_post_views enable row level security;
 
 drop policy if exists "categories are viewable by everyone" on public.categories;
 create policy "categories are viewable by everyone"
@@ -255,6 +264,14 @@ drop policy if exists "users can remove their own community post likes" on publi
 create policy "users can remove their own community post likes"
 on public.community_post_likes for delete to authenticated
 using (auth.uid() = user_id);
+
+drop policy if exists "community post views are viewable by everyone" on public.community_post_views;
+create policy "community post views are viewable by everyone"
+on public.community_post_views for select using (true);
+
+drop policy if exists "community post views can be created by everyone" on public.community_post_views;
+create policy "community post views can be created by everyone"
+on public.community_post_views for insert with check (true);
 
 insert into storage.buckets (id, name, public)
 values ('community-images', 'community-images', true)

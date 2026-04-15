@@ -57,6 +57,8 @@ type RecipeCommentRow = {
   user_id: string;
   body: string;
   created_at: string;
+  parent_id: string | null;
+  is_pinned: boolean;
 };
 
 type RecipeInteractionRow = {
@@ -79,6 +81,7 @@ type RecipeSummary = Pick<
   | 'servings'
   | 'likes'
   | 'favorites'
+  | 'views'
   | 'createdAt'
   | 'author'
 > & {
@@ -124,6 +127,7 @@ function mapSummaryRecipe(
   profilesById: Map<string, ProfileRow>,
   likeCounts: Map<string, number>,
   favoriteCounts: Map<string, number>,
+  viewCounts: Map<string, number>,
   commentsByRecipeId: Map<string, Comment[]>,
   viewerLikedRecipeIds: Set<string>,
   viewerFavoritedRecipeIds: Set<string>
@@ -149,6 +153,7 @@ function mapSummaryRecipe(
     tips: [],
     likes: likeCounts.get(recipe.id) || 0,
     favorites: favoriteCounts.get(recipe.id) || 0,
+    views: viewCounts.get(recipe.id) || 0,
     isLiked: viewerLikedRecipeIds.has(recipe.id),
     isFavorited: viewerFavoritedRecipeIds.has(recipe.id),
     comments: commentsByRecipeId.get(recipe.id) || [],
@@ -176,6 +181,7 @@ async function getSupabaseRecipeData() {
     commentsResult,
     viewerLikesResult,
     viewerFavoritesResult,
+    viewsResult,
   ] = await Promise.all([
     supabase
       .from('recipes')
@@ -203,7 +209,8 @@ async function getSupabaseRecipeData() {
     supabase.from('recipe_favorites').select('recipe_id'),
     supabase
       .from('recipe_comments')
-      .select('id, recipe_id, user_id, body, created_at')
+      .select('id, recipe_id, user_id, body, created_at, parent_id, is_pinned')
+      .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: true }),
     viewerId
       ? supabase.from('recipe_likes').select('recipe_id').eq('user_id', viewerId)
@@ -214,6 +221,7 @@ async function getSupabaseRecipeData() {
           .select('recipe_id')
           .eq('user_id', viewerId)
       : Promise.resolve({ data: [], error: null }),
+    supabase.from('recipe_views').select('recipe_id'),
   ]);
 
   if (recipesResult.error || !recipesResult.data || recipesResult.data.length === 0) {
@@ -232,6 +240,7 @@ async function getSupabaseRecipeData() {
   const viewerLikeRows = (viewerLikesResult.data as RecipeInteractionRow[]) ?? [];
   const viewerFavoriteRows =
     (viewerFavoritesResult.data as RecipeInteractionRow[]) ?? [];
+  const viewRows = (viewsResult.data as RecipeInteractionRow[]) ?? [];
 
   const categoriesById = new Map<string, Category>(
     categoryRows.map((category) => [
@@ -247,15 +256,31 @@ async function getSupabaseRecipeData() {
     profileRows.map((profile) => [profile.id, profile])
   );
   const commentsByRecipeId = new Map<string, Comment[]>();
+  // First pass: build all comment objects keyed by id
+  const commentById = new Map<string, Comment>();
   commentRows.forEach((comment) => {
-    const bucket = commentsByRecipeId.get(comment.recipe_id) || [];
-    bucket.push({
+    commentById.set(comment.id, {
       id: comment.id,
       text: comment.body,
       user: buildUser(commentUsersById.get(comment.user_id)),
       createdAt: comment.created_at,
+      replies: [],
+      isPinned: comment.is_pinned,
     });
-    commentsByRecipeId.set(comment.recipe_id, bucket);
+  });
+  // Second pass: nest replies under parents, collect top-level per recipe
+  commentRows.forEach((comment) => {
+    const node = commentById.get(comment.id)!;
+    if (comment.parent_id) {
+      const parent = commentById.get(comment.parent_id);
+      if (parent) {
+        parent.replies.push(node);
+      }
+    } else {
+      const bucket = commentsByRecipeId.get(comment.recipe_id) || [];
+      bucket.push(node);
+      commentsByRecipeId.set(comment.recipe_id, bucket);
+    }
   });
 
   const likeCounts = new Map<string, number>();
@@ -270,6 +295,12 @@ async function getSupabaseRecipeData() {
       (favoriteCounts.get(row.recipe_id) || 0) + 1
     );
   });
+
+  const viewCounts = new Map<string, number>();
+  viewRows.forEach((row) => {
+    viewCounts.set(row.recipe_id, (viewCounts.get(row.recipe_id) || 0) + 1);
+  });
+
   const viewerLikedRecipeIds = new Set(
     viewerLikeRows.map((row) => row.recipe_id)
   );
@@ -284,6 +315,7 @@ async function getSupabaseRecipeData() {
       profilesById,
       likeCounts,
       favoriteCounts,
+      viewCounts,
       commentsByRecipeId,
       viewerLikedRecipeIds,
       viewerFavoritedRecipeIds
