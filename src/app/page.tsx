@@ -7,7 +7,7 @@ import { getTopTriedItPosts } from '@/lib/supabase/public-community';
 import { TriedItCarousel } from '@/components/tried-it-carousel';
 
 export default async function Home() {
-  const [{ latestRecipes, popularRecipes }, triedItPosts] = await Promise.all([
+  const [{ popularRecipes }, triedItPosts] = await Promise.all([
     getHomepageRecipes(),
     getTopTriedItPosts(10),
   ]);
@@ -65,7 +65,7 @@ export default async function Home() {
             </div>
 
             <p className="mt-5 sm:mt-6 max-w-xl mx-auto text-base sm:text-lg md:text-xl leading-relaxed" style={{ color: '#4a5e47' }}>
-              From our kitchen to yours — recipes crafted with love, steeped in tradition, and made to be shared.
+              From our kitchen to yours, recipes crafted with love, steeped in tradition, and made to be shared.
             </p>
 
             {/* Lavender stripe divider */}
@@ -96,14 +96,14 @@ export default async function Home() {
 
       <section className="py-12">
         <div className="text-center mb-12">
-          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl">Newest Creations</h2>
-          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">Discover the latest additions to our collection, fresh from the kitchen!</p>
+          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl">Most Loved Recipes</h2>
+          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">The recipes everyone keeps coming back to: our most viewed creations!</p>
         </div>
-        {latestRecipes.length > 3 ? (
-          <RecipesCarousel recipes={latestRecipes} />
+        {popularRecipes.length > 3 ? (
+          <RecipesCarousel recipes={popularRecipes} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            {latestRecipes.map((recipe) => (
+            {popularRecipes.map((recipe) => (
               <RecipeCard key={recipe.id} recipe={recipe} />
             ))}
           </div>
@@ -119,7 +119,7 @@ export default async function Home() {
         <div className="text-center mb-12 px-4">
           <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl">Tried It!</h2>
           <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-            See what our community is cooking — real attempts at our chef recipes, sorted by most loved.
+            See what our community is cooking. Real attempts at our chef recipes, sorted by most loved.
           </p>
         </div>
         {triedItPosts.length > 3 ? (

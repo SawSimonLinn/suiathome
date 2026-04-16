@@ -630,7 +630,7 @@ export function NewRecipeForm({
                 : 'Admin Recipe Publisher'}
           </Badge>
           <div>
-            <h1 className="font-headline text-4xl md:text-5xl">
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">
               {currentStep === 'preview'
                 ? isEditMode
                   ? 'Review Changes'

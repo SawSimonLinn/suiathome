@@ -288,7 +288,7 @@ export function SettingsForm({
                 className="cursor-pointer"
               />
               <p className="text-xs text-muted-foreground">
-                JPG, PNG, or WebP — uploaded to your account.
+                Upload a JPG, PNG, or WebP file to your account.
               </p>
             </div>
 

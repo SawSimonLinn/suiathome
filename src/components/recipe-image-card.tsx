@@ -41,7 +41,7 @@ export function RecipeImageCard({ recipe }: RecipeImageCardProps) {
           aria-hidden="true"
         />
 
-        {/* Image — tall aspect ratio so it feels editorial */}
+        {/* Image: tall aspect ratio so it feels editorial */}
         <div className="relative w-full aspect-[3/4]">
           {coverImage ? (
             <Image

@@ -61,7 +61,7 @@ export default function RecipeClientPage({
         await supabase.from('recipe_views').insert({ recipe_id: recipe.id });
         setViewCount((c) => c + 1);
       } catch {
-        // silently ignore — view tracking is non-critical
+        // Silently ignore: view tracking is non-critical.
       }
     }
     void trackView();
@@ -99,7 +99,7 @@ export default function RecipeClientPage({
     <div className="py-8 md:py-12">
       <article className="mx-auto max-w-5xl border-2 border-foreground bg-paper paper-shadow relative overflow-hidden">
 
-        {/* Sage green top ribbon — mirrors hero */}
+        {/* Sage green top ribbon: mirrors hero */}
         <div className="w-full border-b-2 border-foreground py-2 px-4 flex items-center justify-center gap-2" style={{ backgroundColor: 'var(--sage)' }}>
           <span className="text-sm font-medium tracking-widest uppercase" style={{ color: '#2d4a2a' }}>
             🌿 &nbsp; Homemade with love &nbsp; 🌿
@@ -108,7 +108,7 @@ export default function RecipeClientPage({
 
         <div className="p-4 sm:p-6 md:p-10">
 
-          {/* Tape strips — like hero card */}
+          {/* Tape strips: like hero card */}
           <div className="absolute top-[3.5rem] left-5 w-14 h-5 border border-foreground/60 rotate-[-3deg]" style={{ backgroundColor: 'var(--brass)', opacity: 0.6 }} aria-hidden="true" />
           <div className="absolute top-[3.5rem] right-7 w-12 h-5 border border-foreground/60 rotate-[2deg]" style={{ backgroundColor: 'var(--blush)' }} aria-hidden="true" />
 
@@ -274,7 +274,7 @@ export default function RecipeClientPage({
           </div>
         </div>
 
-        {/* Bottom floral strip — mirrors hero */}
+        {/* Bottom floral strip: mirrors hero */}
         <div className="w-full border-t-2 border-foreground py-2 flex justify-center gap-3 text-lg" style={{ backgroundColor: 'var(--blush-light)' }} aria-hidden="true">
           <span>🌷</span><span>🌿</span><span>🫶</span><span>🌿</span><span>🌷</span>
         </div>

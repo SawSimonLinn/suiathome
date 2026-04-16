@@ -7,7 +7,6 @@ import { Footer } from '@/components/layout/footer';
 import { hasSupabaseEnv } from '@/lib/supabase/config';
 import { getAuthContext } from '@/lib/supabase/auth';
 import { Analytics } from "@vercel/analytics/next"
-import { CustomCursor } from '@/components/custom-cursor'
 
 export const metadata: Metadata = {
   title: 'Sui at home',
@@ -41,7 +40,7 @@ export default async function RootLayout({
           'min-h-screen bg-background font-body antialiased',
         )}
       >
-        {/* Global background wallpaper — tiling pattern, works at any screen size */}
+        {/* Global background wallpaper: tiling pattern that works at any screen size */}
         <div className="pointer-events-none select-none fixed inset-0 z-0" aria-hidden="true">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -94,14 +93,14 @@ export default async function RootLayout({
 
               {/* ── one tile: 7 icons in a 300×120 cell, staggered rows ── */}
               <pattern id="bg-tile" x="0" y="0" width="480" height="200" patternUnits="userSpaceOnUse">
-                {/* row A — 6 icons spread across 480px */}
+                {/* Row A: 6 icons spread across 480px */}
                 <g transform="translate(10,15)  rotate(-7,20,20)"  opacity="0.08"><use href="#ic-house"/></g>
                 <g transform="translate(95,10)  rotate(5,20,15)"   opacity="0.07"><use href="#ic-cup"/></g>
                 <g transform="translate(180,14) rotate(-5,18,18)"  opacity="0.06"><use href="#ic-flower"/></g>
                 <g transform="translate(268,12) rotate(8,19,18)"   opacity="0.07"><use href="#ic-pot"/></g>
                 <g transform="translate(350,16) rotate(-6,20,18)"  opacity="0.06"><use href="#ic-pin"/></g>
                 <g transform="translate(432,11) rotate(9,12,12)"   opacity="0.07"><use href="#ic-fsm"/></g>
-                {/* row B — shifted half a tile width so icons sit in the gaps of row A */}
+                {/* Row B: shifted half a tile width so icons sit in the gaps of row A */}
                 <g transform="translate(-5,112)  rotate(6,20,18)"  opacity="0.07"><use href="#ic-jar"/></g>
                 <g transform="translate(52,108)  rotate(-8,20,20)" opacity="0.06"><use href="#ic-house"/></g>
                 <g transform="translate(135,114) rotate(5,18,18)"  opacity="0.07"><use href="#ic-flower"/></g>
@@ -121,7 +120,6 @@ export default async function RootLayout({
           <main className="flex-1 container mx-auto px-4 md:px-8">{children}</main>
           <Footer />
         </div>
-        <CustomCursor />
         <Toaster />
         <Analytics />
       </body>

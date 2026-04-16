@@ -38,7 +38,7 @@ export default async function AdminCommentsPage() {
         <div className="space-y-3">
           <Badge variant="secondary">Admin Moderation</Badge>
           <div>
-            <h1 className="font-headline text-4xl md:text-5xl">
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">
               Comment Controls
             </h1>
             <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
