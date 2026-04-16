@@ -84,7 +84,7 @@ export default async function AdminPage() {
                 comment on recipes stored in Supabase.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 py-4 sm:px-6 sm:py-6">
               <AdminAnalyticsPanel
                 engagementTrend={dashboardData.engagementTrend}
                 topRecipes={dashboardData.topRecipes}

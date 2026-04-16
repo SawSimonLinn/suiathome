@@ -85,13 +85,13 @@ export function AdminAnalyticsPanel({
   const hasTopRecipes = topRecipes.length > 0;
 
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div>
+    <div className="grid gap-4 sm:gap-6">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="overflow-hidden">
           {hasTrendData ? (
             <ChartContainer
               config={engagementChartConfig}
-              className="min-h-[200px] sm:min-h-[320px] w-full"
+              className="min-h-[180px] sm:min-h-[280px] w-full"
             >
               <LineChart data={engagementTrend} margin={{ left: 4, right: 4 }}>
                 <CartesianGrid vertical={false} />
@@ -130,18 +130,18 @@ export function AdminAnalyticsPanel({
               </LineChart>
             </ChartContainer>
           ) : (
-            <div className="flex min-h-[200px] sm:min-h-[320px] items-center justify-center border-2 border-foreground bg-paper p-6 text-center text-sm text-muted-foreground paper-shadow">
+            <div className="flex min-h-[180px] sm:min-h-[280px] items-center justify-center border-2 border-foreground bg-paper p-6 text-center text-sm text-muted-foreground paper-shadow">
               Once users start liking, favoriting, and commenting on real Supabase-backed
               recipes, this engagement trend chart will populate automatically.
             </div>
           )}
         </div>
 
-        <div>
+        <div className="overflow-hidden">
           {hasTopRecipes ? (
             <ChartContainer
               config={recipeBreakdownConfig}
-              className="min-h-[200px] sm:min-h-[320px] w-full"
+              className="min-h-[180px] sm:min-h-[280px] w-full"
             >
               <BarChart
                 data={topRecipes.map((recipe) => ({
@@ -179,7 +179,7 @@ export function AdminAnalyticsPanel({
               </BarChart>
             </ChartContainer>
           ) : (
-            <div className="flex min-h-[320px] items-center justify-center border-2 border-foreground bg-paper p-6 text-center text-sm text-muted-foreground paper-shadow">
+            <div className="flex min-h-[180px] sm:min-h-[280px] items-center justify-center border-2 border-foreground bg-paper p-6 text-center text-sm text-muted-foreground paper-shadow">
               Top-recipe analytics will appear here after the first likes, favorites,
               and comments hit your database.
             </div>
