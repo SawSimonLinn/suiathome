@@ -227,8 +227,10 @@ export default function RecipeClientPage({
                 {recipe.ingredients.map((ing, index) => (
                   <li key={index} className="flex gap-3 items-start p-2">
                     <div>
-                      <span className="font-semibold">{ing.quantity}</span>
-                      <span className="text-muted-foreground"> {ing.name}</span>
+                      {ing.quantity && ing.quantity !== 'to taste' && (
+                        <span className="font-semibold">{ing.quantity} </span>
+                      )}
+                      <span className="text-muted-foreground">{ing.name}</span>
                     </div>
                   </li>
                 ))}

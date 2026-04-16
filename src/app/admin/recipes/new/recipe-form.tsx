@@ -143,7 +143,7 @@ function getFileKey(file: File) {
 }
 
 function formatIngredientLine(ingredient: { quantity: string; name: string }) {
-  return ingredient.quantity
+  return ingredient.quantity && ingredient.quantity !== 'to taste'
     ? `${ingredient.quantity} - ${ingredient.name}`
     : ingredient.name;
 }
@@ -242,7 +242,7 @@ function buildRecipeDraftPreview({
         const parsedLine = splitIngredientLine(line);
 
         return {
-          quantity: parsedLine.quantity || 'to taste',
+          quantity: parsedLine.quantity,
           name: parsedLine.name,
         };
       }),
