@@ -187,7 +187,7 @@ export function AdminAnalyticsPanel({
         </div>
       </div>
 
-      <ScrollArea className="w-full whitespace-nowrap border-2 border-foreground bg-paper paper-shadow">
+      <ScrollArea className="w-full whitespace-nowrap rounded-none border-2 border-foreground bg-paper paper-shadow">
         <Table>
           <TableHeader>
             <TableRow>
