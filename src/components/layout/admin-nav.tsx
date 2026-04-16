@@ -28,6 +28,11 @@ const adminLinks = [
     label: 'Moderate Comments',
     isActive: (pathname: string) => pathname.startsWith('/admin/comments'),
   },
+  {
+    href: '/admin/categories',
+    label: 'Manage Categories',
+    isActive: (pathname: string) => pathname.startsWith('/admin/categories'),
+  },
 ];
 
 export function AdminNav() {

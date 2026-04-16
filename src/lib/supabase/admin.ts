@@ -350,6 +350,29 @@ export async function getAdminDashboardData() {
   };
 }
 
+export async function getCategoriesWithRecipeCount() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, slug, recipes(id)')
+    .order('name', { ascending: true });
+
+  if (error) return [] as (AdminCategory & { recipeCount: number })[];
+
+  return ((data as unknown as (AdminCategory & { recipes: { id: string }[] })[]) ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    recipeCount: c.recipes?.length ?? 0,
+  }));
+}
+
+export async function deleteCategory(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('categories').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
 export async function getAdminCategories() {
   const supabase = await createClient();
   const { data, error } = await supabase

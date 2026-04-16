@@ -8,6 +8,8 @@ import { createClient } from '@/lib/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Eye, Pencil } from 'lucide-react';
+import Link from 'next/link';
 import { CommunityPostCard } from '@/components/community-post-card';
 import { CreateCommunityPostCard } from '@/components/create-community-post-card';
 import { ImageStripLightbox } from '@/components/image-strip-lightbox';
@@ -100,10 +102,20 @@ export default function RecipeClientPage({
       <article className="mx-auto max-w-5xl border-2 border-foreground bg-paper paper-shadow relative overflow-hidden">
 
         {/* Sage green top ribbon: mirrors hero */}
-        <div className="w-full border-b-2 border-foreground py-2 px-4 flex items-center justify-center gap-2" style={{ backgroundColor: 'var(--sage)' }}>
+        <div className="w-full border-b-2 border-foreground py-2 px-4 flex items-center justify-center gap-2 relative" style={{ backgroundColor: 'var(--sage)' }}>
           <span className="text-sm font-medium tracking-widest uppercase" style={{ color: '#2d4a2a' }}>
             🌿 &nbsp; Homemade with love &nbsp; 🌿
           </span>
+          {currentUser?.role === 'admin' && (
+            <Link
+              href={`/admin/recipes/${recipe.id}/edit`}
+              className="absolute right-3 flex items-center gap-1.5 text-xs font-semibold border-2 border-foreground px-2.5 py-1 paper-btn"
+              style={{ backgroundColor: 'var(--brass)', color: '#2d4a2a' }}
+            >
+              <Pencil className="h-3 w-3" />
+              Edit
+            </Link>
+          )}
         </div>
 
         <div className="p-4 sm:p-6 md:p-10">
@@ -112,44 +124,55 @@ export default function RecipeClientPage({
           <div className="absolute top-[3.5rem] left-5 w-14 h-5 border border-foreground/60 rotate-[-3deg]" style={{ backgroundColor: 'var(--brass)', opacity: 0.6 }} aria-hidden="true" />
           <div className="absolute top-[3.5rem] right-7 w-12 h-5 border border-foreground/60 rotate-[2deg]" style={{ backgroundColor: 'var(--blush)' }} aria-hidden="true" />
 
-          <header className="mb-8 text-center">
-            {/* Flower row */}
-            <div className="flex justify-center gap-2 mb-4" aria-hidden="true">
-              {SECTION_FLOWERS.map((f, i) => (
-                <span key={i} className="text-xl">{f}</span>
-              ))}
-            </div>
+          <header className="mb-8">
+            <div className="flex flex-col md:flex-row md:items-start gap-6">
 
-            <Badge variant="secondary" className="mb-4 border border-foreground/30">{recipe.category.name}</Badge>
+              {/* Left: title + description */}
+              <div className="flex-1 min-w-0">
+                {/* Flower row */}
+                <div className="flex gap-1.5 mb-3" aria-hidden="true">
+                  {SECTION_FLOWERS.map((f, i) => (
+                    <span key={i} className="text-base">{f}</span>
+                  ))}
+                </div>
 
-            <h1 className="font-headline text-3xl sm:text-4xl md:text-6xl !leading-tight tracking-tight mb-3" style={{ color: '#2d4a2a' }}>
-              {recipe.title}
-            </h1>
+                <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl !leading-tight tracking-tight mb-2" style={{ color: '#2d4a2a' }}>
+                  {recipe.title}
+                </h1>
 
-            {/* Squiggly underline */}
-            <div className="flex justify-center mt-3 mb-5">
-              <SquigglyLine width={220} opacity={0.5} />
-            </div>
+                <SquigglyLine width={180} opacity={0.45} />
 
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{recipe.description}</p>
-
-            {/* Lavender divider */}
-            <div className="mx-auto mt-6 mb-5 h-[3px] w-20 border-0" style={{ backgroundColor: 'var(--lavender)' }} />
-
-            <div className="mt-2 flex items-center justify-center gap-4">
-              <Avatar className="h-12 w-12 border-2 border-foreground">
-                <AvatarImage src={recipe.author.avatarUrl} alt={recipe.author.name} />
-                <AvatarFallback>{recipe.author.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold">{recipe.author.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  Posted on {new Date(recipe.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {viewCount} {viewCount === 1 ? 'view' : 'views'}
-                </p>
+                <p className="text-base text-muted-foreground mt-3 leading-relaxed">{recipe.description}</p>
               </div>
+
+              {/* Right: sticky info card */}
+              <div className="shrink-0 md:w-52 border-2 border-foreground p-4 relative rotate-[0.5deg] paper-shadow-sm" style={{ backgroundColor: 'var(--blush-light)' }}>
+                {/* tape strip */}
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-4 border border-foreground/50 rotate-[-1deg]" style={{ backgroundColor: 'var(--lavender)', opacity: 0.85 }} aria-hidden="true" />
+
+                <Badge variant="secondary" className="mb-3 border border-foreground/30 w-full justify-center text-xs tracking-widest uppercase">
+                  {recipe.category.name}
+                </Badge>
+
+                <div className="flex items-center gap-2.5">
+                  <Avatar className="h-10 w-10 border-2 border-foreground shrink-0">
+                    <AvatarImage src={recipe.author.avatarUrl} alt={recipe.author.name} />
+                    <AvatarFallback>{recipe.author.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm truncate">{recipe.author.name}</p>
+                    <p className="text-xs text-muted-foreground leading-snug">
+                      {new Date(recipe.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {viewCount} {viewCount === 1 ? 'view' : 'views'}</span>
+                  <span className="text-base" aria-hidden="true">🍀</span>
+                </div>
+              </div>
+
             </div>
           </header>
 

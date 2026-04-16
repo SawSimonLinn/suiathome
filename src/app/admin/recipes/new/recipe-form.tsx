@@ -391,7 +391,7 @@ export function NewRecipeForm({
   };
 
   const handlePublish = async () => {
-    if (currentStep !== 'preview') {
+    if (!isEditMode && currentStep !== 'preview') {
       return;
     }
 
@@ -664,11 +664,11 @@ export function NewRecipeForm({
 
       setSuccessMessage(
         isEditMode
-          ? 'Recipe updated successfully. Opening the recipe page...'
+          ? 'Recipe updated successfully. Going back to admin...'
           : 'Recipe published successfully. Opening the recipe page...'
       );
       startNavigation();
-      router.push(`/recipes/${recipeId}`);
+      router.push(isEditMode ? '/admin/recipes' : `/recipes/${recipeId}`);
       router.refresh();
     } finally {
       setIsSubmitting(false);
@@ -729,14 +729,16 @@ export function NewRecipeForm({
             </Alert>
           ) : null}
 
-          <div className="flex flex-wrap gap-2">
-            <Badge variant={currentStep === 'edit' ? 'default' : 'outline'}>
-              1. Edit Recipe
-            </Badge>
-            <Badge variant={currentStep === 'preview' ? 'default' : 'outline'}>
-              2. {isEditMode ? 'Review Changes' : 'View Recipe'}
-            </Badge>
-          </div>
+          {!isEditMode && (
+            <div className="flex flex-wrap gap-2">
+              <Badge variant={currentStep === 'edit' ? 'default' : 'outline'}>
+                1. Edit Recipe
+              </Badge>
+              <Badge variant={currentStep === 'preview' ? 'default' : 'outline'}>
+                2. View Recipe
+              </Badge>
+            </div>
+          )}
 
           {currentStep === 'edit' ? (
             <>
@@ -988,9 +990,19 @@ export function NewRecipeForm({
                 <Button type="button" variant="outline" asChild>
                   <Link href="/admin">Cancel</Link>
                 </Button>
-                <Button type="button" onClick={handleViewRecipe}>
-                  {isEditMode ? 'Review Changes' : 'Review Recipe'}
-                </Button>
+                {isEditMode ? (
+                  <Button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => { void handlePublish(); }}
+                  >
+                    {isSubmitting ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                ) : (
+                  <Button type="button" onClick={handleViewRecipe}>
+                    Review Recipe
+                  </Button>
+                )}
               </div>
             </>
           ) : previewDraft ? (

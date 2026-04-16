@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+
+import { Pencil } from 'lucide-react';
 
 import { SignOutButton } from '@/components/layout/sign-out-button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -80,6 +82,7 @@ export function SettingsForm({
   initialSocialLinks,
 }: SettingsFormProps) {
   const router = useRouter();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(initialName);
   const [bio, setBio] = useState(initialBio);
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
@@ -236,12 +239,29 @@ export function SettingsForm({
           ) : null}
 
           <div className="flex flex-col items-center gap-4 border-2 border-foreground bg-secondary p-6 text-center paper-shadow-sm">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={avatarPreview} alt={previewName} />
-              <AvatarFallback className="text-3xl">
-                {getInitials(previewName)}
-              </AvatarFallback>
-            </Avatar>
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className="group relative h-24 w-24 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label="Change profile photo"
+            >
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={avatarPreview} alt={previewName} />
+                <AvatarFallback className="text-3xl">
+                  {getInitials(previewName)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                <Pencil className="h-5 w-5 text-white" />
+              </span>
+            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
             <div className="space-y-1">
               <p className="text-lg font-semibold">{previewName}</p>
               <p className="text-sm text-muted-foreground">{email}</p>
@@ -274,21 +294,6 @@ export function SettingsForm({
               />
               <p className="text-xs text-muted-foreground text-right">
                 {bio.length}/300
-              </p>
-            </div>
-
-            {/* Profile photo */}
-            <div className="grid gap-2">
-              <Label htmlFor="avatar-upload">Profile Photo</Label>
-              <Input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="cursor-pointer"
-              />
-              <p className="text-xs text-muted-foreground">
-                Upload a JPG, PNG, or WebP file to your account.
               </p>
             </div>
 
