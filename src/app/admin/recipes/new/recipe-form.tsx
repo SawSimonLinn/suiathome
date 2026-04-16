@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { AdminNav } from '@/components/layout/admin-nav';
 import { ImageStripLightbox } from '@/components/image-strip-lightbox';
@@ -286,6 +286,11 @@ export function NewRecipeForm({
   );
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [coverIndex, setCoverIndex] = useState(0);
+  const [coverPosition, setCoverPosition] = useState(initialRecipe?.coverPosition ?? 'center center');
+  const [showFocalPicker, setShowFocalPicker] = useState(false);
+  const [focalNaturalAspect, setFocalNaturalAspect] = useState<number | null>(null);
+  const dragIndexRef = useRef<number | null>(null);
   const [prepTime, setPrepTime] = useState(initialRecipe?.prepTime ?? '');
   const [cookTime, setCookTime] = useState(initialRecipe?.cookTime ?? '');
   const [servings, setServings] = useState(String(initialRecipe?.servings ?? 4));
@@ -330,32 +335,50 @@ export function NewRecipeForm({
           ingredientsText,
           stepsText,
           tipsText,
-          imagePreviews: allImagePreviews,
+          imagePreviews: allImagePreviews.length > 0
+            ? [allImagePreviews[coverIndex] ?? allImagePreviews[0], ...allImagePreviews.filter((_, i) => i !== coverIndex)]
+            : [],
         })
       : null;
   const previewDraft = previewResult?.draft ?? null;
 
-  const handleImageFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFiles = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
+    event.target.value = '';
     if (files.length === 0) return;
 
     const existingKeys = new Set(imageFiles.map(getFileKey));
     const nextFiles = files.filter((file) => !existingKeys.has(getFileKey(file)));
 
-    if (nextFiles.length === 0) {
-      event.target.value = '';
-      return;
-    }
+    if (nextFiles.length === 0) return;
 
-    setImageFiles((prev) => [...prev, ...nextFiles]);
-    setImagePreviews((prev) => [
-      ...prev,
-      ...nextFiles.map((file) => URL.createObjectURL(file)),
-    ]);
-    event.target.value = '';
+    try {
+      const convertedFiles = await Promise.all(nextFiles.map((f) => convertHeicToJpeg(f)));
+
+      setImageFiles((prev) => [...prev, ...convertedFiles]);
+      setImagePreviews((prev) => [
+        ...prev,
+        ...convertedFiles.map((file) => URL.createObjectURL(file)),
+      ]);
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : 'Failed to process one or more images.'
+      );
+    }
   };
 
   const removeImage = (index: number) => {
+    const total = allImagePreviews.length;
+    // If removing the cover, reset to first remaining image
+    if (index === coverIndex) {
+      setCoverIndex(0);
+    } else if (index < coverIndex) {
+      setCoverIndex((prev) => prev - 1);
+    }
+    // Clamp coverIndex after removal
+    const newTotal = total - 1;
+    setCoverIndex((prev) => (prev >= newTotal ? Math.max(0, newTotal - 1) : prev));
+
     if (index < existingImageUrls.length) {
       setExistingImageUrls((prev) => prev.filter((_, i) => i !== index));
       return;
@@ -368,6 +391,26 @@ export function NewRecipeForm({
     }
     setImageFiles((prev) => prev.filter((_, i) => i !== previewIndex));
     setImagePreviews((prev) => prev.filter((_, i) => i !== previewIndex));
+  };
+
+  const reorderImages = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    const all = [...existingImageUrls, ...imagePreviews];
+    const reordered = [...all];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+
+    const newExisting = reordered.slice(0, existingImageUrls.length);
+    const newPreviews = reordered.slice(existingImageUrls.length);
+
+    setExistingImageUrls(newExisting);
+    setImagePreviews(newPreviews);
+    setCoverIndex((prev) => {
+      if (prev === fromIndex) return toIndex;
+      if (fromIndex < prev && toIndex >= prev) return prev - 1;
+      if (fromIndex > prev && toIndex <= prev) return prev + 1;
+      return prev;
+    });
   };
 
   const handleViewRecipe = () => {
@@ -454,7 +497,7 @@ export function NewRecipeForm({
       // Upload images to Supabase Storage
       const uploadedUrls: string[] = [];
       for (let i = 0; i < imageFiles.length; i++) {
-        const file = await convertHeicToJpeg(imageFiles[i]);
+        const file = imageFiles[i];
         const ext = file.name.split('.').pop() || 'jpg';
         const uniqueName =
           globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${i}`;
@@ -470,7 +513,11 @@ export function NewRecipeForm({
         uploadedUrls.push(data.publicUrl);
       }
 
-      const visibleImageUrls = [...existingImageUrls, ...uploadedUrls];
+      const allUrls = [...existingImageUrls, ...uploadedUrls];
+      const safeCoverIndex = coverIndex < allUrls.length ? coverIndex : 0;
+      const visibleImageUrls = allUrls.length > 0
+        ? [allUrls[safeCoverIndex], ...allUrls.filter((_, i) => i !== safeCoverIndex)]
+        : [];
 
       let resolvedCategoryId = categoryId;
 
@@ -530,6 +577,7 @@ export function NewRecipeForm({
             story: story.trim(),
             image_url: visibleImageUrls[0] ?? null,
             image_hint: imageHint.trim() || null,
+            cover_position: coverPosition,
             prep_time: prepTime.trim(),
             cook_time: cookTime.trim(),
             servings: parsedServings,
@@ -558,6 +606,7 @@ export function NewRecipeForm({
             story: story.trim(),
             image_url: visibleImageUrls[0] ?? null,
             image_hint: imageHint.trim() || null,
+            cover_position: coverPosition,
             prep_time: prepTime.trim(),
             cook_time: cookTime.trim(),
             servings: parsedServings,
@@ -901,20 +950,43 @@ export function NewRecipeForm({
                         onChange={handleImageFiles}
                         className="cursor-pointer"
                       />
-                      {imagePreviews.length > 0 ? (
+                      {allImagePreviews.length > 0 ? (
                         <div className="mt-2 flex flex-wrap gap-2">
                           {allImagePreviews.map((src, i) => (
-                            <div key={src} className="relative">
+                            <div
+                              key={src}
+                              className="relative cursor-grab active:cursor-grabbing"
+                              draggable
+                              onDragStart={() => { dragIndexRef.current = i; }}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={() => {
+                                if (dragIndexRef.current !== null) {
+                                  reorderImages(dragIndexRef.current, i);
+                                  dragIndexRef.current = null;
+                                }
+                              }}
+                            >
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={src}
                                 alt={`Preview ${i + 1}`}
-                                className="h-20 w-20 rounded border object-cover overflow-hidden"
-                                style={{ display: 'block' }}
+                                onClick={() => i !== coverIndex && setCoverIndex(i)}
+                                onDoubleClick={() => i === coverIndex && setShowFocalPicker(true)}
+                                className={`h-20 w-20 rounded object-cover overflow-hidden ${i === coverIndex ? 'ring-2 ring-primary border-2 border-primary' : 'border opacity-70 hover:opacity-100'}`}
+                                style={{ display: 'block', objectPosition: i === coverIndex ? coverPosition : undefined }}
+                                title={i === coverIndex ? 'Double-click to set focal point' : 'Click to set as cover'}
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                  const placeholder = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                  if (placeholder) placeholder.style.display = 'flex';
+                                }}
                               />
-                              {i === 0 ? (
-                                <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-center text-[10px] text-white">
-                                  Cover
+                              <div className="h-20 w-20 hidden items-center justify-center rounded border bg-muted text-[10px] text-muted-foreground text-center p-1">
+                                No preview
+                              </div>
+                              {i === coverIndex ? (
+                                <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-center text-[10px] text-white leading-tight py-0.5">
+                                  Cover · dbl-click
                                 </span>
                               ) : null}
                               <button
@@ -927,6 +999,80 @@ export function NewRecipeForm({
                               </button>
                             </div>
                           ))}
+                        </div>
+                      ) : null}
+
+                      {/* Focal point picker */}
+                      {showFocalPicker && allImagePreviews[coverIndex] ? (
+                        <div className="mt-3 rounded border bg-muted p-3 flex flex-col gap-2">
+                          <p className="text-xs text-muted-foreground">Click anywhere to set the focal point. The bright area shows what appears in the thumbnail.</p>
+                          <div
+                            className="relative w-full overflow-hidden rounded cursor-crosshair select-none"
+                            onClick={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+                              const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+                              setCoverPosition(`${x}% ${y}%`);
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={allImagePreviews[coverIndex]}
+                              alt="Focal point preview"
+                              className="w-full h-auto block pointer-events-none"
+                              draggable={false}
+                              onLoad={(e) => {
+                                const img = e.currentTarget;
+                                setFocalNaturalAspect(img.naturalWidth / img.naturalHeight);
+                              }}
+                            />
+                            {/* Crop window overlays */}
+                            {focalNaturalAspect !== null && (() => {
+                              const THUMB = 4 / 3;
+                              const [xStr, yStr] = coverPosition.split(' ');
+                              const xPct = parseFloat(xStr);
+                              const yPct = parseFloat(yStr);
+                              if (isNaN(xPct) || isNaN(yPct)) return null;
+
+                              if (focalNaturalAspect >= THUMB) {
+                                // Wider than 4:3 — horizontal crop, show left/right overlays
+                                const cropWidthPct = (THUMB / focalNaturalAspect) * 100;
+                                const cropLeftPct = Math.max(0, Math.min(100 - cropWidthPct, xPct - cropWidthPct / 2));
+                                return (
+                                  <>
+                                    <div className="absolute inset-y-0 left-0 bg-black/50 pointer-events-none" style={{ width: `${cropLeftPct}%` }} />
+                                    <div className="absolute inset-y-0 right-0 bg-black/50 pointer-events-none" style={{ width: `${100 - cropLeftPct - cropWidthPct}%` }} />
+                                  </>
+                                );
+                              } else {
+                                // Taller than 4:3 — vertical crop, show top/bottom overlays
+                                const cropHeightPct = (3 / 4) * focalNaturalAspect * 100;
+                                const cropTopPct = Math.max(0, Math.min(100 - cropHeightPct, yPct - cropHeightPct / 2));
+                                return (
+                                  <>
+                                    <div className="absolute inset-x-0 top-0 bg-black/50 pointer-events-none" style={{ height: `${cropTopPct}%` }} />
+                                    <div className="absolute inset-x-0 bottom-0 bg-black/50 pointer-events-none" style={{ height: `${100 - cropTopPct - cropHeightPct}%` }} />
+                                  </>
+                                );
+                              }
+                            })()}
+                            {/* Crosshair dot */}
+                            {(() => {
+                              const [xStr, yStr] = coverPosition.split(' ');
+                              const x = parseFloat(xStr);
+                              const y = parseFloat(yStr);
+                              if (isNaN(x) || isNaN(y)) return null;
+                              return (
+                                <div className="absolute pointer-events-none" style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}>
+                                  <div className="w-4 h-4 rounded-full border-2 border-white shadow-md bg-primary/80" />
+                                </div>
+                              );
+                            })()}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Focal point: {coverPosition}</span>
+                            <button type="button" onClick={() => setShowFocalPicker(false)} className="text-xs underline">Done</button>
+                          </div>
                         </div>
                       ) : null}
                     </div>

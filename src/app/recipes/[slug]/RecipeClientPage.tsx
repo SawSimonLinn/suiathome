@@ -183,6 +183,7 @@ export default function RecipeClientPage({
                 alt={recipe.title}
                 fill
                 className="object-cover"
+                style={{ objectPosition: recipe.coverPosition ?? 'center center' }}
                 data-ai-hint={coverImage.imageHint}
                 priority
               />

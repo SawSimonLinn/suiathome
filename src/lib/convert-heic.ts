@@ -7,9 +7,17 @@ export async function convertHeicToJpeg(file: File): Promise<File> {
 
   if (!isHeic) return file;
 
-  const heic2any = (await import('heic2any')).default;
-  const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
-  const blob = Array.isArray(converted) ? converted[0] : converted;
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('/api/convert-heic', { method: 'POST', body: formData });
+
+  if (!response.ok) {
+    const { error } = await response.json().catch(() => ({ error: 'HEIC conversion failed' }));
+    throw new Error(error ?? 'HEIC conversion failed');
+  }
+
+  const blob = await response.blob();
   const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
   return new File([blob], newName, { type: 'image/jpeg' });
 }

@@ -13,6 +13,7 @@ type RecipeRow = {
   story: string;
   image_url: string | null;
   image_hint: string | null;
+  cover_position: string | null;
   prep_time: string;
   cook_time: string;
   servings: number;
@@ -81,6 +82,7 @@ type RecipeSummary = Pick<
   | 'imageId'
   | 'imageUrl'
   | 'imageHint'
+  | 'coverPosition'
   | 'galleryImages'
   | 'category'
   | 'prepTime'
@@ -148,6 +150,7 @@ function mapSummaryRecipe(
     imageId: '',
     imageUrl: recipe.image_url || undefined,
     imageHint: recipe.image_hint || undefined,
+    coverPosition: recipe.cover_position || 'center center',
     galleryImages: [],
     category: categoriesById.get(recipe.category_id) || {
       id: recipe.category_id,
@@ -195,7 +198,7 @@ async function getSupabaseRecipeData() {
     supabase
       .from('recipes')
       .select(
-        'id, author_id, category_id, slug, title, description, story, image_url, image_hint, prep_time, cook_time, servings, created_at'
+        'id, author_id, category_id, slug, title, description, story, image_url, image_hint, cover_position, prep_time, cook_time, servings, created_at'
       )
       .order('created_at', { ascending: false }),
     supabase.from('categories').select('id, name, slug').order('name', {

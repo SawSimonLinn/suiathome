@@ -85,6 +85,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               alt={recipe.title}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
+              style={{ objectPosition: recipe.coverPosition ?? 'center center' }}
               data-ai-hint={coverImage.imageHint}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
