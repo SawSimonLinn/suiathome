@@ -6,7 +6,6 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useRecipeInteractions } from '@/hooks/use-recipe-interactions';
 import { createClient } from '@/lib/supabase/client';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CommunityPostCard } from '@/components/community-post-card';
@@ -199,7 +198,8 @@ export default function RecipeClientPage({
           {/* Ingredients + Instructions */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 lg:gap-12">
             <div className="md:col-span-2">
-              <h2 className="mb-4 border-b-2 border-foreground pb-2 font-headline text-3xl">Ingredients</h2>
+              <h2 className="mb-1 font-headline text-3xl flex items-center gap-2">Ingredients <span aria-hidden="true">🥕</span></h2>
+              <div className="mb-4"><SquigglyLine width={140} opacity={0.45} /></div>
               <ul className="space-y-3 text-base">
                 {recipe.ingredients.map((ing, index) => (
                   <li key={index} className="flex gap-3 items-start p-2">
@@ -213,7 +213,8 @@ export default function RecipeClientPage({
             </div>
 
             <div className="md:col-span-3">
-              <h2 className="mb-4 border-b-2 border-foreground pb-2 font-headline text-3xl">Instructions</h2>
+              <h2 className="mb-1 font-headline text-3xl flex items-center gap-2">Instructions <span aria-hidden="true">📝</span></h2>
+              <div className="mb-4"><SquigglyLine width={160} opacity={0.45} /></div>
               <ol className="list-none space-y-6 text-base leading-loose">
                 {recipe.steps.map((step, index) => (
                   <li key={index} className="flex items-start gap-4">
@@ -229,10 +230,16 @@ export default function RecipeClientPage({
 
           {recipe.tips.length > 0 ? (
             <>
-              <Separator className="my-12" />
+              <div className="my-10 flex items-center justify-center gap-3">
+                <span className="text-base" aria-hidden="true">✦</span>
+                <SquigglyLine width={120} opacity={0.4} />
+                <span className="text-base" aria-hidden="true">🌿</span>
+                <SquigglyLine width={120} opacity={0.4} />
+                <span className="text-base" aria-hidden="true">✦</span>
+              </div>
               <section>
-                <h2 className="mb-4 border-b-2 border-foreground pb-2 font-headline text-3xl">
-                  Tips
+                <h2 className="mb-4 pb-1 font-headline text-3xl flex items-center gap-2">
+                  Tips <span className="text-xl" aria-hidden="true">💡</span>
                 </h2>
                 <RecipeTipsPanel tips={recipe.tips} />
               </section>
@@ -241,7 +248,13 @@ export default function RecipeClientPage({
 
           {recipe.galleryImages && recipe.galleryImages.length > 0 ? (
             <>
-              <Separator className="my-12" />
+              <div className="my-10 flex items-center justify-center gap-3">
+                <span className="text-base" aria-hidden="true">✦</span>
+                <SquigglyLine width={120} opacity={0.4} />
+                <span className="text-base" aria-hidden="true">📸</span>
+                <SquigglyLine width={120} opacity={0.4} />
+                <span className="text-base" aria-hidden="true">✦</span>
+              </div>
               <section>
                 <h2 className="mb-4 font-headline text-3xl flex items-center gap-2">More Photos</h2>
                 <ImageStripLightbox
@@ -256,7 +269,13 @@ export default function RecipeClientPage({
             </>
           ) : null}
 
-          <Separator className="my-12" />
+          <div className="my-10 flex items-center justify-center gap-3">
+            <span className="text-base" aria-hidden="true">🌸</span>
+            <SquigglyLine width={100} opacity={0.4} />
+            <span className="text-base" aria-hidden="true">🫶</span>
+            <SquigglyLine width={100} opacity={0.4} />
+            <span className="text-base" aria-hidden="true">🌸</span>
+          </div>
 
           {/* Like / Favorite / Share */}
           <div className="flex justify-center items-center gap-4 flex-wrap">
