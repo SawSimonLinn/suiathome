@@ -118,7 +118,7 @@ export function CreateCommunityPostCard({
       <button
         type="button"
         onClick={handleOpen}
-        className="flex min-h-[220px] w-full flex-col items-center justify-center gap-3 border-2 border-dashed border-foreground/40 bg-secondary/30 transition-colors hover:border-foreground hover:bg-secondary/60"
+        className="flex h-full min-h-[220px] w-full flex-col items-center justify-center gap-3 border-2 border-dashed border-foreground/40 bg-secondary/30 transition-colors hover:border-foreground hover:bg-secondary/60"
       >
         <span className="flex h-12 w-12 items-center justify-center border-2 border-foreground text-2xl font-bold">
           +

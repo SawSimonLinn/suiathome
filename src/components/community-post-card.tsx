@@ -288,7 +288,7 @@ export function CommunityPostCard({
   const imgStickerRot = (code % 2 === 0 ? 1 : -1) * (6 + (code % 10));
 
   return (
-    <Card className="self-start overflow-hidden border-2 border-foreground bg-paper paper-shadow relative">
+    <Card className="h-full flex flex-col overflow-hidden border-2 border-foreground bg-paper paper-shadow relative">
       {/* Tape strip */}
       <div
         className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-4 border border-foreground/60 z-10"
@@ -321,7 +321,7 @@ export function CommunityPostCard({
           </Button>
         ) : null}
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 flex-1">
         {post.imageUrl && (
           <>
             <button
@@ -381,14 +381,13 @@ export function CommunityPostCard({
             {post.caption}
           </p>
           {canExpandCaption ? (
-            <Button
+            <button
               type="button"
-              variant="link"
-              className="mt-2 h-auto p-0 text-sm"
-              onClick={() => setIsCaptionExpanded((current) => !current)}
+              className="mt-0.5 text-sm font-medium underline underline-offset-2 text-muted-foreground hover:text-foreground"
+              onClick={() => setIsCaptionExpanded((c) => !c)}
             >
               {isCaptionExpanded ? 'See less' : 'See more'}
-            </Button>
+            </button>
           ) : null}
         </div>
       </CardContent>
