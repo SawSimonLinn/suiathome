@@ -18,9 +18,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/recipes", label: "Recipes" },
-  { href: "/community", label: "Community" },
+  { href: "/", label: "Home", emoji: "🏠" },
+  { href: "/recipes", label: "Recipes", emoji: "🍜" },
+  { href: "/community", label: "Community", emoji: "💬" },
 ];
 
 type HeaderProps = {
@@ -34,9 +34,9 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
 
   const isLoggedIn = Boolean(userEmail);
   const accountLinks = [
-    ...(isLoggedIn ? [{ href: "/profile", label: "Profile" }] : []),
-    ...(isLoggedIn ? [{ href: "/settings", label: "Settings" }] : []),
-    ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+    ...(isLoggedIn ? [{ href: "/profile", label: "Profile", emoji: "👤" }] : []),
+    ...(isLoggedIn ? [{ href: "/settings", label: "Settings", emoji: "⚙️" }] : []),
+    ...(isAdmin ? [{ href: "/admin", label: "Admin", emoji: "🛠️" }] : []),
   ];
 
   const isActiveLink = (href: string) =>
@@ -125,7 +125,7 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
                       onClick={() => setMobileMenuOpen(false)}
                       className={mobileLinkClassName(link.href)}
                     >
-                      {link.label}
+                      <span>{link.emoji} {link.label}</span>
                     </Link>
                   ))}
                 </nav>
@@ -149,7 +149,7 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
                             onClick={() => setMobileMenuOpen(false)}
                             className={mobileLinkClassName(link.href)}
                           >
-                            {link.label}
+                            <span>{link.emoji} {link.label}</span>
                           </Link>
                         ))}
                         <SignOutButton
