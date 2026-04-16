@@ -13,6 +13,7 @@ import { CommunityPostCard } from '@/components/community-post-card';
 import { CreateCommunityPostCard } from '@/components/create-community-post-card';
 import { ImageStripLightbox } from '@/components/image-strip-lightbox';
 import { RecipeImageCard } from '@/components/recipe-image-card';
+import { RecipeTipsPanel } from '@/components/recipe-tips-panel';
 import type { Recipe, CommunityPost, User } from '@/lib/types';
 import { RecipeQaSection } from './RecipeQaSection';
 
@@ -80,7 +81,7 @@ export default function RecipeClientPage({
     shareRecipe,
   } = useRecipeInteractions({
     recipeId: recipe.id,
-    recipeSlug: recipe.slug,
+    recipePathId: recipe.id,
     recipeTitle: recipe.title,
     initialLikeCount: recipe.likes,
     initialFavoriteCount: recipe.favorites,
@@ -226,11 +227,23 @@ export default function RecipeClientPage({
             </div>
           </div>
 
+          {recipe.tips.length > 0 ? (
+            <>
+              <Separator className="my-12" />
+              <section>
+                <h2 className="mb-4 border-b-2 border-foreground pb-2 font-headline text-3xl">
+                  Tips
+                </h2>
+                <RecipeTipsPanel tips={recipe.tips} />
+              </section>
+            </>
+          ) : null}
+
           {recipe.galleryImages && recipe.galleryImages.length > 0 ? (
             <>
               <Separator className="my-12" />
               <section>
-                <h2 className="mb-4 font-headline text-3xl flex items-center gap-2">📸 More Photos</h2>
+                <h2 className="mb-4 font-headline text-3xl flex items-center gap-2">More Photos</h2>
                 <ImageStripLightbox
                   dialogTitle={`${recipe.title} photos`}
                   dialogDescription={`Large preview for the additional images in ${recipe.title}.`}

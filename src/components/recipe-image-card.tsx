@@ -31,7 +31,7 @@ export function RecipeImageCard({ recipe }: RecipeImageCardProps) {
   const { sticker, tapeColor, tapeRotation, stickerRotation } = getDoodleProps(recipe.id);
 
   return (
-    <Link href={`/recipes/${recipe.slug}`} className="group block">
+    <Link href={`/recipes/${recipe.id}`} className="group block">
       <div className="overflow-hidden border-2 border-foreground paper-shadow transition-all duration-300 hover:paper-shadow-lg hover:-translate-y-1 relative">
 
         {/* Tape strip */}

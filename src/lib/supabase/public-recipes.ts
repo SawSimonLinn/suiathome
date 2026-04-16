@@ -406,9 +406,11 @@ export async function getHomepageRecipes() {
   return { latestRecipes, popularRecipes };
 }
 
-export async function getPublicRecipeBySlug(slug: string) {
+export async function getPublicRecipeByIdentifier(identifier: string) {
   const { recipes } = await getPublicRecipesData();
-  return recipes.find((recipe) => recipe.slug === slug);
+  return recipes.find(
+    (recipe) => recipe.id === identifier || recipe.slug === identifier
+  );
 }
 
 export async function getRelatedPublicRecipes(recipe: Recipe, count: number) {

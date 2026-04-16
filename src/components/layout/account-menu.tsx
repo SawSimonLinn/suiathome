@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { ChevronDown, LogOut, Settings, Shield, User } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { useNavigationFeedback } from '@/components/layout/navigation-feedback-provider';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,7 @@ type AccountMenuProps = {
 
 export function AccountMenu({ userEmail, isAdmin }: AccountMenuProps) {
   const router = useRouter();
+  const { startNavigation } = useNavigationFeedback();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -31,6 +33,7 @@ export function AccountMenu({ userEmail, isAdmin }: AccountMenuProps) {
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
+      startNavigation();
       router.push('/');
       router.refresh();
     } finally {

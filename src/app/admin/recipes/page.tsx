@@ -80,7 +80,7 @@ export default async function AdminRecipesPage() {
                 <TableRow>
                   <TableHead>Title</TableHead>
                   <TableHead className="hidden sm:table-cell">Category</TableHead>
-                  <TableHead className="hidden md:table-cell">Slug</TableHead>
+                  <TableHead className="hidden md:table-cell">Recipe ID</TableHead>
                   <TableHead className="hidden sm:table-cell">Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -92,7 +92,7 @@ export default async function AdminRecipesPage() {
                       <TableCell className="font-medium max-w-[140px] truncate">{recipe.title}</TableCell>
                       <TableCell className="hidden sm:table-cell">{recipe.categoryName}</TableCell>
                       <TableCell className="hidden md:table-cell text-muted-foreground max-w-[160px] truncate">
-                        /{recipe.slug}
+                        /recipes/{recipe.id}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">{formatDate(recipe.createdAt)}</TableCell>
                       <TableCell>
@@ -101,7 +101,7 @@ export default async function AdminRecipesPage() {
                             <Link href={`/admin/recipes/${recipe.id}/edit`}>Edit</Link>
                           </Button>
                           <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
-                            <Link href={`/recipes/${recipe.slug}`}>View Live</Link>
+                            <Link href={`/recipes/${recipe.id}`}>View Live</Link>
                           </Button>
                         </div>
                       </TableCell>

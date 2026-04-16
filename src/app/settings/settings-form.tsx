@@ -313,6 +313,12 @@ export function SettingsForm({
                 </p>
               )}
 
+              {socialLinks.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Your profile will show a clean handle or site name with its favicon, not the full URL.
+                </p>
+              )}
+
               <div className="grid gap-3">
                 {socialLinks.map((link, index) => (
                   <div

@@ -11,7 +11,7 @@ type RecipeInteractionTable = 'recipe_likes' | 'recipe_favorites';
 
 type UseRecipeInteractionsOptions = {
   recipeId: string;
-  recipeSlug: string;
+  recipePathId: string;
   recipeTitle: string;
   initialLikeCount: number;
   initialFavoriteCount: number;
@@ -29,7 +29,7 @@ type ToggleOptions = {
 
 export function useRecipeInteractions({
   recipeId,
-  recipeSlug,
+  recipePathId,
   recipeTitle,
   initialLikeCount,
   initialFavoriteCount,
@@ -127,7 +127,7 @@ export function useRecipeInteractions({
 
   async function shareRecipe() {
     setIsSharing(true);
-    const url = `${window.location.origin}/recipes/${recipeSlug}`;
+    const url = `${window.location.origin}/recipes/${recipePathId}`;
 
     try {
       if (navigator.share) {

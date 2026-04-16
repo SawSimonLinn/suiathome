@@ -38,7 +38,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
     shareRecipe,
   } = useRecipeInteractions({
     recipeId: recipe.id,
-    recipeSlug: recipe.slug,
+    recipePathId: recipe.id,
     recipeTitle: recipe.title,
     initialLikeCount: recipe.likes,
     initialFavoriteCount: recipe.favorites,
@@ -61,7 +61,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
   const { sticker, tapeColor, tapeRotation, stickerRotation } = getDoodleProps(recipe.id);
 
   return (
-    <Link href={`/recipes/${recipe.slug}`} className="group block h-full">
+    <Link href={`/recipes/${recipe.id}`} className="group block h-full">
       <div
         className={cn(
           "flex h-full flex-col overflow-hidden border-2 border-foreground bg-paper paper-shadow transition-all duration-300 group-hover:paper-shadow-lg group-hover:-translate-y-1",

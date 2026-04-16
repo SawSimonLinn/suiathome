@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Button, type ButtonProps } from '@/components/ui/button';
+import { useNavigationFeedback } from '@/components/layout/navigation-feedback-provider';
 import { createClient } from '@/lib/supabase/client';
 
 type SignOutButtonProps = Omit<ButtonProps, 'onClick'> & {
@@ -17,6 +18,7 @@ export function SignOutButton({
   ...buttonProps
 }: SignOutButtonProps) {
   const router = useRouter();
+  const { startNavigation } = useNavigationFeedback();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -26,6 +28,7 @@ export function SignOutButton({
       const supabase = createClient();
       await supabase.auth.signOut();
       onSignedOut?.();
+      startNavigation();
       router.push('/');
       router.refresh();
     } finally {

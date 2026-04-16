@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/password-input';
 import { createClient } from '@/lib/supabase/client';
+import { useNavigationFeedback } from '@/components/layout/navigation-feedback-provider';
 import {
   GOOGLE_AUTH_REDIRECT_URL,
   OAUTH_NEXT_COOKIE,
@@ -30,6 +31,7 @@ function getNextPath(next: string | null) {
 export function LoginForm({ supabaseReady }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { startNavigation } = useNavigationFeedback();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -60,6 +62,7 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
         return;
       }
 
+      startNavigation();
       router.replace(next);
       router.refresh();
     } finally {

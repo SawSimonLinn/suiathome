@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { NavigationFeedbackProvider } from '@/components/layout/navigation-feedback-provider';
 import { hasSupabaseEnv } from '@/lib/supabase/config';
 import { getAuthContext } from '@/lib/supabase/auth';
 import { Analytics } from "@vercel/analytics/next"
@@ -115,12 +116,14 @@ export default async function RootLayout({
           </svg>
         </div>
 
-        <div className="relative flex min-h-screen flex-col">
-          <Header userEmail={userEmail} isAdmin={isAdmin} />
-          <main className="flex-1 container mx-auto px-4 md:px-8">{children}</main>
-          <Footer />
-        </div>
-        <Toaster />
+        <NavigationFeedbackProvider>
+          <div className="relative flex min-h-screen flex-col">
+            <Header userEmail={userEmail} isAdmin={isAdmin} />
+            <main className="flex-1 container mx-auto px-4 md:px-8">{children}</main>
+            <Footer />
+          </div>
+          <Toaster />
+        </NavigationFeedbackProvider>
         <Analytics />
       </body>
     </html>

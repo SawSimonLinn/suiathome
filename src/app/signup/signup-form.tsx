@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/password-input';
+import { useNavigationFeedback } from '@/components/layout/navigation-feedback-provider';
 import { createLegalConsentMetadata } from '@/lib/legal';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -36,6 +37,7 @@ const LEGAL_ACCEPTANCE_ERROR =
 export function SignupForm({ supabaseReady }: SignupFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { startNavigation } = useNavigationFeedback();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -89,11 +91,13 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
       }
 
       if (data.session) {
+        startNavigation();
         router.replace(next);
         router.refresh();
         return;
       }
 
+      startNavigation();
       router.replace('/login?message=Check%20your%20email%20to%20confirm%20your%20account.');
       router.refresh();
     } finally {

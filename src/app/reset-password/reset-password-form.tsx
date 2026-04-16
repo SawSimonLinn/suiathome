@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/password-input';
+import { useNavigationFeedback } from '@/components/layout/navigation-feedback-provider';
 import { createClient } from '@/lib/supabase/client';
 
 type ResetPasswordFormProps = {
@@ -29,6 +30,7 @@ export function ResetPasswordForm({
   userEmail,
 }: ResetPasswordFormProps) {
   const router = useRouter();
+  const { startNavigation } = useNavigationFeedback();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -75,6 +77,7 @@ export function ResetPasswordForm({
 
       await supabase.auth.signOut();
       setSuccessMessage('Password updated. Redirecting you to sign in...');
+      startNavigation();
       router.replace('/login?message=Password%20updated.%20Please%20sign%20in%20again.');
       router.refresh();
     } finally {

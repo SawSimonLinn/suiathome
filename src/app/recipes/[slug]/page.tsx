@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation';
 import { getAuthContext, type AuthContext } from '@/lib/supabase/auth';
-import { getPublicRecipeBySlug, getRelatedPublicRecipes } from '@/lib/supabase/public-recipes';
+import {
+  getPublicRecipeByIdentifier,
+  getRelatedPublicRecipes,
+} from '@/lib/supabase/public-recipes';
 import { getPublicCommunityPostsByRecipeId } from '@/lib/supabase/public-community';
 import type { User } from '@/lib/types';
 import RecipeClientPage from './RecipeClientPage';
@@ -30,8 +33,8 @@ function buildCurrentUser(authContext: AuthContext): User | null {
 export default async function RecipeDetailPage({
   params,
 }: RecipeDetailPageProps) {
-  const { slug } = await params;
-  const recipe = await getPublicRecipeBySlug(slug);
+  const { slug: recipeIdentifier } = await params;
+  const recipe = await getPublicRecipeByIdentifier(recipeIdentifier);
 
   if (!recipe) {
     notFound();

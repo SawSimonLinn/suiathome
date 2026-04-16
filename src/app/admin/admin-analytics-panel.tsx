@@ -204,7 +204,7 @@ export function AdminAnalyticsPanel({
                 <TableRow key={recipe.id}>
                   <TableCell className="font-medium">
                     <Link
-                      href={`/recipes/${recipe.slug}`}
+                      href={`/recipes/${recipe.id}`}
                       className="underline-offset-4 hover:underline"
                   >
                       {recipe.title}

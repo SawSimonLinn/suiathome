@@ -6,6 +6,8 @@ import { useState } from 'react';
 
 import { AdminNav } from '@/components/layout/admin-nav';
 import { ImageStripLightbox } from '@/components/image-strip-lightbox';
+import { useNavigationFeedback } from '@/components/layout/navigation-feedback-provider';
+import { RecipeTipsPanel } from '@/components/recipe-tips-panel';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,7 +40,6 @@ type NewRecipeFormProps = {
 
 type RecipeDraftPreview = {
   title: string;
-  normalizedSlug: string;
   description: string;
   story: string;
   prepTime: string;
@@ -68,6 +69,50 @@ function slugify(value: string) {
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+function buildTemporaryRecipeSlug(title: string) {
+  const base = slugify(title) || 'recipe';
+  const suffix =
+    globalThis.crypto?.randomUUID?.().slice(0, 8) ??
+    `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+  return `${base}-${suffix}`;
+}
+
+function splitRecipeTitleParts(fullTitle: string) {
+  const normalizedTitle = fullTitle.trim();
+  const match = normalizedTitle.match(/^(.*?)\s*\(([^()]*)\)\s*$/);
+
+  if (!match) {
+    return {
+      mainTitle: normalizedTitle,
+      burmeseTitle: '',
+    };
+  }
+
+  const mainTitle = match[1]?.trim() ?? '';
+  const burmeseTitle = match[2]?.trim() ?? '';
+
+  if (!mainTitle || !burmeseTitle) {
+    return {
+      mainTitle: normalizedTitle,
+      burmeseTitle: '',
+    };
+  }
+
+  return { mainTitle, burmeseTitle };
+}
+
+function formatRecipeTitle(mainTitle: string, burmeseTitle: string) {
+  const normalizedMainTitle = mainTitle.trim();
+  const normalizedBurmeseTitle = burmeseTitle.trim();
+
+  if (!normalizedBurmeseTitle) {
+    return normalizedMainTitle;
+  }
+
+  return `${normalizedMainTitle} (${normalizedBurmeseTitle})`;
 }
 
 function normalizeLines(lines: string[]) {
@@ -104,8 +149,8 @@ function formatIngredientLine(ingredient: { quantity: string; name: string }) {
 }
 
 function buildRecipeDraftPreview({
-  title,
-  slug,
+  mainTitle,
+  burmeseTitle,
   description,
   story,
   prepTime,
@@ -119,8 +164,8 @@ function buildRecipeDraftPreview({
   tipsText,
   imagePreviews,
 }: {
-  title: string;
-  slug: string;
+  mainTitle: string;
+  burmeseTitle: string;
   description: string;
   story: string;
   prepTime: string;
@@ -134,12 +179,11 @@ function buildRecipeDraftPreview({
   tipsText: string;
   imagePreviews: string[];
 }) {
-  const normalizedTitle = title.trim();
+  const normalizedTitle = formatRecipeTitle(mainTitle, burmeseTitle);
   const normalizedDescription = description.trim();
   const normalizedStory = story.trim();
   const normalizedPrepTime = prepTime.trim();
   const normalizedCookTime = cookTime.trim();
-  const normalizedSlug = slugify(slug || title);
   const normalizedIngredients = normalizeLines(ingredientsText.split('\n'));
   const normalizedSteps = normalizeLines(stepsText.split('\n'));
   const normalizedTips = normalizeLines(tipsText.split('\n'));
@@ -147,10 +191,6 @@ function buildRecipeDraftPreview({
 
   if (!normalizedTitle) {
     return { draft: null, error: 'Add a recipe title before continuing.' };
-  }
-
-  if (!normalizedSlug) {
-    return { draft: null, error: 'Add a recipe slug before continuing.' };
   }
 
   if (!normalizedDescription) {
@@ -192,7 +232,6 @@ function buildRecipeDraftPreview({
   return {
     draft: {
       title: normalizedTitle,
-      normalizedSlug,
       description: normalizedDescription,
       story: normalizedStory,
       prepTime: normalizedPrepTime,
@@ -221,11 +260,13 @@ export function NewRecipeForm({
   initialRecipe = null,
   mode = 'create',
 }: NewRecipeFormProps) {
+  const titleParts = splitRecipeTitleParts(initialRecipe?.title ?? '');
   const router = useRouter();
+  const { startNavigation } = useNavigationFeedback();
   const isEditMode = mode === 'edit' && Boolean(initialRecipe);
   const [currentStep, setCurrentStep] = useState<'edit' | 'preview'>('edit');
-  const [title, setTitle] = useState(initialRecipe?.title ?? '');
-  const [slug, setSlug] = useState(initialRecipe?.slug ?? '');
+  const [mainTitle, setMainTitle] = useState(titleParts.mainTitle);
+  const [burmeseTitle, setBurmeseTitle] = useState(titleParts.burmeseTitle);
   const [description, setDescription] = useState(initialRecipe?.description ?? '');
   const [story, setStory] = useState(initialRecipe?.story ?? '');
   const [imageHint, setImageHint] = useState(initialRecipe?.imageHint ?? '');
@@ -253,13 +294,20 @@ export function NewRecipeForm({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadKey] = useState(
+    () =>
+      initialRecipe?.id ??
+      `recipe-draft-${
+        globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)
+      }`
+  );
   const allImagePreviews = [...existingImageUrls, ...imagePreviews];
 
   const previewResult =
     currentStep === 'preview'
       ? buildRecipeDraftPreview({
-          title,
-          slug,
+          mainTitle,
+          burmeseTitle,
           description,
           story,
           prepTime,
@@ -311,20 +359,13 @@ export function NewRecipeForm({
     setImagePreviews((prev) => prev.filter((_, i) => i !== previewIndex));
   };
 
-  const handleTitleChange = (value: string) => {
-    setTitle(value);
-    if (!slug) {
-      setSlug(slugify(value));
-    }
-  };
-
   const handleViewRecipe = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
 
     const { draft, error } = buildRecipeDraftPreview({
-      title,
-      slug,
+      mainTitle,
+      burmeseTitle,
       description,
       story,
       prepTime,
@@ -360,8 +401,8 @@ export function NewRecipeForm({
 
     try {
       const { draft, error } = buildRecipeDraftPreview({
-        title,
-        slug,
+        mainTitle,
+        burmeseTitle,
         description,
         story,
         prepTime,
@@ -383,7 +424,6 @@ export function NewRecipeForm({
       }
 
       const {
-        normalizedSlug,
         ingredientRows: previewIngredientRows,
         stepRows: previewStepRows,
         tipRows: previewTipRows,
@@ -407,7 +447,7 @@ export function NewRecipeForm({
         const ext = file.name.split('.').pop() || 'jpg';
         const uniqueName =
           globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${i}`;
-        const path = `${normalizedSlug}/${uniqueName}.${ext}`;
+        const path = `${uploadKey}/${uniqueName}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from('recipe-images')
           .upload(path, file, { upsert: true });
@@ -462,15 +502,19 @@ export function NewRecipeForm({
       }
 
       let recipeId = initialRecipe?.id ?? '';
-      let recipeSlug = normalizedSlug;
+      const storedSlug =
+        initialRecipe?.slug?.trim() ||
+        (isEditMode && initialRecipe?.id
+          ? initialRecipe.id
+          : buildTemporaryRecipeSlug(mainTitle));
 
       if (isEditMode && initialRecipe) {
         const { data: recipe, error: recipeError } = await supabase
           .from('recipes')
           .update({
             category_id: resolvedCategoryId,
-            slug: normalizedSlug,
-            title: title.trim(),
+            slug: storedSlug,
+            title: draft.title,
             description: description.trim(),
             story: story.trim(),
             image_url: visibleImageUrls[0] ?? null,
@@ -480,8 +524,8 @@ export function NewRecipeForm({
             servings: parsedServings,
           })
           .eq('id', initialRecipe.id)
-          .select('id, slug')
-          .single<{ id: string; slug: string }>();
+          .select('id')
+          .single<{ id: string }>();
 
         if (recipeError || !recipe) {
           setErrorMessage(
@@ -491,15 +535,14 @@ export function NewRecipeForm({
         }
 
         recipeId = recipe.id;
-        recipeSlug = recipe.slug;
       } else {
         const { data: recipe, error: recipeError } = await supabase
           .from('recipes')
           .insert({
             author_id: user.id,
             category_id: resolvedCategoryId,
-            slug: normalizedSlug,
-            title: title.trim(),
+            slug: storedSlug,
+            title: draft.title,
             description: description.trim(),
             story: story.trim(),
             image_url: visibleImageUrls[0] ?? null,
@@ -508,8 +551,8 @@ export function NewRecipeForm({
             cook_time: cookTime.trim(),
             servings: parsedServings,
           })
-          .select('id, slug')
-          .single<{ id: string; slug: string }>();
+          .select('id')
+          .single<{ id: string }>();
 
         if (recipeError || !recipe) {
           setErrorMessage(
@@ -519,7 +562,22 @@ export function NewRecipeForm({
         }
 
         recipeId = recipe.id;
-        recipeSlug = recipe.slug;
+
+        // New recipes use the row id as the public identifier, even though the table still requires a slug column.
+        const { error: slugUpdateError } = await supabase
+          .from('recipes')
+          .update({ slug: recipe.id })
+          .eq('id', recipe.id);
+
+        if (slugUpdateError) {
+          setErrorMessage(
+            getFriendlyAdminError(
+              slugUpdateError.message ||
+                'Recipe was created, but the internal identifier could not be finalized.'
+            )
+          );
+          return;
+        }
       }
 
       if (isEditMode) {
@@ -609,7 +667,8 @@ export function NewRecipeForm({
           ? 'Recipe updated successfully. Opening the recipe page...'
           : 'Recipe published successfully. Opening the recipe page...'
       );
-      router.push(`/recipes/${recipeSlug}`);
+      startNavigation();
+      router.push(`/recipes/${recipeId}`);
       router.refresh();
     } finally {
       setIsSubmitting(false);
@@ -691,23 +750,26 @@ export function NewRecipeForm({
                   </CardHeader>
                   <CardContent className="grid gap-5">
                     <div className="grid gap-2">
-                      <Label htmlFor="title">Title</Label>
+                      <Label htmlFor="mainTitle">Title in English</Label>
                       <Input
-                        id="title"
+                        id="mainTitle"
                         required
-                        value={title}
-                        onChange={(event) => handleTitleChange(event.target.value)}
+                        value={mainTitle}
+                        onChange={(event) => setMainTitle(event.target.value)}
                       />
                     </div>
 
                     <div className="grid gap-2">
-                      <Label htmlFor="slug">Slug</Label>
+                      <Label htmlFor="burmeseTitle">
+                        Title in Burmese
+                        <span className="ml-1 font-normal text-muted-foreground">
+                          (optional)
+                        </span>
+                      </Label>
                       <Input
-                        id="slug"
-                        required
-                        value={slug}
-                        onChange={(event) => setSlug(slugify(event.target.value))}
-                        placeholder="classic-spaghetti-carbonara"
+                        id="burmeseTitle"
+                        value={burmeseTitle}
+                        onChange={(event) => setBurmeseTitle(event.target.value)}
                       />
                     </div>
 
@@ -869,7 +931,7 @@ export function NewRecipeForm({
                 </Card>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-3">
+              <div className="grid gap-6 lg:grid-cols-2">
                 <Card>
                   <CardHeader>
                     <CardTitle>Ingredients</CardTitle>
@@ -903,24 +965,24 @@ export function NewRecipeForm({
                     />
                   </CardContent>
                 </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Tips</CardTitle>
-                    <CardDescription>
-                      Optional but useful. One tip per line for the recipe detail page.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Textarea
-                      rows={14}
-                      value={tipsText}
-                      onChange={(event) => setTipsText(event.target.value)}
-                      placeholder={'Use room temperature eggs.\nReserve pasta water.\nWork quickly off the heat.'}
-                    />
-                  </CardContent>
-                </Card>
               </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tips</CardTitle>
+                  <CardDescription>
+                    Optional. Add a short tip or a longer note for the recipe page.
+                    New lines are fine, but the public recipe will show this as one readable text block.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    rows={6}
+                    value={tipsText}
+                    onChange={(event) => setTipsText(event.target.value)}
+                  />
+                </CardContent>
+              </Card>
 
               <div className="flex flex-wrap justify-end gap-3">
                 <Button type="button" variant="outline" asChild>
@@ -964,11 +1026,6 @@ export function NewRecipeForm({
                   <p className="mx-auto max-w-3xl text-lg text-muted-foreground">
                     {previewDraft.description}
                   </p>
-                  <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
-                    <span>Draft preview</span>
-                    <span aria-hidden="true">•</span>
-                    <span>/{previewDraft.normalizedSlug}</span>
-                  </div>
                 </header>
 
                 {previewDraft.coverImagePreview ? (
@@ -1046,16 +1103,10 @@ export function NewRecipeForm({
                     <Separator className="my-10" />
                     <section>
                       <h3 className="mb-4 font-headline text-3xl">Tips</h3>
-                      <ul className="grid gap-3">
-                        {previewDraft.tipRows.map((tip, index) => (
-                          <li
-                            key={`${tip}-${index}`}
-                            className="border-2 border-foreground bg-background p-4 paper-shadow-sm"
-                          >
-                            {tip}
-                          </li>
-                        ))}
-                      </ul>
+                      <RecipeTipsPanel
+                        tips={previewDraft.tipRows}
+                        className="bg-background"
+                      />
                     </section>
                   </>
                 ) : null}
