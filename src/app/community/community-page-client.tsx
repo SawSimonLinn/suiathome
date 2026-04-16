@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { CommunityPostCard } from '@/components/community-post-card';
+import { convertHeicToJpeg } from '@/lib/convert-heic';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -133,10 +134,11 @@ export function CommunityPageClient({
       let imageUrl = '';
 
       if (selectedFile) {
-        imagePath = createImagePath(currentUser.id, selectedFile.name);
+        const convertedFile = await convertHeicToJpeg(selectedFile);
+        imagePath = createImagePath(currentUser.id, convertedFile.name);
         const { error: uploadError } = await supabase.storage
           .from('community-images')
-          .upload(imagePath, selectedFile, {
+          .upload(imagePath, convertedFile, {
             upsert: false,
           });
 

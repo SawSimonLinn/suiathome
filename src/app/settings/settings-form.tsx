@@ -6,6 +6,7 @@ import { useRef, useState } from 'react';
 
 import { Pencil } from 'lucide-react';
 
+import { convertHeicToJpeg } from '@/lib/convert-heic';
 import { SignOutButton } from '@/components/layout/sign-out-button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -150,11 +151,12 @@ export function SettingsForm({
       let uploadedUrl = avatarUrl;
 
       if (avatarFile) {
-        const ext = avatarFile.name.split('.').pop();
+        const convertedAvatar = await convertHeicToJpeg(avatarFile);
+        const ext = convertedAvatar.name.split('.').pop();
         const path = `${userId}/avatar.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from('avatars')
-          .upload(path, avatarFile, { upsert: true });
+          .upload(path, convertedAvatar, { upsert: true });
 
         if (uploadError) {
           setErrorMessage(uploadError.message);

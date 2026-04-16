@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
+import { convertHeicToJpeg } from '@/lib/convert-heic';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -77,11 +78,12 @@ export function CreateCommunityPostCard({
       let imagePath: string | null = null;
 
       if (imageFile) {
-        const ext = imageFile.name.split('.').pop();
+        const convertedImage = await convertHeicToJpeg(imageFile);
+        const ext = convertedImage.name.split('.').pop();
         const path = `${currentUser.id}/${Date.now()}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from('community-images')
-          .upload(path, imageFile, { upsert: false });
+          .upload(path, convertedImage, { upsert: false });
 
         if (uploadError) {
           setError(uploadError.message);

@@ -30,6 +30,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import type { AdminCategory, AdminEditableRecipe } from '@/lib/supabase/admin';
+import { convertHeicToJpeg } from '@/lib/convert-heic';
 import { createClient } from '@/lib/supabase/client';
 
 type NewRecipeFormProps = {
@@ -130,6 +131,16 @@ function splitIngredientLine(line: string) {
         name: rest.join(separator).trim(),
       };
     }
+  }
+
+  // Auto-detect leading number + optional unit as quantity
+  const units = 'packs?|lbs?|oz|ml|g|kg|cups?|tbsp|tsp|tablespoons?|teaspoons?|cloves?|bunch(?:es)?|small|large|medium|pieces?|slices?|heads?';
+  const autoMatch = line.trim().match(new RegExp(`^(\\d+(?:[./]\\d+)?(?:\\s+(?:${units}))?)\\s+(.+)$`, 'i'));
+  if (autoMatch) {
+    return {
+      quantity: autoMatch[1].trim(),
+      name: autoMatch[2].trim(),
+    };
   }
 
   return {
@@ -443,7 +454,7 @@ export function NewRecipeForm({
       // Upload images to Supabase Storage
       const uploadedUrls: string[] = [];
       for (let i = 0; i < imageFiles.length; i++) {
-        const file = imageFiles[i];
+        const file = await convertHeicToJpeg(imageFiles[i]);
         const ext = file.name.split('.').pop() || 'jpg';
         const uniqueName =
           globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${i}`;
