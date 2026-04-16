@@ -12,6 +12,12 @@ import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/password-input';
 import { createLegalConsentMetadata } from '@/lib/legal';
 import { createClient } from '@/lib/supabase/client';
+import {
+  GOOGLE_AUTH_REDIRECT_URL,
+  OAUTH_LEGAL_CONSENT_COOKIE,
+  OAUTH_NEXT_COOKIE,
+  serializeOAuthStateCookie,
+} from '@/lib/supabase/oauth';
 
 type SignupFormProps = {
   supabaseReady: boolean;
@@ -105,15 +111,16 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
     setErrorMessage(null);
 
     try {
-      const supabase = createClient();
-      const redirectUrl = new URL('/auth/callback', window.location.origin);
-      redirectUrl.searchParams.set('next', next);
-      redirectUrl.searchParams.set('privacyAccepted', 'true');
-      redirectUrl.searchParams.set('termsAccepted', 'true');
+      document.cookie = serializeOAuthStateCookie(OAUTH_NEXT_COOKIE, next);
+      document.cookie = serializeOAuthStateCookie(
+        OAUTH_LEGAL_CONSENT_COOKIE,
+        'true'
+      );
 
+      const supabase = createClient();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: redirectUrl.toString() },
+        options: { redirectTo: GOOGLE_AUTH_REDIRECT_URL },
       });
 
       if (error) {

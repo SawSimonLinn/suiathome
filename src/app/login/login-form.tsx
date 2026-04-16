@@ -10,6 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/password-input';
 import { createClient } from '@/lib/supabase/client';
+import {
+  GOOGLE_AUTH_REDIRECT_URL,
+  OAUTH_NEXT_COOKIE,
+  serializeOAuthStateCookie,
+} from '@/lib/supabase/oauth';
 
 type LoginFormProps = {
   supabaseReady: boolean;
@@ -72,11 +77,13 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
     setErrorMessage(null);
 
     try {
+      document.cookie = serializeOAuthStateCookie(OAUTH_NEXT_COOKIE, next);
+
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+          redirectTo: GOOGLE_AUTH_REDIRECT_URL,
         },
       });
 
