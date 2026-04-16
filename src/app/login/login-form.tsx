@@ -86,7 +86,7 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: GOOGLE_AUTH_REDIRECT_URL,
+          redirectTo: GOOGLE_AUTH_REDIRECT_URL(),
         },
       });
 

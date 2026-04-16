@@ -1,4 +1,4 @@
-export const GOOGLE_AUTH_REDIRECT_URL = 'http://localhost:9002/auth/callback';
+export const GOOGLE_AUTH_REDIRECT_URL = () => `${window.location.origin}/auth/callback`;
 
 export const OAUTH_NEXT_COOKIE = 'suiathome-oauth-next';
 export const OAUTH_LEGAL_CONSENT_COOKIE = 'suiathome-oauth-legal-consent';

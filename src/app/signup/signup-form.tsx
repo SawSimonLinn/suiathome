@@ -124,7 +124,7 @@ export function SignupForm({ supabaseReady }: SignupFormProps) {
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: GOOGLE_AUTH_REDIRECT_URL },
+        options: { redirectTo: GOOGLE_AUTH_REDIRECT_URL() },
       });
 
       if (error) {
