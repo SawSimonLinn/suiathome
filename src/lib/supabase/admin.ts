@@ -35,6 +35,10 @@ export type AdminRecipeListItem = {
   slug: string;
   categoryName: string;
   createdAt: string;
+  isHidden: boolean;
+  views: number;
+  likes: number;
+  favorites: number;
 };
 
 export type AdminEditableRecipe = {
@@ -390,14 +394,30 @@ export async function getAdminCategories() {
 
 export async function getAdminRecipeList(limit = 100) {
   const supabase = await createClient();
-  const [recipesResult, categoriesResult] = await Promise.all([
-    supabase
-      .from('recipes')
-      .select('id, title, slug, category_id, created_at')
-      .order('created_at', { ascending: false })
-      .limit(limit),
-    supabase.from('categories').select('id, name'),
-  ]);
+
+  const withHidden = await supabase
+    .from('recipes')
+    .select('id, title, slug, category_id, created_at, is_hidden')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  const hiddenReady = !withHidden.error;
+
+  const recipesResult = hiddenReady
+    ? withHidden
+    : await supabase
+        .from('recipes')
+        .select('id, title, slug, category_id, created_at')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+  const [categoriesResult, viewsResult, likesResult, favoritesResult] =
+    await Promise.all([
+      supabase.from('categories').select('id, name'),
+      supabase.from('recipe_views').select('recipe_id'),
+      supabase.from('recipe_likes').select('recipe_id'),
+      supabase.from('recipe_favorites').select('recipe_id'),
+    ]);
 
   if (recipesResult.error || !recipesResult.data) {
     return [] as AdminRecipeListItem[];
@@ -409,6 +429,18 @@ export async function getAdminRecipeList(limit = 100) {
     )
   );
 
+  const countById = (rows: { recipe_id: string }[] | null) => {
+    const map = new Map<string, number>();
+    for (const row of rows ?? []) {
+      map.set(row.recipe_id, (map.get(row.recipe_id) ?? 0) + 1);
+    }
+    return map;
+  };
+
+  const viewsById = countById(viewsResult.data as { recipe_id: string }[] | null);
+  const likesById = countById(likesResult.data as { recipe_id: string }[] | null);
+  const favoritesById = countById(favoritesResult.data as { recipe_id: string }[] | null);
+
   return (
     (recipesResult.data as {
       id: string;
@@ -416,14 +448,34 @@ export async function getAdminRecipeList(limit = 100) {
       slug: string;
       category_id: string;
       created_at: string;
+      is_hidden?: boolean;
     }[]).map((recipe) => ({
       id: recipe.id,
       title: recipe.title,
       slug: recipe.slug,
       categoryName: categoriesById.get(recipe.category_id) || 'Uncategorized',
       createdAt: recipe.created_at,
+      isHidden: hiddenReady ? Boolean(recipe.is_hidden) : false,
+      views: viewsById.get(recipe.id) ?? 0,
+      likes: likesById.get(recipe.id) ?? 0,
+      favorites: favoritesById.get(recipe.id) ?? 0,
     })) ?? []
   );
+}
+
+export async function toggleRecipeVisibility(id: string, isHidden: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('recipes')
+    .update({ is_hidden: isHidden })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteRecipe(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('recipes').delete().eq('id', id);
+  if (error) throw new Error(error.message);
 }
 
 export async function getAdminRecipeForEdit(recipeId: string) {

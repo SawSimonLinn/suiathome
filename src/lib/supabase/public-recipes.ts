@@ -198,7 +198,7 @@ async function getSupabaseRecipeData() {
     supabase
       .from('recipes')
       .select(
-        'id, author_id, category_id, slug, title, description, story, image_url, image_hint, cover_position, prep_time, cook_time, servings, created_at'
+        'id, author_id, category_id, slug, title, description, story, image_url, image_hint, cover_position, prep_time, cook_time, servings, created_at, is_hidden'
       )
       .order('created_at', { ascending: false }),
     supabase.from('categories').select('id, name, slug').order('name', {
@@ -240,11 +240,15 @@ async function getSupabaseRecipeData() {
     supabase.from('recipe_views').select('recipe_id'),
   ]);
 
-  if (recipesResult.error || !recipesResult.data || recipesResult.data.length === 0) {
+  if (recipesResult.error || !recipesResult.data) {
     return null;
   }
 
-  const recipeRows = (recipesResult.data as RecipeRow[]) ?? [];
+  // Filter out hidden recipes client-side so the query still works even if
+  // the is_hidden column was not yet added to the DB (it would just be undefined).
+  const recipeRows = (recipesResult.data as (RecipeRow & { is_hidden?: boolean })[]).filter(
+    (r) => !r.is_hidden
+  );
   const categoryRows = (categoriesResult.data as CategoryRow[]) ?? [];
   const profileRows = (profilesResult.data as ProfileRow[]) ?? [];
   const ingredientRows = (ingredientsResult.data as RecipeIngredientRow[]) ?? [];

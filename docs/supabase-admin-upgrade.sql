@@ -17,6 +17,9 @@ as $$
   );
 $$;
 
+alter table public.recipes
+add column if not exists is_hidden boolean not null default false;
+
 alter table public.recipe_comments
 add column if not exists is_hidden boolean not null default false;
 
