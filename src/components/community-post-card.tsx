@@ -300,9 +300,9 @@ export function CommunityPostCard({
           <AvatarImage src={post.user.avatarUrl} alt={post.user.name} />
           <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
         </Avatar>
-        <div className="grid gap-0.5">
+        <div className="grid min-w-0 flex-1 gap-0.5">
           <div className="flex flex-wrap items-center gap-2">
-            <Link href={`/profile/${post.user.id}`} className="font-semibold hover:underline">
+            <Link href={`/profile/${post.user.id}`} className="truncate font-semibold hover:underline">
               {post.user.name}
             </Link>
             <UserRoleBadge user={post.user} />
@@ -391,26 +391,26 @@ export function CommunityPostCard({
           ) : null}
         </div>
       </CardContent>
-      <CardFooter className="flex items-center justify-between gap-3 border-t p-2">
+      <CardFooter className="flex items-center justify-between gap-1 border-t p-2">
         <Button
+          size="sm"
           variant={isLiked ? 'secondary' : 'ghost'}
           onClick={() => void handleLike()}
           disabled={isTogglingLike}
+          className="shrink-0"
         >
           {isLiked ? 'Unlike' : 'Like'} ({likeCount})
         </Button>
         {post.imageUrl ? (
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Eye className="h-4 w-4" />
-            <span>
-              {viewCount} {viewCount === 1 ? 'view' : 'views'}
-            </span>
+          <div className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+            <Eye className="h-3.5 w-3.5" />
+            <span>{viewCount}</span>
           </div>
         ) : (
           <div />
         )}
-        <Button variant="ghost" onClick={() => setIsCommentsOpen((open) => !open)}>
-          {isCommentsOpen ? 'Hide Comments' : 'Comment'} ({comments.length})
+        <Button size="sm" variant="ghost" onClick={() => setIsCommentsOpen((open) => !open)} className="shrink-0">
+          {isCommentsOpen ? 'Hide' : 'Comment'} ({comments.length})
         </Button>
       </CardFooter>
       {isCommentsOpen ? (

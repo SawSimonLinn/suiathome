@@ -29,13 +29,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import {
   Table,
   TableBody,
@@ -47,7 +41,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import type { AdminRecipeListItem } from '@/lib/supabase/admin';
 
-type SortKey = 'newest' | 'oldest' | 'most-views' | 'most-likes' | 'most-favorites';
+type SortKey = 'newest' | 'oldest' | 'most-views';
 
 type ConfirmAction =
   | { kind: 'delete'; recipe: AdminRecipeListItem }
@@ -65,18 +59,9 @@ function formatDate(value: string) {
 
 function sortRecipes(recipes: AdminRecipeListItem[], sort: SortKey) {
   return [...recipes].sort((a, b) => {
-    switch (sort) {
-      case 'newest':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case 'oldest':
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      case 'most-views':
-        return b.views - a.views;
-      case 'most-likes':
-        return b.likes - a.likes;
-      case 'most-favorites':
-        return b.favorites - a.favorites;
-    }
+    if (sort === 'newest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    if (sort === 'oldest') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    return b.views - a.views;
   });
 }
 
@@ -105,9 +90,9 @@ export function RecipeManagementPanel({
     return sortRecipes(filtered, sort);
   }, [recipes, search, sort]);
 
-  const withTimeout = <T,>(promise: Promise<T>, ms: number): Promise<T> =>
+  const withTimeout = <T,>(promise: PromiseLike<T>, ms: number): Promise<T> =>
     Promise.race([
-      promise,
+      Promise.resolve(promise),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error(`Request timed out after ${ms / 1000}s. Check your Supabase RLS policies.`)), ms)
       ),
@@ -124,8 +109,8 @@ export function RecipeManagementPanel({
       const supabase = createClient();
 
       if (confirmAction.kind === 'delete') {
-        const { error } = await withTimeout(
-          supabase.from('recipes').delete().eq('id', recipe.id),
+        const { error } = await withTimeout<{ error: { message: string } | null }>(
+          supabase.from('recipes').delete().eq('id', recipe.id) as PromiseLike<{ error: { message: string } | null }>,
           8000
         );
         if (error) {
@@ -136,8 +121,8 @@ export function RecipeManagementPanel({
         setConfirmAction(null);
       } else {
         const isHidden = confirmAction.kind === 'hide';
-        const { error } = await withTimeout(
-          supabase.from('recipes').update({ is_hidden: isHidden }).eq('id', recipe.id),
+        const { error } = await withTimeout<{ error: { message: string } | null }>(
+          supabase.from('recipes').update({ is_hidden: isHidden }).eq('id', recipe.id) as PromiseLike<{ error: { message: string } | null }>,
           8000
         );
         if (error) {
@@ -182,12 +167,24 @@ export function RecipeManagementPanel({
   return (
     <>
       <Card>
-        <CardHeader>
-          <CardTitle>Uploaded Recipes</CardTitle>
-          <CardDescription>
-            Search, filter, and manage recipes. Hidden recipes stay in the database
-            but are removed from the public page.
-          </CardDescription>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle>Uploaded Recipes</CardTitle>
+            <CardDescription>
+              Search, filter, and manage recipes.
+            </CardDescription>
+          </div>
+          <div className="flex w-full overflow-hidden rounded-md border border-input sm:w-auto sm:shrink-0">
+            {(['newest', 'oldest', 'most-views'] as const).map((key, i) => (
+              <button
+                key={key}
+                onClick={() => setSort(key)}
+                className={`flex-1 py-1.5 text-xs font-medium transition-colors sm:flex-none sm:px-3 ${i > 0 ? 'border-l border-input' : ''} ${sort === key ? 'bg-foreground text-background' : 'bg-background text-muted-foreground hover:text-foreground'}`}
+              >
+                {key === 'newest' ? 'Newest' : key === 'oldest' ? 'Oldest' : 'Most Views'}
+              </button>
+            ))}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {errorMessage ? (
@@ -197,7 +194,6 @@ export function RecipeManagementPanel({
             </Alert>
           ) : null}
 
-          {/* Search + Sort controls */}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <Input
               placeholder="Search by title or category…"
@@ -205,18 +201,6 @@ export function RecipeManagementPanel({
               onChange={(e) => setSearch(e.target.value)}
               className="sm:max-w-xs"
             />
-            <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-              <SelectTrigger className="sm:w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest first</SelectItem>
-                <SelectItem value="oldest">Oldest first</SelectItem>
-                <SelectItem value="most-views">Most views</SelectItem>
-                <SelectItem value="most-likes">Most likes</SelectItem>
-                <SelectItem value="most-favorites">Most favorites</SelectItem>
-              </SelectContent>
-            </Select>
             <span className="text-sm text-muted-foreground sm:ml-auto">
               {displayed.length} of {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
             </span>
@@ -229,8 +213,8 @@ export function RecipeManagementPanel({
                   <TableHead>Title</TableHead>
                   <TableHead className="hidden sm:table-cell">Category</TableHead>
                   <TableHead className="hidden md:table-cell">Status</TableHead>
-                  <TableHead className="hidden lg:table-cell text-right">Views</TableHead>
-                  <TableHead className="hidden lg:table-cell text-right">Likes</TableHead>
+                  <TableHead className="text-right">Views</TableHead>
+                  <TableHead className="hidden sm:table-cell text-right">Likes</TableHead>
                   <TableHead className="hidden sm:table-cell">Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -250,17 +234,17 @@ export function RecipeManagementPanel({
                           {recipe.isHidden ? 'Hidden' : 'Visible'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell text-right tabular-nums text-muted-foreground">
+                      <TableCell className="text-right tabular-nums text-muted-foreground">
                         {recipe.views.toLocaleString()}
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell text-right tabular-nums text-muted-foreground">
+                      <TableCell className="hidden sm:table-cell text-right tabular-nums text-muted-foreground">
                         {recipe.likes.toLocaleString()}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
                         {formatDate(recipe.createdAt)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"

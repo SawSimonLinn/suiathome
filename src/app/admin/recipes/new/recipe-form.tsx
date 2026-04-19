@@ -18,6 +18,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -32,6 +40,16 @@ import { Textarea } from '@/components/ui/textarea';
 import type { AdminCategory, AdminEditableRecipe } from '@/lib/supabase/admin';
 import { convertHeicToJpeg } from '@/lib/convert-heic';
 import { createClient } from '@/lib/supabase/client';
+
+type AiSection = 'ingredients' | 'instructions';
+
+type AiModalState = {
+  section: AiSection;
+  context: string;
+  result: string;
+  isGenerating: boolean;
+  error: string | null;
+};
 
 type NewRecipeFormProps = {
   categories: AdminCategory[];
@@ -280,7 +298,6 @@ export function NewRecipeForm({
   const [burmeseTitle, setBurmeseTitle] = useState(titleParts.burmeseTitle);
   const [description, setDescription] = useState(initialRecipe?.description ?? '');
   const [story, setStory] = useState(initialRecipe?.story ?? '');
-  const [imageHint, setImageHint] = useState(initialRecipe?.imageHint ?? '');
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>(
     initialRecipe?.imageUrls ?? []
   );
@@ -310,6 +327,7 @@ export function NewRecipeForm({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [aiModal, setAiModal] = useState<AiModalState | null>(null);
   const [uploadKey] = useState(
     () =>
       initialRecipe?.id ??
@@ -444,6 +462,45 @@ export function NewRecipeForm({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const openAiModal = (section: AiSection) => {
+    setAiModal({ section, context: '', result: '', isGenerating: false, error: null });
+  };
+
+  const closeAiModal = () => {
+    setAiModal(null);
+  };
+
+  const runAiGenerate = async () => {
+    if (!aiModal || !aiModal.context.trim()) return;
+    setAiModal((prev) => prev ? { ...prev, isGenerating: true, error: null, result: '' } : prev);
+
+    try {
+      const response = await fetch('/api/ai/generate-recipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ section: aiModal.section, context: aiModal.context }),
+      });
+      const data = await response.json() as { result?: string; error?: string };
+      if (!response.ok || data.error) {
+        setAiModal((prev) => prev ? { ...prev, isGenerating: false, error: data.error ?? 'Generation failed.' } : prev);
+      } else {
+        setAiModal((prev) => prev ? { ...prev, isGenerating: false, result: data.result ?? '' } : prev);
+      }
+    } catch {
+      setAiModal((prev) => prev ? { ...prev, isGenerating: false, error: 'Network error. Please try again.' } : prev);
+    }
+  };
+
+  const applyAiResult = () => {
+    if (!aiModal || !aiModal.result.trim()) return;
+    if (aiModal.section === 'ingredients') {
+      setIngredientsText(aiModal.result.trim());
+    } else {
+      setStepsText(aiModal.result.trim());
+    }
+    closeAiModal();
+  };
+
   const handlePublish = async () => {
     if (!isEditMode && currentStep !== 'preview') {
       return;
@@ -576,7 +633,7 @@ export function NewRecipeForm({
             description: description.trim(),
             story: story.trim(),
             image_url: visibleImageUrls[0] ?? null,
-            image_hint: imageHint.trim() || null,
+            image_hint: formatRecipeTitle(mainTitle, burmeseTitle).trim() || null,
             cover_position: coverPosition,
             prep_time: prepTime.trim(),
             cook_time: cookTime.trim(),
@@ -605,7 +662,7 @@ export function NewRecipeForm({
             description: description.trim(),
             story: story.trim(),
             image_url: visibleImageUrls[0] ?? null,
-            image_hint: imageHint.trim() || null,
+            image_hint: formatRecipeTitle(mainTitle, burmeseTitle).trim() || null,
             cover_position: coverPosition,
             prep_time: prepTime.trim(),
             cook_time: cookTime.trim(),
@@ -1077,26 +1134,28 @@ export function NewRecipeForm({
                       ) : null}
                     </div>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="imageHint">Image Hint</Label>
-                      <Input
-                        id="imageHint"
-                        value={imageHint}
-                        onChange={(event) => setImageHint(event.target.value)}
-                        placeholder="pasta dish"
-                      />
-                    </div>
                   </CardContent>
                 </Card>
               </div>
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Ingredients</CardTitle>
-                    <CardDescription>
-                      One ingredient per line. Use `quantity - ingredient` for the cleanest split.
-                    </CardDescription>
+                  <CardHeader className="flex flex-row items-start justify-between gap-4">
+                    <div>
+                      <CardTitle>Ingredients</CardTitle>
+                      <CardDescription>
+                        One ingredient per line. Use `quantity - ingredient` for the cleanest split.
+                      </CardDescription>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => openAiModal('ingredients')}
+                    >
+                      ✦ Generate
+                    </Button>
                   </CardHeader>
                   <CardContent>
                     <Textarea
@@ -1109,11 +1168,22 @@ export function NewRecipeForm({
                 </Card>
 
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Instructions</CardTitle>
-                    <CardDescription>
-                      One step per line. These become the numbered cooking steps.
-                    </CardDescription>
+                  <CardHeader className="flex flex-row items-start justify-between gap-4">
+                    <div>
+                      <CardTitle>Instructions</CardTitle>
+                      <CardDescription>
+                        One step per line. These become the numbered cooking steps.
+                      </CardDescription>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => openAiModal('instructions')}
+                    >
+                      ✦ Generate
+                    </Button>
                   </CardHeader>
                   <CardContent>
                     <Textarea
@@ -1332,6 +1402,110 @@ export function NewRecipeForm({
           ) : null}
         </div>
       </div>
+
+      {/* AI Generate Modal */}
+      <Dialog open={aiModal !== null} onOpenChange={(open) => { if (!open) closeAiModal(); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Generate {aiModal?.section === 'ingredients' ? 'Ingredients' : 'Instructions'} with AI
+            </DialogTitle>
+            <DialogDescription>
+              Describe the dish or paste any notes. The AI will generate a formatted{' '}
+              {aiModal?.section === 'ingredients' ? 'ingredient list' : 'step-by-step instruction list'} you can edit before applying.
+            </DialogDescription>
+          </DialogHeader>
+
+          {aiModal ? (
+            <div className="grid gap-4">
+              {/* Example hint */}
+              <div className="rounded-md border border-dashed bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                <p className="mb-1 font-medium text-foreground">Example input:</p>
+                {aiModal.section === 'ingredients' ? (
+                  <p className="leading-relaxed">
+                    &ldquo;For a pot of Burmese mohinga I use catfish fillet, rice vermicelli noodles,
+                    lemongrass, shallots, garlic, ginger, fish sauce, banana stem, chickpea flour,
+                    turmeric, chilli flakes, boiled eggs, and a squeeze of lime. Serves about 4 people.&rdquo;
+                  </p>
+                ) : (
+                  <p className="leading-relaxed">
+                    &ldquo;Simmer catfish with lemongrass, ginger and turmeric until cooked, then remove
+                    and flake the fish. Strain the broth back into the pot, stir in chickpea flour to
+                    thicken, add fish sauce and sliced banana stem and cook 10 more minutes. Soak noodles,
+                    divide into bowls, ladle the broth over the top and finish with boiled egg,
+                    crispy onions and lime.&rdquo;
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="ai-context">Your description or notes</Label>
+                <Textarea
+                  id="ai-context"
+                  rows={5}
+                  placeholder={
+                    aiModal.section === 'ingredients'
+                      ? 'Type or paste a description of the dish and the ingredients you use — amounts, units, any details you know. The AI will format them into a clean list.'
+                      : 'Describe how the dish is made in your own words or paste rough cooking notes. The AI will turn this into clear, numbered steps.'
+                  }
+                  value={aiModal.context}
+                  onChange={(e) => setAiModal((prev) => prev ? { ...prev, context: e.target.value } : prev)}
+                  disabled={aiModal.isGenerating}
+                />
+              </div>
+
+              {aiModal.error ? (
+                <Alert variant="destructive">
+                  <AlertTitle>Generation failed</AlertTitle>
+                  <AlertDescription>{aiModal.error}</AlertDescription>
+                </Alert>
+              ) : null}
+
+              {aiModal.result ? (
+                <div className="grid gap-2">
+                  <Label htmlFor="ai-result">
+                    Generated result{' '}
+                    <span className="font-normal text-muted-foreground">(edit as needed)</span>
+                  </Label>
+                  <Textarea
+                    id="ai-result"
+                    rows={12}
+                    value={aiModal.result}
+                    onChange={(e) => setAiModal((prev) => prev ? { ...prev, result: e.target.value } : prev)}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          <DialogFooter className="flex-wrap gap-2">
+            <Button type="button" variant="outline" onClick={closeAiModal}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!aiModal?.context.trim() || aiModal?.isGenerating}
+              onClick={() => { void runAiGenerate(); }}
+            >
+              {aiModal?.isGenerating
+                ? 'Generating…'
+                : aiModal?.result
+                  ? 'Regenerate'
+                  : 'Generate'}
+            </Button>
+            {aiModal?.result ? (
+              <Button
+                type="button"
+                disabled={!aiModal.result.trim()}
+                onClick={applyAiResult}
+              >
+                Apply to Form
+              </Button>
+            ) : null}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

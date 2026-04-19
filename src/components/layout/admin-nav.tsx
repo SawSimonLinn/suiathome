@@ -13,24 +13,24 @@ const adminLinks = [
     isActive: (pathname: string) => pathname === '/admin',
   },
   {
-    href: '/admin/recipes/new',
-    label: 'Upload Recipe',
-    isActive: (pathname: string) => pathname === '/admin/recipes/new',
+    href: '/admin/analytics',
+    label: 'Analytics',
+    isActive: (pathname: string) => pathname.startsWith('/admin/analytics'),
   },
   {
     href: '/admin/recipes',
-    label: 'Edit Uploaded Recipes',
+    label: 'Recipes',
     isActive: (pathname: string) =>
       pathname === '/admin/recipes' || pathname.startsWith('/admin/recipes/'),
   },
   {
     href: '/admin/comments',
-    label: 'Moderate Comments',
+    label: 'Comments',
     isActive: (pathname: string) => pathname.startsWith('/admin/comments'),
   },
   {
     href: '/admin/categories',
-    label: 'Manage Categories',
+    label: 'Categories',
     isActive: (pathname: string) => pathname.startsWith('/admin/categories'),
   },
 ];

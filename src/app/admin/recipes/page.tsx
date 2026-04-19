@@ -1,7 +1,9 @@
+import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { AdminNav } from '@/components/layout/admin-nav';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { getAuthContext } from '@/lib/supabase/auth';
 import { getAdminRecipeList } from '@/lib/supabase/admin';
 import { hasSupabaseEnv } from '@/lib/supabase/config';
@@ -27,17 +29,19 @@ export default async function AdminRecipesPage() {
   return (
     <div className="py-8 md:py-12">
       <div className="mx-auto max-w-6xl space-y-6">
-        <div className="space-y-3">
-          <Badge variant="secondary">Admin Recipe Library</Badge>
-          <div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-2">
+            <Badge variant="secondary">Admin</Badge>
             <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">
-              Manage Recipes
+              Recipes
             </h1>
-            <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
-              Edit, hide, or delete uploaded recipes. Hidden recipes are removed
-              from the public page but stay in your database.
+            <p className="max-w-xl text-base text-muted-foreground">
+              Upload new recipes or edit, hide, and delete existing ones.
             </p>
           </div>
+          <Button asChild size="lg" className="shrink-0">
+            <Link href="/admin/recipes/new">+ Upload Recipe</Link>
+          </Button>
         </div>
 
         <AdminNav />

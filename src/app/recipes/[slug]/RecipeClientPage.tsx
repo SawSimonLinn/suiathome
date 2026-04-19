@@ -355,16 +355,16 @@ export default function RecipeClientPage({
             {['🍳', '🥘', '🫕'].map((e, i) => <span key={i} className="text-lg">{e}</span>)}
           </div>
         </div>
-        <div className="flex items-stretch gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
+        <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:overflow-x-auto md:pb-4 md:snap-x md:snap-mandatory">
           {relatedPosts.map(post => (
-            <div key={post.id} className="w-[min(88vw,420px)] shrink-0 snap-start">
+            <div key={post.id} className="w-full md:w-[min(88vw,420px)] md:shrink-0 md:snap-start">
               <CommunityPostCard
                 post={post}
                 currentUser={currentUser}
               />
             </div>
           ))}
-          <div className="w-[min(88vw,420px)] shrink-0 snap-start">
+          <div className="w-full md:w-[min(88vw,420px)] md:shrink-0 md:snap-start">
             <CreateCommunityPostCard
               recipeId={recipe.id}
               recipeTitle={recipe.title}

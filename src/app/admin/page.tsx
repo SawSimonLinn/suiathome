@@ -1,7 +1,16 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import {
+  BarChart3,
+  BookOpen,
+  MessageSquare,
+  Tag,
+  Users,
+  TrendingUp,
+  Eye,
+  Heart,
+} from 'lucide-react';
 
-import { AdminAnalyticsPanel } from '@/app/admin/admin-analytics-panel';
 import { AdminNav } from '@/components/layout/admin-nav';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +18,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -23,6 +33,8 @@ import {
 import { getAuthContext } from '@/lib/supabase/auth';
 import { getAdminDashboardData } from '@/lib/supabase/admin';
 import { hasSupabaseEnv } from '@/lib/supabase/config';
+
+const statIcons = [Users, BookOpen, Heart, Eye];
 
 export default async function AdminPage() {
   if (!hasSupabaseEnv()) {
@@ -43,71 +55,139 @@ export default async function AdminPage() {
 
   return (
     <div className="py-8 md:py-12">
-      <section className="mx-auto max-w-6xl">
-        <div className="space-y-3">
+      <section className="mx-auto max-w-6xl space-y-8">
+
+        {/* Header */}
+        <div className="space-y-2">
           <Badge variant="secondary">Admin Dashboard</Badge>
-          <div>
-            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">
-              Control Center
-            </h1>
-            <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
-              Track recipe engagement, publish new content, moderate comments,
-              and manage the editorial side of Sui at home from one place.
-            </p>
-          </div>
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">
+            Control Center
+          </h1>
+          <p className="max-w-2xl text-base text-muted-foreground">
+            Manage recipes, moderate content, and track engagement across Sui at Home.
+          </p>
         </div>
 
         <AdminNav />
 
-        <div className="mt-8 grid gap-4 grid-cols-2 lg:grid-cols-4">
-          {dashboardData.stats.map((stat) => (
-            <Card key={stat.label}>
-              <CardHeader>
-                <CardDescription>{stat.label}</CardDescription>
-                <CardTitle className="text-2xl sm:text-4xl">
-                  {stat.value === null ? 'Not Ready' : stat.value.toLocaleString()}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">{stat.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Stats */}
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          {dashboardData.stats.map((stat, i) => {
+            const Icon = statIcons[i] ?? TrendingUp;
+            return (
+              <Card key={stat.label}>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                      {stat.label}
+                    </CardDescription>
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <CardTitle className="text-2xl sm:text-3xl">
+                    {stat.value === null ? '—' : stat.value.toLocaleString()}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">{stat.description}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
-        <div className="mt-8 grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recipe Analytics</CardTitle>
-              <CardDescription>
-                These charts summarize how many users like, favorite, and
-                comment on recipes stored in Supabase.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-3 py-4 sm:px-6 sm:py-6">
-              <AdminAnalyticsPanel
-                engagementTrend={dashboardData.engagementTrend}
-                topRecipes={dashboardData.topRecipes}
-              />
-            </CardContent>
-          </Card>
+        {/* Quick Actions */}
+        <div>
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+            Quick Actions
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.05fr_0.95fr]">
-            <Card>
+            <Card className="flex flex-col">
               <CardHeader>
-                <CardTitle>Recent Profiles</CardTitle>
+                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-paper paper-shadow-sm">
+                  <BookOpen className="h-4 w-4" />
+                </div>
+                <CardTitle className="text-base">Recipes</CardTitle>
                 <CardDescription>
-                  Quick visibility into who has signed up and which accounts are admins.
+                  Upload new recipes or edit, hide, and delete existing ones.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
+              <CardFooter className="mt-auto flex gap-2">
+                <Button asChild size="sm">
+                  <Link href="/admin/recipes">Manage Recipes</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="flex flex-col">
+              <CardHeader>
+                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-paper paper-shadow-sm">
+                  <MessageSquare className="h-4 w-4" />
+                </div>
+                <CardTitle className="text-base">Comments</CardTitle>
+                <CardDescription>
+                  Review, hide, or permanently delete user comments.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="mt-auto">
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/admin/comments">Moderate Comments</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="flex flex-col">
+              <CardHeader>
+                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-paper paper-shadow-sm">
+                  <Tag className="h-4 w-4" />
+                </div>
+                <CardTitle className="text-base">Categories</CardTitle>
+                <CardDescription>
+                  Create and organize the categories recipes are grouped under.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="mt-auto">
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/admin/categories">Manage Categories</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="flex flex-col sm:col-span-2 lg:col-span-3">
+              <CardHeader>
+                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-paper paper-shadow-sm">
+                  <BarChart3 className="h-4 w-4" />
+                </div>
+                <CardTitle className="text-base">Analytics</CardTitle>
+                <CardDescription>
+                  Track likes, favorites, and comments over time. See which recipes
+                  are driving the most engagement.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="mt-auto">
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/admin/analytics">View Analytics</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+
+          </div>
+        </div>
+
+        {/* Recent Profiles */}
+        <div>
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+            Recent Sign-ups
+          </h2>
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Role</TableHead>
-                      <TableHead>Created</TableHead>
+                      <TableHead>Joined</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -124,110 +204,31 @@ export default async function AdminPage() {
                               {profile.role || 'user'}
                             </Badge>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-muted-foreground">
                             {profile.created_at
                               ? new Date(profile.created_at).toLocaleDateString('en-US', {
                                   year: 'numeric',
                                   month: 'short',
                                   day: 'numeric',
                                 })
-                              : 'Unknown'}
+                              : '—'}
                           </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
                         <TableCell colSpan={3} className="text-muted-foreground">
-                          No profile rows found yet.
+                          No profiles yet.
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="gap-4">
-                <div>
-                  <CardTitle>Admin Workflows</CardTitle>
-                  <CardDescription>
-                    This is where the admin-facing editing and moderation controls live.
-                  </CardDescription>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button asChild>
-                    <Link href="/admin/recipes/new">Upload Recipe</Link>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <Link href="/admin/recipes">Edit Uploaded Recipes</Link>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <Link href="/admin/comments">Moderate Comments</Link>
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="grid gap-4 text-sm text-muted-foreground">
-                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
-                  <p className="font-medium text-foreground">Upload recipes</p>
-                  <p className="mt-1">
-                    Use
-                    {' '}
-                    <Link href="/admin/recipes/new" className="underline hover:text-foreground">
-                      /admin/recipes/new
-                    </Link>
-                    {' '}
-                    to publish new recipes with title, story, ingredients, steps,
-                    tips, and category details.
-                  </p>
-                </div>
-                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
-                  <p className="font-medium text-foreground">Remove or hide comments</p>
-                  <p className="mt-1">
-                    Use
-                    {' '}
-                    <Link href="/admin/comments" className="underline hover:text-foreground">
-                      /admin/comments
-                    </Link>
-                    {' '}
-                    to delete comments completely or hide/unhide them once the
-                    admin upgrade SQL is applied.
-                  </p>
-                </div>
-                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
-                  <p className="font-medium text-foreground">Edit uploaded recipes</p>
-                  <p className="mt-1">
-                    Use
-                    {' '}
-                    <Link href="/admin/recipes" className="underline hover:text-foreground">
-                      /admin/recipes
-                    </Link>
-                    {' '}
-                    to review existing recipes, open them in the editor, and save updated copy,
-                    ingredients, steps, tips, and images.
-                  </p>
-                </div>
-                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
-                  <p className="font-medium text-foreground">Enable admin policies</p>
-                  <p className="mt-1">
-                    Run `docs/supabase-admin-upgrade.sql` in Supabase if you
-                    have not already. That file enables admin
-                    recipe management and hidden comment moderation.
-                  </p>
-                </div>
-                <div className="border-2 border-foreground bg-paper p-4 paper-shadow-sm">
-                  <p className="font-medium text-foreground">More detail features</p>
-                  <p className="mt-1">
-                    The admin recipe tools now cover create, review, and edit flows
-                    with multi-image previews. Next up can be drafts, image
-                    cleanup, and richer version history.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
+
       </section>
     </div>
   );
