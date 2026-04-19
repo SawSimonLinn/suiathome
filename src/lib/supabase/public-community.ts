@@ -280,3 +280,77 @@ export async function getPublicCommunityPostsByRecipeId(
 
   return getCommunityPostsFromSupabase({ linkedRecipeId: recipeId, limit });
 }
+
+export async function getCommunityPostById(
+  postId: string
+): Promise<CommunityPost | null> {
+  if (!hasSupabaseEnv()) {
+    const mock = mockCommunityPosts.find((p) => p.id === postId);
+    if (!mock) return null;
+    const { linkedRecipe, ...rest } = mock;
+    return rest;
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const viewerId = user?.id ?? null;
+
+  const { data: postData, error } = await supabase
+    .from('community_posts')
+    .select('id, user_id, linked_recipe_id, caption, image_path, image_hint, created_at')
+    .eq('id', postId)
+    .single<CommunityPostRow>();
+
+  if (error || !postData) return null;
+
+  const [profilesResult, likesResult, viewerLikesResult, viewsResult, commentsResult] =
+    await Promise.all([
+      supabase.from('profiles').select('id, name, avatar_url, role'),
+      supabase.from('community_post_likes').select('post_id').eq('post_id', postId),
+      viewerId
+        ? supabase
+            .from('community_post_likes')
+            .select('post_id')
+            .eq('post_id', postId)
+            .eq('user_id', viewerId)
+        : Promise.resolve({ data: [], error: null }),
+      supabase.from('community_post_views').select('post_id').eq('post_id', postId),
+      supabase
+        .from('community_post_comments')
+        .select('id, post_id, user_id, body, created_at')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true }),
+    ]);
+
+  const profiles = (profilesResult.data as CommunityProfileRow[]) ?? [];
+  const likes = (likesResult.data as CommunityLikeRow[]) ?? [];
+  const viewerLikeRows = (viewerLikesResult.data as CommunityLikeRow[]) ?? [];
+  const views = (viewsResult.data as CommunityViewRow[]) ?? [];
+  const comments = (commentsResult.data as CommunityCommentRow[]) ?? [];
+
+  const profilesById = new Map(profiles.map((p) => [p.id, p]));
+  const isLiked = viewerLikeRows.length > 0;
+
+  const postComments: CommunityComment[] = comments.map((comment) => ({
+    id: comment.id,
+    text: comment.body,
+    user: buildUser(comment.user_id, profilesById.get(comment.user_id)),
+    createdAt: comment.created_at,
+  }));
+
+  return {
+    id: postData.id,
+    user: buildUser(postData.user_id, profilesById.get(postData.user_id)),
+    caption: postData.caption,
+    imageUrl: await resolveCommunityImageUrl(supabase, postData.image_path),
+    imageHint: postData.image_hint || 'community food post',
+    likes: likes.length,
+    views: views.length,
+    isLiked,
+    comments: postComments,
+    createdAt: postData.created_at,
+    linkedRecipeId: postData.linked_recipe_id,
+  };
+}

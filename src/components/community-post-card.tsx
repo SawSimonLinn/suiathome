@@ -287,8 +287,18 @@ export function CommunityPostCard({
   const tapeRot = (code % 2 === 0 ? 1 : -1) * (1 + (code % 3));
   const imgStickerRot = (code % 2 === 0 ? 1 : -1) * (6 + (code % 10));
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button, a, input, textarea, [role="dialog"]')) {
+      return;
+    }
+    router.push(`/community/${post.id}`);
+  };
+
   return (
-    <Card className="h-full flex flex-col overflow-hidden border-2 border-foreground bg-paper paper-shadow relative">
+    <Card
+      className="h-full flex flex-col overflow-hidden border-2 border-foreground bg-paper paper-shadow relative cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* Tape strip */}
       <div
         className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-4 border border-foreground/60 z-10"
