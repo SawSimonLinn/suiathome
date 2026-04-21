@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { CommunityPostCard } from '@/components/community-post-card';
+import { ProfilePostsClient } from './profile-posts-client';
 import { ProfileSocialLinks } from '@/components/profile-social-links';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { hasSupabaseEnv } from '@/lib/supabase/config';
@@ -96,11 +96,19 @@ export default async function PublicProfilePage({
 
   if (!profile) notFound();
 
-  const { data: myPostRows } = await supabase
+  const isOwner = viewerId === userId;
+
+  let postsQuery = supabase
     .from('community_posts')
-    .select('id, caption, image_path, image_hint, created_at, linked_recipe_id')
+    .select('id, caption, image_path, image_hint, is_hidden, created_at, linked_recipe_id')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
+
+  if (!isOwner) {
+    postsQuery = postsQuery.eq('is_hidden', false);
+  }
+
+  const { data: myPostRows } = await postsQuery;
 
   const postIds = (myPostRows ?? []).map((r) => r.id);
 
@@ -176,6 +184,7 @@ export default async function PublicProfilePage({
         likes: likeCounts.get(row.id) ?? 0,
         views: viewCounts.get(row.id) ?? 0,
         isLiked: viewerLikedPostIds.has(row.id),
+        isHidden: row.is_hidden ?? false,
         comments: commentsByPost.get(row.id) ?? [],
         createdAt: row.created_at,
         linkedRecipeId: row.linked_recipe_id ?? null,
@@ -241,24 +250,11 @@ export default async function PublicProfilePage({
       {/* Community Posts */}
       <section className="space-y-4">
         <h2 className="font-headline text-3xl md:text-4xl">Community Posts</h2>
-        {myPosts.length > 0 ? (
-          <div className="mx-auto flex max-w-3xl flex-col gap-6">
-            {myPosts.map((post) => (
-              <CommunityPostCard
-                key={post.id}
-                post={post}
-                currentUser={currentUser}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="border-2 border-foreground bg-paper py-12 text-center paper-shadow">
-            <p className="text-lg font-semibold">No posts yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              This member hasn&apos;t shared anything in the community yet.
-            </p>
-          </div>
-        )}
+        <ProfilePostsClient
+          initialPosts={myPosts}
+          currentUser={currentUser}
+          isOwner={isOwner}
+        />
       </section>
     </div>
   );

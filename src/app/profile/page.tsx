@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { CommunityPostCard } from '@/components/community-post-card';
+import { ProfilePostsClient } from './[userId]/profile-posts-client';
 import { ProfileSocialLinks } from '@/components/profile-social-links';
 import { RecipeImageCard } from '@/components/recipe-image-card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -105,7 +105,7 @@ export default async function ProfilePage() {
       getPublicRecipesData(),
       supabase
         .from('community_posts')
-        .select('id, caption, image_path, image_hint, created_at, linked_recipe_id')
+        .select('id, caption, image_path, image_hint, is_hidden, created_at, linked_recipe_id')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false }),
     ]);
@@ -180,6 +180,7 @@ export default async function ProfilePage() {
         likes: likeCounts.get(row.id) ?? 0,
         views: viewCounts.get(row.id) ?? 0,
         isLiked: viewerLikedPostIds.has(row.id),
+        isHidden: row.is_hidden ?? false,
         comments: [],
         createdAt: row.created_at,
         linkedRecipeId: row.linked_recipe_id ?? null,
@@ -261,24 +262,12 @@ export default async function ProfilePage() {
       {/* Community Posts */}
       <section className="space-y-4">
         <h2 className="font-headline text-3xl md:text-4xl">My Community Posts</h2>
-        {myPosts.length > 0 ? (
-          <div className="mx-auto flex max-w-3xl flex-col gap-6">
-            {myPosts.map((post) => (
-              <CommunityPostCard
-                key={post.id}
-                post={post}
-                currentUser={currentUser}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="border-2 border-foreground bg-paper py-12 text-center paper-shadow">
-            <p className="text-lg font-semibold">No posts yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Share a photo or thought in the community and it will appear here.
-            </p>
-          </div>
-        )}
+        <ProfilePostsClient
+          initialPosts={myPosts}
+          currentUser={currentUser}
+          isOwner={true}
+          emptyMessage="Share a photo or thought in the community and it will appear here."
+        />
       </section>
     </div>
   );

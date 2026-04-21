@@ -10,6 +10,7 @@ type CommunityPostRow = {
   caption: string;
   image_path: string | null;
   image_hint: string | null;
+  is_hidden: boolean;
   created_at: string;
 };
 
@@ -81,8 +82,9 @@ async function getCommunityPostsFromSupabase({
   let postsQuery = supabase
     .from('community_posts')
     .select(
-      'id, user_id, linked_recipe_id, caption, image_path, image_hint, created_at'
+      'id, user_id, linked_recipe_id, caption, image_path, image_hint, is_hidden, created_at'
     )
+    .eq('is_hidden', false)
     .order('created_at', { ascending: false });
 
   if (linkedRecipeId) {
@@ -173,6 +175,7 @@ async function getCommunityPostsFromSupabase({
       likes: likeCounts.get(post.id) || 0,
       views: viewCounts.get(post.id) || 0,
       isLiked: viewerLikedPostIds.has(post.id),
+      isHidden: post.is_hidden ?? false,
       comments: commentsByPostId.get(post.id) || [],
       createdAt: post.created_at,
       linkedRecipeId: post.linked_recipe_id,
@@ -206,8 +209,9 @@ export async function getTopTriedItPosts(limit = 10) {
   // Fetch posts that are linked to a recipe, with like counts via subquery
   const { data: postsData, error } = await supabase
     .from('community_posts')
-    .select('id, user_id, linked_recipe_id, caption, image_path, image_hint, created_at')
+    .select('id, user_id, linked_recipe_id, caption, image_path, image_hint, is_hidden, created_at')
     .not('linked_recipe_id', 'is', null)
+    .eq('is_hidden', false)
     .limit(100); // fetch more to sort by likes client-side
 
   if (error || !postsData) return [] as CommunityPost[];
@@ -256,6 +260,7 @@ export async function getTopTriedItPosts(limit = 10) {
       likes: likeCounts.get(post.id) || 0,
       views: viewCounts.get(post.id) || 0,
       isLiked: viewerLikedPostIds.has(post.id),
+      isHidden: post.is_hidden ?? false,
       comments: [],
       createdAt: post.created_at,
       linkedRecipeId: post.linked_recipe_id,
@@ -299,7 +304,7 @@ export async function getCommunityPostById(
 
   const { data: postData, error } = await supabase
     .from('community_posts')
-    .select('id, user_id, linked_recipe_id, caption, image_path, image_hint, created_at')
+    .select('id, user_id, linked_recipe_id, caption, image_path, image_hint, is_hidden, created_at')
     .eq('id', postId)
     .single<CommunityPostRow>();
 
@@ -349,6 +354,7 @@ export async function getCommunityPostById(
     likes: likes.length,
     views: views.length,
     isLiked,
+    isHidden: postData.is_hidden ?? false,
     comments: postComments,
     createdAt: postData.created_at,
     linkedRecipeId: postData.linked_recipe_id,

@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/supabase/client';
 import type { CommunityPost, Recipe, User } from '@/lib/types';
 
@@ -49,6 +50,55 @@ export function CommunityPostDetailClient({
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const canEdit = currentUser?.id === post.user.id;
+
+  const handleDeletePost = async (postId: string) => {
+    if (!currentUser) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('community_posts')
+        .delete()
+        .eq('id', postId)
+        .eq('user_id', currentUser.id);
+
+      if (error) {
+        toast({ variant: 'destructive', title: 'Could not delete post', description: error.message });
+        return;
+      }
+
+      router.push('/community');
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Could not delete post', description: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  };
+
+  const handleToggleHide = async (p: CommunityPost) => {
+    if (!currentUser) return;
+
+    const newHidden = !p.isHidden;
+    setPost((current) => ({ ...current, isHidden: newHidden }));
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('community_posts')
+        .update({ is_hidden: newHidden })
+        .eq('id', p.id)
+        .eq('user_id', currentUser.id);
+
+      if (error) {
+        setPost((current) => ({ ...current, isHidden: p.isHidden }));
+        toast({ variant: 'destructive', title: 'Could not update post', description: error.message });
+        return;
+      }
+
+      router.refresh();
+    } catch (error) {
+      setPost((current) => ({ ...current, isHidden: p.isHidden }));
+      toast({ variant: 'destructive', title: 'Could not update post', description: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  };
 
   const startEditingPost = (p: CommunityPost) => {
     setEditingPost(p);
@@ -134,6 +184,8 @@ export function CommunityPostDetailClient({
         currentUser={currentUser}
         canEdit={canEdit}
         onEdit={startEditingPost}
+        onDelete={handleDeletePost}
+        onToggleHide={handleToggleHide}
       />
 
       {linkedRecipe && (

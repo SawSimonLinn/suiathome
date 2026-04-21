@@ -1,10 +1,20 @@
 'use client';
-import { Eye } from 'lucide-react';
+import { Eye, MoreHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import Link from 'next/link';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -14,6 +24,13 @@ import {
   DialogDescription,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/supabase/client';
@@ -27,6 +44,8 @@ interface CommunityPostCardProps {
   currentUser?: User | null;
   canEdit?: boolean;
   onEdit?: (post: CommunityPost) => void;
+  onDelete?: (postId: string) => void;
+  onToggleHide?: (post: CommunityPost) => void;
 }
 
 export function CommunityPostCard({
@@ -34,6 +53,8 @@ export function CommunityPostCard({
   currentUser = null,
   canEdit = false,
   onEdit,
+  onDelete,
+  onToggleHide,
 }: CommunityPostCardProps) {
   const router = useRouter();
   const captionRef = useRef<HTMLParagraphElement | null>(null);
@@ -49,6 +70,7 @@ export function CommunityPostCard({
   const [commentError, setCommentError] = useState<string | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isTogglingLike, setIsTogglingLike] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsLiked(post.isLiked ?? false);
@@ -322,15 +344,66 @@ export function CommunityPostCard({
           </p>
         </div>
         <span className="ml-auto text-xl select-none pointer-events-none" aria-hidden="true">{headerSticker}</span>
-        {canEdit && onEdit ? (
-          <Button
-            variant="ghost"
-            onClick={() => onEdit(post)}
-          >
-            Edit
-          </Button>
+        {canEdit && (onEdit || onDelete || onToggleHide) ? (
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Post options</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onEdit ? (
+                  <DropdownMenuItem onClick={() => onEdit(post)}>
+                    Edit
+                  </DropdownMenuItem>
+                ) : null}
+                {onToggleHide ? (
+                  <DropdownMenuItem onClick={() => onToggleHide(post)}>
+                    {post.isHidden ? 'Show post' : 'Hide post'}
+                  </DropdownMenuItem>
+                ) : null}
+                {onDelete ? (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete post?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently remove your post and all its comments. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={() => onDelete?.(post.id)}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
         ) : null}
       </CardHeader>
+      {post.isHidden ? (
+        <div className="border-t border-b bg-muted/50 px-4 py-2 text-xs text-muted-foreground">
+          This post is hidden from the community feed.
+        </div>
+      ) : null}
       <CardContent className="p-0 flex-1">
         {post.imageUrl && (
           <>

@@ -63,6 +63,7 @@ export type CommunityPost = {
   likes: number;
   views: number;
   isLiked?: boolean;
+  isHidden?: boolean;
   comments: CommunityComment[];
   createdAt: string;
   linkedRecipeId?: string | null;

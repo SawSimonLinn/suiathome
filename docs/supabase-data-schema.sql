@@ -84,8 +84,10 @@ create table if not exists public.community_posts (
   caption text not null check (char_length(trim(caption)) > 0),
   image_path text,
   image_hint text,
+  is_hidden boolean not null default false,
   created_at timestamptz not null default now()
 );
+-- Migration: alter table public.community_posts add column if not exists is_hidden boolean not null default false;
 
 create table if not exists public.community_post_comments (
   id uuid primary key default gen_random_uuid(),

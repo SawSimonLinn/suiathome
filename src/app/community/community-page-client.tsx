@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { createClient } from '@/lib/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import type { CommunityPost, Recipe, User } from '@/lib/types';
 
 type CommunityPageClientProps = {
@@ -202,6 +203,62 @@ export function CommunityPageClient({
       router.refresh();
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    if (!currentUser) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('community_posts')
+        .delete()
+        .eq('id', postId)
+        .eq('user_id', currentUser.id);
+
+      if (error) {
+        toast({ variant: 'destructive', title: 'Could not delete post', description: error.message });
+        return;
+      }
+
+      setPosts((current) => current.filter((p) => p.id !== postId));
+      router.refresh();
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Could not delete post', description: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  };
+
+  const handleToggleHide = async (post: CommunityPost) => {
+    if (!currentUser) return;
+
+    const newHidden = !post.isHidden;
+    setPosts((current) =>
+      current.map((p) => (p.id === post.id ? { ...p, isHidden: newHidden } : p))
+    );
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('community_posts')
+        .update({ is_hidden: newHidden })
+        .eq('id', post.id)
+        .eq('user_id', currentUser.id);
+
+      if (error) {
+        setPosts((current) =>
+          current.map((p) => (p.id === post.id ? { ...p, isHidden: post.isHidden } : p))
+        );
+        toast({ variant: 'destructive', title: 'Could not update post', description: error.message });
+        return;
+      }
+
+      router.refresh();
+    } catch (error) {
+      setPosts((current) =>
+        current.map((p) => (p.id === post.id ? { ...p, isHidden: post.isHidden } : p))
+      );
+      toast({ variant: 'destructive', title: 'Could not update post', description: error instanceof Error ? error.message : 'Unknown error' });
     }
   };
 
@@ -436,6 +493,8 @@ export function CommunityPageClient({
               currentUser={currentUser}
               canEdit={currentUser?.id === post.user.id}
               onEdit={startEditingPost}
+              onDelete={handleDeletePost}
+              onToggleHide={handleToggleHide}
             />
           ))
         ) : (
