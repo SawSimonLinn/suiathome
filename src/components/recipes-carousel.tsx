@@ -7,7 +7,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { RecipeCard } from '@/components/recipe-card';
+import { RecipeImageCard } from '@/components/recipe-image-card';
 import type { Recipe } from '@/lib/types';
 
 interface RecipesCarouselProps {
@@ -21,7 +21,7 @@ export function RecipesCarousel({ recipes }: RecipesCarouselProps) {
         <CarouselContent>
           {recipes.map((recipe) => (
             <CarouselItem key={recipe.id} className="md:basis-1/2 lg:basis-1/3">
-              <RecipeCard recipe={recipe} />
+              <RecipeImageCard recipe={recipe} />
             </CarouselItem>
           ))}
         </CarouselContent>

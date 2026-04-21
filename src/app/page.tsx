@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { RecipeCard } from '@/components/recipe-card';
+import { RecipeImageCard } from '@/components/recipe-image-card';
 import { RecipesCarousel } from '@/components/recipes-carousel';
 import { getHomepageRecipes } from '@/lib/supabase/public-recipes';
 import { getTopTriedItPosts } from '@/lib/supabase/public-community';
@@ -104,7 +104,7 @@ export default async function Home() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             {popularRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <RecipeImageCard key={recipe.id} recipe={recipe} />
             ))}
           </div>
         )}
