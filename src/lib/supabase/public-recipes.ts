@@ -407,8 +407,13 @@ export async function getHomepageRecipes() {
     )
     .slice(0, 3);
   const popularRecipes = [...recipes]
-    .sort((left, right) => right.likes - left.likes)
-    .slice(0, 4);
+    .sort((left, right) => {
+      if (right.views !== left.views) {
+        return right.views - left.views;
+      }
+      return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+    })
+    .slice(0, 10);
 
   return { latestRecipes, popularRecipes };
 }
