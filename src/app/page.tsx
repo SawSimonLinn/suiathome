@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { RecipeImageCard } from '@/components/recipe-image-card';
 import { RecipesCarousel } from '@/components/recipes-carousel';
 import { getHomepageRecipes } from '@/lib/supabase/public-recipes';
@@ -142,25 +144,40 @@ export default async function Home() {
                     style={{ backgroundColor: tapeColor, opacity: 0.65, rotate: `${tapeRot}deg` }}
                     aria-hidden="true"
                   />
-                  {post.imageUrl ? (
-                    <div className="aspect-square overflow-hidden bg-secondary/20 relative">
-                      <img src={post.imageUrl} alt={post.caption} className="w-full h-full object-cover" loading="lazy" />
-                      <span
-                        className="absolute bottom-2 right-2 text-2xl select-none pointer-events-none drop-shadow-sm"
-                        style={{ rotate: `${stickerRot}deg` }}
-                        aria-hidden="true"
-                      >{sticker}</span>
+                  <Link href={`/community/${post.id}`} className="flex flex-col flex-1">
+                    {post.imageUrl ? (
+                      <div className="aspect-square overflow-hidden bg-secondary/20 relative">
+                        <img src={post.imageUrl} alt={post.caption} className="w-full h-full object-cover" loading="lazy" />
+                        <span
+                          className="absolute bottom-2 right-2 text-2xl select-none pointer-events-none drop-shadow-sm"
+                          style={{ rotate: `${stickerRot}deg` }}
+                          aria-hidden="true"
+                        >{sticker}</span>
+                      </div>
+                    ) : (
+                      <div className="aspect-square bg-secondary/20 flex items-center justify-center">
+                        <span className="text-4xl" aria-hidden="true">{sticker}</span>
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <svg width="100%" height="8" viewBox="0 0 200 8" preserveAspectRatio="none" aria-hidden="true" className="mb-2">
+                        <path d="M0 4 Q10 1 20 4 Q30 7 40 4 Q50 1 60 4 Q70 7 80 4 Q90 1 100 4 Q110 7 120 4 Q130 1 140 4 Q150 7 160 4 Q170 1 180 4 Q190 7 200 4" stroke="var(--sage-dark, #4a7a40)" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.3"/>
+                      </svg>
+                      <p className="text-sm line-clamp-3">{post.caption}</p>
                     </div>
-                  ) : (
-                    <div className="aspect-square bg-secondary/20 flex items-center justify-center">
-                      <span className="text-4xl" aria-hidden="true">{sticker}</span>
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <svg width="100%" height="8" viewBox="0 0 200 8" preserveAspectRatio="none" aria-hidden="true" className="mb-2">
-                      <path d="M0 4 Q10 1 20 4 Q30 7 40 4 Q50 1 60 4 Q70 7 80 4 Q90 1 100 4 Q110 7 120 4 Q130 1 140 4 Q150 7 160 4 Q170 1 180 4 Q190 7 200 4" stroke="var(--sage-dark, #4a7a40)" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.3"/>
-                    </svg>
-                    <p className="text-sm line-clamp-3">{post.caption}</p>
+                  </Link>
+                  <div className="flex items-center justify-between px-4 pb-4">
+                    <Link href={`/profile/${post.user.id}`} className="flex items-center gap-2 hover:underline">
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src={post.user.avatarUrl} alt={post.user.name} />
+                        <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">{post.user.name}</span>
+                    </Link>
+                    <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Heart className="h-4 w-4" />
+                      {post.likes}
+                    </span>
                   </div>
                 </div>
               );

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -32,6 +33,8 @@ function getPostDoodleProps(id: string) {
 }
 
 export function TriedItCarousel({ posts }: TriedItCarouselProps) {
+  const router = useRouter();
+
   if (posts.length === 0) {
     return (
       <p className="text-center text-muted-foreground">
@@ -48,8 +51,10 @@ export function TriedItCarousel({ posts }: TriedItCarouselProps) {
             const { sticker, tapeColor, tapeRotation, cornerDoodle, stickerRotation } = getPostDoodleProps(post.id);
             return (
               <CarouselItem key={post.id} className="md:basis-1/2 lg:basis-1/3">
-                <div className="border-2 border-foreground bg-paper paper-shadow h-full flex flex-col overflow-hidden relative">
-
+                <div
+                  className="border-2 border-foreground bg-paper paper-shadow h-full flex flex-col overflow-hidden relative cursor-pointer"
+                  onClick={() => router.push(`/community/${post.id}`)}
+                >
                   {/* Tape strip */}
                   <div
                     className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-4 border border-foreground/60 z-10"
@@ -65,7 +70,6 @@ export function TriedItCarousel({ posts }: TriedItCarouselProps) {
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
-                      {/* Cute sticker on image */}
                       <span
                         className="absolute bottom-2 right-2 text-2xl select-none pointer-events-none drop-shadow-sm"
                         style={{ rotate: `${stickerRotation}deg` }}
@@ -81,7 +85,6 @@ export function TriedItCarousel({ posts }: TriedItCarouselProps) {
                   )}
 
                   <div className="p-4 flex flex-col gap-3 flex-1">
-                    {/* Squiggly top accent */}
                     <svg width="100%" height="8" viewBox="0 0 200 8" preserveAspectRatio="none" aria-hidden="true">
                       <path d="M0 4 Q10 1 20 4 Q30 7 40 4 Q50 1 60 4 Q70 7 80 4 Q90 1 100 4 Q110 7 120 4 Q130 1 140 4 Q150 7 160 4 Q170 1 180 4 Q190 7 200 4" stroke="var(--sage-dark, #4a7a40)" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.3"/>
                     </svg>
@@ -92,6 +95,7 @@ export function TriedItCarousel({ posts }: TriedItCarouselProps) {
                       <Link
                         href={`/profile/${post.user.id}`}
                         className="flex items-center gap-2 hover:underline"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Avatar className="h-7 w-7">
                           <AvatarImage src={post.user.avatarUrl} alt={post.user.name} />
@@ -105,15 +109,6 @@ export function TriedItCarousel({ posts }: TriedItCarouselProps) {
                         <span className="text-base" aria-hidden="true">{cornerDoodle}</span>
                       </span>
                     </div>
-
-                    {post.linkedRecipeId && (
-                      <Link
-                        href={`/community`}
-                        className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-                      >
-                        View in community →
-                      </Link>
-                    )}
                   </div>
                 </div>
               </CarouselItem>

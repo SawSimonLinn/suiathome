@@ -41,7 +41,7 @@ export default async function AdminAnalyticsPage() {
               Analytics
             </h1>
             <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
-              Track recipe engagement over time — likes, favorites, and comments
+              Track recipe engagement over time - likes, favorites, and comments
               across all your published content.
             </p>
           </div>

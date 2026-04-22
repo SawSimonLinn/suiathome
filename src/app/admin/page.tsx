@@ -84,7 +84,7 @@ export default async function AdminPage() {
                     <Icon className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <CardTitle className="text-2xl sm:text-3xl">
-                    {stat.value === null ? '—' : stat.value.toLocaleString()}
+                    {stat.value === null ? '-' : stat.value.toLocaleString()}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -211,7 +211,7 @@ export default async function AdminPage() {
                                   month: 'short',
                                   day: 'numeric',
                                 })
-                              : '—'}
+                              : '-'}
                           </TableCell>
                         </TableRow>
                       ))

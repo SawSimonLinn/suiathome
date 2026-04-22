@@ -12,7 +12,7 @@ Format rules:
 - If there is no specific quantity, just write the ingredient name
 - Use metric units where possible
 - Be precise and complete
-- Do NOT include any headers, bullets, numbers, or extra formatting — just plain lines`,
+- Do NOT include any headers, bullets, numbers, or extra formatting - just plain lines`,
 
   instructions: `You are a professional recipe writer. Given a description or notes about a dish, generate clear, numbered cooking instructions.
 
@@ -20,8 +20,8 @@ Format rules:
 - One step per line
 - Write each step as a complete, actionable sentence
 - Be specific about temperatures, times, and techniques
-- Do NOT include numbers at the start of lines — just plain text steps, one per line
-- Do NOT include any headers, bullets, or extra formatting — just plain lines`,
+- Do NOT include numbers at the start of lines - just plain text steps, one per line
+- Do NOT include any headers, bullets, or extra formatting - just plain lines`,
 };
 
 export async function POST(request: NextRequest) {

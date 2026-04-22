@@ -1092,7 +1092,7 @@ export function NewRecipeForm({
                               if (isNaN(xPct) || isNaN(yPct)) return null;
 
                               if (focalNaturalAspect >= THUMB) {
-                                // Wider than 4:3 — horizontal crop, show left/right overlays
+                                // Wider than 4:3 - horizontal crop, show left/right overlays
                                 const cropWidthPct = (THUMB / focalNaturalAspect) * 100;
                                 const cropLeftPct = Math.max(0, Math.min(100 - cropWidthPct, xPct - cropWidthPct / 2));
                                 return (
@@ -1102,7 +1102,7 @@ export function NewRecipeForm({
                                   </>
                                 );
                               } else {
-                                // Taller than 4:3 — vertical crop, show top/bottom overlays
+                                // Taller than 4:3 - vertical crop, show top/bottom overlays
                                 const cropHeightPct = (3 / 4) * focalNaturalAspect * 100;
                                 const cropTopPct = Math.max(0, Math.min(100 - cropHeightPct, yPct - cropHeightPct / 2));
                                 return (
@@ -1445,7 +1445,7 @@ export function NewRecipeForm({
                   rows={5}
                   placeholder={
                     aiModal.section === 'ingredients'
-                      ? 'Type or paste a description of the dish and the ingredients you use — amounts, units, any details you know. The AI will format them into a clean list.'
+                      ? 'Type or paste a description of the dish and the ingredients you use - amounts, units, any details you know. The AI will format them into a clean list.'
                       : 'Describe how the dish is made in your own words or paste rough cooking notes. The AI will turn this into clear, numbered steps.'
                   }
                   value={aiModal.context}

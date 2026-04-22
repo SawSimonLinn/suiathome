@@ -18,9 +18,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/", label: "Home", emoji: "🏠" },
   { href: "/recipes", label: "Recipes", emoji: "🍜" },
   { href: "/community", label: "Community", emoji: "💬" },
+  { href: "/about", label: "About", emoji: "🌸" },
 ];
 
 type HeaderProps = {
