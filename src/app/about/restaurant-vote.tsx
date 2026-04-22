@@ -101,11 +101,11 @@ export function RestaurantVote() {
               <p className="text-base" style={{ color: "#4a5e47" }}>
                 Sign in to cast your vote - each account gets one vote.
               </p>
-              <div className="flex gap-3">
-                <Button asChild size="lg" className="border-2 border-foreground paper-btn font-bold" style={{ backgroundColor: "var(--brass)", color: "#2d1a00" }}>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button asChild size="lg" className="w-full sm:w-auto border-2 border-foreground paper-btn font-bold" style={{ backgroundColor: "var(--brass)", color: "#2d1a00" }}>
                   <Link href="/login">🔑 Log In to Vote</Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="border-2 border-foreground paper-btn font-semibold" style={{ backgroundColor: "var(--blush-light)", color: "#5c2d3a" }}>
+                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto border-2 border-foreground paper-btn font-semibold" style={{ backgroundColor: "var(--blush-light)", color: "#5c2d3a" }}>
                   <Link href="/signup">✨ Sign Up</Link>
                 </Button>
               </div>

@@ -38,6 +38,7 @@ export function ImageStripLightbox({
 
   return (
     <>
+      <div className="relative">
       <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
         {images.map((image, index) => (
           <button
@@ -61,6 +62,13 @@ export function ImageStripLightbox({
             </span>
           </button>
         ))}
+      </div>
+      {images.length > 1 && (
+        <p className="md:hidden text-center text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1" aria-hidden="true">
+          <span>swipe for more</span>
+          <span>→</span>
+        </p>
+      )}
       </div>
 
       <Dialog

@@ -20,7 +20,7 @@ export function RecipesCarousel({ recipes }: RecipesCarouselProps) {
       <Carousel opts={{ align: 'start', loop: true }}>
         <CarouselContent>
           {recipes.map((recipe) => (
-            <CarouselItem key={recipe.id} className="md:basis-1/2 lg:basis-1/3">
+            <CarouselItem key={recipe.id} className="basis-1/2 md:basis-1/2 lg:basis-1/3">
               <RecipeImageCard recipe={recipe} />
             </CarouselItem>
           ))}
@@ -28,6 +28,10 @@ export function RecipesCarousel({ recipes }: RecipesCarouselProps) {
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
+      <p className="md:hidden text-center text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1" aria-hidden="true">
+        <span>swipe for more</span>
+        <span>→</span>
+      </p>
     </div>
   );
 }

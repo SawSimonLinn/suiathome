@@ -50,7 +50,7 @@ export function TriedItCarousel({ posts }: TriedItCarouselProps) {
           {posts.map((post) => {
             const { sticker, tapeColor, tapeRotation, cornerDoodle, stickerRotation } = getPostDoodleProps(post.id);
             return (
-              <CarouselItem key={post.id} className="md:basis-1/2 lg:basis-1/3">
+              <CarouselItem key={post.id} className="basis-1/2 md:basis-1/2 lg:basis-1/3">
                 <div
                   className="border-2 border-foreground bg-paper paper-shadow h-full flex flex-col overflow-hidden relative cursor-pointer"
                   onClick={() => router.push(`/community/${post.id}`)}
@@ -118,6 +118,10 @@ export function TriedItCarousel({ posts }: TriedItCarouselProps) {
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
+      <p className="md:hidden text-center text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1" aria-hidden="true">
+        <span>swipe for more</span>
+        <span>→</span>
+      </p>
     </div>
   );
 }
