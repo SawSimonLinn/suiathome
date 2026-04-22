@@ -1,14 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useRecipeInteractions } from '@/hooks/use-recipe-interactions';
 import { createClient } from '@/lib/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Eye, Pencil } from 'lucide-react';
+import { Eye, Pencil, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { CommunityPostCard } from '@/components/community-post-card';
 import { CreateCommunityPostCard } from '@/components/create-community-post-card';
@@ -16,7 +16,6 @@ import { ImageStripLightbox } from '@/components/image-strip-lightbox';
 import { RecipeImageCard } from '@/components/recipe-image-card';
 import { RecipeTipsPanel } from '@/components/recipe-tips-panel';
 import type { Recipe, CommunityPost, User } from '@/lib/types';
-import { RecipeQaSection } from './RecipeQaSection';
 
 interface RecipeClientPageProps {
   recipe: Recipe;
@@ -26,6 +25,87 @@ interface RecipeClientPageProps {
 }
 
 const SECTION_FLOWERS = ['🌸', '🌼', '🌸', '🌼', '🌸'];
+
+function getReelPlatform(url: string): 'instagram' | 'facebook' | 'other' {
+  if (url.includes('instagram.com')) return 'instagram';
+  if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
+  return 'other';
+}
+
+function getEmbedUrl(url: string, platform: 'instagram' | 'facebook' | 'other'): string | null {
+  if (platform === 'instagram') {
+    // Strip trailing slash then append /embed/
+    return url.replace(/\/$/, '') + '/embed/';
+  }
+  if (platform === 'facebook') {
+    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&mute=0`;
+  }
+  return null;
+}
+
+function ReelPlayer({ url }: { url: string }) {
+  const platform = getReelPlatform(url);
+  const embedUrl = getEmbedUrl(url, platform);
+
+  if (!embedUrl) {
+    // Fallback for direct video file URLs
+    return (
+      <div className="relative border-2 border-foreground paper-shadow-sm overflow-hidden" style={{ backgroundColor: '#000' }}>
+        <video
+          src={url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full max-h-[480px] object-contain"
+        />
+      </div>
+    );
+  }
+
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  useEffect(() => {
+    iframeRef.current?.setAttribute('scrolling', 'no');
+  }, []);
+
+  return (
+    <div className="border-2 border-foreground paper-shadow-sm flex justify-center py-4" style={{ backgroundColor: 'var(--cream-warm)' }}>
+      <div style={{ width: 320, height: 550, overflow: 'hidden' }}>
+        <iframe
+          ref={iframeRef}
+          src={embedUrl}
+          width={320}
+          height={700}
+          style={{ border: 'none', display: 'block' }}
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          allowFullScreen
+          title="Recipe reel"
+        />
+      </div>
+    </div>
+  );
+}
+
+function ReelSection({ reelUrl }: { reelUrl: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-3 mb-4 group"
+      >
+        <h2 className="font-headline text-3xl flex items-center gap-2">
+          Watch it Cook <span className="text-xl" aria-hidden="true">🎥</span>
+        </h2>
+        <span className="flex items-center justify-center border-2 border-foreground w-7 h-7 paper-btn shrink-0" style={{ backgroundColor: 'var(--cream-warm)' }}>
+          {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </span>
+      </button>
+      {open && <ReelPlayer url={reelUrl} />}
+    </section>
+  );
+}
 
 function SquigglyLine({ width = 180, opacity = 0.5 }: { width?: number; opacity?: number }) {
   return (
@@ -295,6 +375,19 @@ export default function RecipeClientPage({
             </>
           ) : null}
 
+          {recipe.reelUrl ? (
+            <>
+              <div className="my-10 flex items-center justify-center gap-3">
+                <span className="text-base" aria-hidden="true">✦</span>
+                <SquigglyLine width={120} opacity={0.4} />
+                <span className="text-base" aria-hidden="true">🎬</span>
+                <SquigglyLine width={120} opacity={0.4} />
+                <span className="text-base" aria-hidden="true">✦</span>
+              </div>
+              <ReelSection reelUrl={recipe.reelUrl} />
+            </>
+          ) : null}
+
           <div className="my-10 flex items-center justify-center gap-3">
             <span className="text-base" aria-hidden="true">🌸</span>
             <SquigglyLine width={100} opacity={0.4} />
@@ -338,11 +431,6 @@ export default function RecipeClientPage({
         </div>
       </article>
 
-      <RecipeQaSection
-        recipeId={recipe.id}
-        initialComments={recipe.comments}
-        currentUser={currentUser}
-      />
 
       {/* Community Creations section */}
       <section className="max-w-6xl mx-auto mt-16 px-4">

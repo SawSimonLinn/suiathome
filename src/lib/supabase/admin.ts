@@ -50,6 +50,7 @@ export type AdminEditableRecipe = {
   imageHint: string;
   imageUrls: string[];
   coverPosition: string;
+  reelUrl: string;
   prepTime: string;
   cookTime: string;
   servings: number;
@@ -490,7 +491,7 @@ export async function getAdminRecipeForEdit(recipeId: string) {
     supabase
       .from('recipes')
       .select(
-        'id, title, slug, description, story, image_url, image_hint, cover_position, prep_time, cook_time, servings, category_id'
+        'id, title, slug, description, story, image_url, image_hint, cover_position, reel_url, prep_time, cook_time, servings, category_id'
       )
       .eq('id', recipeId)
       .maybeSingle(),
@@ -529,6 +530,7 @@ export async function getAdminRecipeForEdit(recipeId: string) {
     image_url: string | null;
     image_hint: string | null;
     cover_position: string | null;
+    reel_url: string | null;
     prep_time: string;
     cook_time: string;
     servings: number;
@@ -548,6 +550,7 @@ export async function getAdminRecipeForEdit(recipeId: string) {
     story: recipe.story,
     imageHint: recipe.image_hint || '',
     coverPosition: recipe.cover_position || 'center center',
+    reelUrl: recipe.reel_url || '',
     imageUrls: [recipe.image_url, ...extraImages].filter(
       (url): url is string => Boolean(url)
     ),

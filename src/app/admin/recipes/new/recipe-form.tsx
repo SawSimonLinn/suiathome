@@ -324,6 +324,7 @@ export function NewRecipeForm({
   const [tipsText, setTipsText] = useState(
     initialRecipe?.tips.join('\n') ?? ''
   );
+  const [reelUrl, setReelUrl] = useState(initialRecipe?.reelUrl ?? '');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -635,6 +636,7 @@ export function NewRecipeForm({
             image_url: visibleImageUrls[0] ?? null,
             image_hint: formatRecipeTitle(mainTitle, burmeseTitle).trim() || null,
             cover_position: coverPosition,
+            reel_url: reelUrl.trim() || null,
             prep_time: prepTime.trim(),
             cook_time: cookTime.trim(),
             servings: parsedServings,
@@ -664,6 +666,7 @@ export function NewRecipeForm({
             image_url: visibleImageUrls[0] ?? null,
             image_hint: formatRecipeTitle(mainTitle, burmeseTitle).trim() || null,
             cover_position: coverPosition,
+            reel_url: reelUrl.trim() || null,
             prep_time: prepTime.trim(),
             cook_time: cookTime.trim(),
             servings: parsedServings,
@@ -1210,6 +1213,30 @@ export function NewRecipeForm({
                     value={tipsText}
                     onChange={(event) => setTipsText(event.target.value)}
                   />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Reel Video</CardTitle>
+                  <CardDescription>
+                    Optional Instagram or Facebook reel link showing how this recipe is cooked. When set, a looping preview with a link to the original post will appear on the recipe page.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-2">
+                    <Label htmlFor="reelUrl">
+                      Reel URL
+                      <span className="ml-1 font-normal text-muted-foreground">(optional)</span>
+                    </Label>
+                    <Input
+                      id="reelUrl"
+                      type="url"
+                      value={reelUrl}
+                      onChange={(event) => setReelUrl(event.target.value)}
+                      placeholder="https://www.instagram.com/reel/... or https://www.facebook.com/reel/..."
+                    />
+                  </div>
                 </CardContent>
               </Card>
 

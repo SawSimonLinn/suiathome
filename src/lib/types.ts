@@ -30,6 +30,7 @@ export type Recipe = {
   imageHint?: string;
   coverPosition?: string;
   galleryImages?: { url: string; position: number }[];
+  reelUrl?: string;
   category: Category;
   prepTime: string;
   cookTime: string;
