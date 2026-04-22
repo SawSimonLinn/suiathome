@@ -44,12 +44,12 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col py-8 md:py-12 gap-16">
+    <div className="flex flex-col py-6 md:py-12 gap-8 md:gap-16">
       {/* ── Hero ── */}
-      <section className="w-full text-center py-12 md:py-20 relative overflow-hidden">
+      <section className="w-full text-center py-6 md:py-20 relative overflow-hidden">
         {/* Floating side decorations */}
         <div
-          className="pointer-events-none select-none absolute inset-0 flex items-center justify-between px-2 sm:px-8 md:px-12"
+          className="pointer-events-none select-none absolute inset-0 hidden sm:flex items-center justify-between sm:px-4 md:px-12"
           aria-hidden="true"
         >
           <div className="flex flex-col gap-5 text-3xl sm:text-4xl opacity-40">
@@ -82,7 +82,7 @@ export default function AboutPage() {
             </span>
           </div>
 
-          <div className="p-6 sm:p-10 relative">
+          <div className="p-4 sm:p-10 relative">
             {/* Tape strips */}
             <div
               className="absolute top-[3.2rem] left-6 w-14 h-5 border border-foreground opacity-70 rotate-[-3deg]"
@@ -265,7 +265,7 @@ export default function AboutPage() {
             🍜 What Drives Her
           </h2>
         </div>
-        <div className="p-6 sm:p-10 grid grid-cols-1 sm:grid-cols-2 gap-8">
+        <div className="p-4 sm:p-10 grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
           <div className="flex flex-col gap-3">
             <h3 className="font-headline text-lg" style={{ color: "#2d4a2a" }}>
               Brands & Collabs
@@ -352,7 +352,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="p-6 sm:p-10 flex flex-col gap-8">
+        <div className="p-4 sm:p-10 flex flex-col gap-6 sm:gap-8">
           <p
             className="text-base sm:text-lg leading-relaxed max-w-2xl"
             style={{ color: "#4a5e47" }}
@@ -409,7 +409,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="text-center py-8">
+      <section className="text-center py-4 md:py-8">
         <p
           className="font-headline text-2xl sm:text-3xl mb-6"
           style={{ color: "#2d4a2a" }}

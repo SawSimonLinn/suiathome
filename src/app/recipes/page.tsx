@@ -14,7 +14,7 @@ export default async function RecipesPage() {
   const { recipes, categories } = await getPublicRecipesData();
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
+    <div className="py-8 md:py-12">
       <header className="text-center mb-8 md:mb-12">
         <h1 className="font-headline text-4xl md:text-5xl">
           All Recipes
@@ -28,9 +28,9 @@ export default async function RecipesPage() {
         <div className="relative flex-grow">
           <Input placeholder="Search recipes..." className="pl-3" />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex gap-3">
             <Select>
-              <SelectTrigger className="w-full sm:w-[160px] md:w-[180px]">
+              <SelectTrigger className="flex-1 sm:w-[160px] md:w-[180px] sm:flex-none">
                 <SelectValue placeholder="🏷️ All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -42,7 +42,7 @@ export default async function RecipesPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button>🔍 Search Recipes</Button>
+            <Button className="shrink-0">🔍 Search</Button>
         </div>
       </div>
 
