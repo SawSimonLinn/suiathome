@@ -8,13 +8,13 @@ import { createClient } from '@/lib/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Eye, Pencil, ChevronDown, ChevronUp } from 'lucide-react';
+import { Eye, Pencil, Heart, Bookmark, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { CommunityPostCard } from '@/components/community-post-card';
 import { CreateCommunityPostCard } from '@/components/create-community-post-card';
-import { ImageStripLightbox } from '@/components/image-strip-lightbox';
-import { RecipeImageCard } from '@/components/recipe-image-card';
+import { RecipeCoverCarousel } from '@/components/recipe-cover-carousel';
 import { RecipeTipsPanel } from '@/components/recipe-tips-panel';
+import { RecipeQaSection } from './RecipeQaSection';
 import type { Recipe, CommunityPost, User } from '@/lib/types';
 
 interface RecipeClientPageProps {
@@ -34,7 +34,6 @@ function getReelPlatform(url: string): 'instagram' | 'facebook' | 'other' {
 
 function getEmbedUrl(url: string, platform: 'instagram' | 'facebook' | 'other'): string | null {
   if (platform === 'instagram') {
-    // Strip trailing slash then append /embed/
     return url.replace(/\/$/, '') + '/embed/';
   }
   if (platform === 'facebook') {
@@ -48,7 +47,6 @@ function ReelPlayer({ url }: { url: string }) {
   const embedUrl = getEmbedUrl(url, platform);
 
   if (!embedUrl) {
-    // Fallback for direct video file URLs
     return (
       <div className="relative border-2 border-foreground paper-shadow-sm overflow-hidden" style={{ backgroundColor: '#000' }}>
         <video
@@ -69,7 +67,7 @@ function ReelPlayer({ url }: { url: string }) {
   }, []);
 
   return (
-    <div className="border-2 border-foreground paper-shadow-sm flex justify-center py-4" style={{ backgroundColor: 'var(--cream-warm)' }}>
+    <div className="border-2 border-foreground paper-shadow-sm flex flex-col items-center py-4 gap-3" style={{ backgroundColor: 'var(--cream-warm)' }}>
       <div style={{ width: 320, height: 550, overflow: 'hidden' }}>
         <iframe
           ref={iframeRef}
@@ -82,27 +80,25 @@ function ReelPlayer({ url }: { url: string }) {
           title="Recipe reel"
         />
       </div>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-xs underline text-muted-foreground hover:text-foreground transition-colors"
+      >
+        Open in {platform === 'instagram' ? 'Instagram' : platform === 'facebook' ? 'Facebook' : 'browser'} ↗
+      </a>
     </div>
   );
 }
 
 function ReelSection({ reelUrl }: { reelUrl: string }) {
-  const [open, setOpen] = useState(false);
   return (
     <section>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-3 mb-4 group"
-      >
-        <h2 className="font-headline text-3xl flex items-center gap-2">
-          Watch it Cook <span className="text-xl" aria-hidden="true">🎥</span>
-        </h2>
-        <span className="flex items-center justify-center border-2 border-foreground w-7 h-7 paper-btn shrink-0" style={{ backgroundColor: 'var(--cream-warm)' }}>
-          {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </span>
-      </button>
-      {open && <ReelPlayer url={reelUrl} />}
+      <h2 className="font-headline text-2xl flex items-center gap-2 mb-4">
+        Watch it Cook <span className="text-xl" aria-hidden="true">🎥</span>
+      </h2>
+      <ReelPlayer url={reelUrl} />
     </section>
   );
 }
@@ -179,261 +175,274 @@ export default function RecipeClientPage({
 
   return (
     <div className="py-8 md:py-12">
-      <article className="mx-auto max-w-5xl border-2 border-foreground bg-paper paper-shadow relative overflow-hidden">
+      <article className="mx-auto max-w-7xl border-2 border-foreground bg-paper paper-shadow relative">
 
-        {/* Sage green top ribbon: mirrors hero */}
+        {/* Top ribbon */}
         <div className="w-full border-b-2 border-foreground py-2 px-4 flex items-center justify-center gap-2 relative" style={{ backgroundColor: 'var(--sage)' }}>
           <span className="text-sm font-medium tracking-widest uppercase" style={{ color: '#2d4a2a' }}>
             🌿 &nbsp; Homemade with love &nbsp; 🌿
           </span>
-          {currentUser?.role === 'admin' && (
-            <Link
-              href={`/admin/recipes/${recipe.id}/edit`}
-              className="absolute right-3 flex items-center gap-1.5 text-xs font-semibold border-2 border-foreground px-2.5 py-1 paper-btn"
-              style={{ backgroundColor: 'var(--brass)', color: '#2d4a2a' }}
-            >
-              <Pencil className="h-3 w-3" />
-              Edit
-            </Link>
-          )}
         </div>
 
-        <div className="p-4 sm:p-6 md:p-10">
+        {/* ── Twitter-style 3-column layout ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_260px]">
 
-          {/* Tape strips: like hero card */}
-          <div className="absolute top-[3.5rem] left-5 w-14 h-5 border border-foreground/60 rotate-[-3deg]" style={{ backgroundColor: 'var(--brass)', opacity: 0.6 }} aria-hidden="true" />
-          <div className="absolute top-[3.5rem] right-7 w-12 h-5 border border-foreground/60 rotate-[2deg]" style={{ backgroundColor: 'var(--blush)' }} aria-hidden="true" />
+          {/* ══ LEFT: Recipe profile panel ══ */}
+          <aside className="border-b-2 lg:border-b-0 lg:border-r-2 border-foreground px-5 md:px-6" style={{ backgroundColor: 'var(--cream-warm)' }}>
+            <div className="themed-scrollbar lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto pb-6 pr-2">
 
-          <header className="mb-8">
-            <div className="flex flex-col md:flex-row md:items-start gap-6">
-
-              {/* Left: title + description */}
-              <div className="flex-1 min-w-0">
-                {/* Flower row */}
+              {/* Flowers + Title */}
+              <div className="pt-6 pb-5 border-b border-foreground/15">
                 <div className="flex gap-1.5 mb-3" aria-hidden="true">
-                  {SECTION_FLOWERS.map((f, i) => (
-                    <span key={i} className="text-base">{f}</span>
-                  ))}
+                  {SECTION_FLOWERS.map((f, i) => <span key={i} className="text-sm">{f}</span>)}
                 </div>
-
-                <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl !leading-tight tracking-tight mb-2" style={{ color: '#2d4a2a' }}>
+                <h1 className="font-headline text-2xl md:text-3xl !leading-tight tracking-tight" style={{ color: '#2d4a2a' }}>
                   {recipe.title}
                 </h1>
-
-                <SquigglyLine width={180} opacity={0.45} />
-
-                <p className="text-base text-muted-foreground mt-3 leading-relaxed">{recipe.description}</p>
+                <div className="mt-2 mb-3"><SquigglyLine width={140} opacity={0.45} /></div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{recipe.description}</p>
               </div>
 
-              {/* Right: sticky info card */}
-              <div className="shrink-0 md:w-52 border-2 border-foreground p-4 relative rotate-[0.5deg] paper-shadow-sm" style={{ backgroundColor: 'var(--blush-light)' }}>
-                {/* tape strip */}
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-4 border border-foreground/50 rotate-[-1deg]" style={{ backgroundColor: 'var(--lavender)', opacity: 0.85 }} aria-hidden="true" />
-
-                <Badge variant="secondary" className="mb-3 border border-foreground/30 w-full justify-center text-xs tracking-widest uppercase">
-                  {recipe.category.name}
-                </Badge>
-
-                <div className="flex items-center gap-2.5">
+              {/* Author */}
+              <div className="py-5 border-b border-foreground/15">
+                <div className="flex items-center gap-3 mb-3">
                   <Avatar className="h-10 w-10 border-2 border-foreground shrink-0">
                     <AvatarImage src={recipe.author.avatarUrl} alt={recipe.author.name} />
                     <AvatarFallback>{recipe.author.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
                     <p className="font-semibold text-sm truncate">{recipe.author.name}</p>
-                    <p className="text-xs text-muted-foreground leading-snug">
+                    <p className="text-xs text-muted-foreground">
                       {new Date(recipe.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
                   </div>
                 </div>
-
-                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {viewCount} {viewCount === 1 ? 'view' : 'views'}</span>
-                  <span className="text-base" aria-hidden="true">🍀</span>
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" className="border border-foreground/20 text-xs tracking-widest uppercase">
+                    {recipe.category.name}
+                  </Badge>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Eye className="h-3 w-3" /> {viewCount} {viewCount === 1 ? 'view' : 'views'}
+                  </span>
                 </div>
               </div>
 
-            </div>
-          </header>
+              {/* Stats */}
+              <div className="py-5 border-b border-foreground/15">
+                <div className="grid grid-cols-3 text-center">
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">Prep</p>
+                    <p className="font-bold text-sm mt-1">{recipe.prepTime}</p>
+                  </div>
+                  <div className="border-x border-foreground/15">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">Cook</p>
+                    <p className="font-bold text-sm mt-1">{recipe.cookTime}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">Serves</p>
+                    <p className="font-bold text-sm mt-1">{recipe.servings}</p>
+                  </div>
+                </div>
+              </div>
 
-          {coverImage && (
-            <div className="relative mb-8 aspect-video w-full border-2 border-foreground paper-shadow-sm overflow-hidden">
-              <Image
-                src={coverImage.imageUrl}
-                alt={recipe.title}
-                fill
-                className="object-cover"
-                style={{ objectPosition: recipe.coverPosition ?? 'center center' }}
-                data-ai-hint={coverImage.imageHint}
-                priority
+              {/* Admin edit */}
+              {currentUser?.role === 'admin' && (
+                <div className="py-4 border-b border-foreground/15">
+                  <Link
+                    href={`/admin/recipes/${recipe.id}/edit`}
+                    className="flex items-center justify-center gap-1.5 text-xs font-semibold border-2 border-foreground px-3 py-1.5 paper-btn w-full"
+                    style={{ backgroundColor: 'var(--brass)', color: '#2d4a2a' }}
+                  >
+                    <Pencil className="h-3 w-3" /> Edit Recipe
+                  </Link>
+                </div>
+              )}
+
+              {/* Related recipes */}
+              {relatedRecipes.length > 0 && (
+                <div className="pt-5">
+                  <h2 className="font-headline text-lg mb-1">You May Also Like</h2>
+                  <div className="mb-4"><SquigglyLine width={110} opacity={0.4} /></div>
+                  <div className="flex flex-col gap-3">
+                    {relatedRecipes.map((r) => (
+                      <Link
+                        key={r.id}
+                        href={`/recipes/${r.slug}`}
+                        className="group flex items-center gap-3 border-2 border-foreground paper-shadow-sm overflow-hidden hover:bg-foreground/5 transition-colors"
+                        style={{ backgroundColor: 'var(--paper)' }}
+                      >
+                        <div className="relative w-16 h-16 shrink-0 border-r-2 border-foreground overflow-hidden">
+                          {r.imageUrl ? (
+                            <Image src={r.imageUrl} alt={r.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-2xl" style={{ backgroundColor: 'var(--blush)' }}>🍽️</div>
+                          )}
+                        </div>
+                        <div className="py-2 pr-2 min-w-0">
+                          <p className="text-xs font-semibold leading-snug line-clamp-2 font-headline">{r.title}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{r.category.name}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </aside>
+
+          {/* ══ CENTER: Content feed ══ */}
+          <main className="min-w-0 border-b-2 lg:border-b-0 border-foreground">
+
+            {/* Carousel — full bleed at top of center column */}
+            {coverImage && (
+              <RecipeCoverCarousel
+                compact
+                images={[
+                  {
+                    src: coverImage.imageUrl,
+                    alt: recipe.title,
+                    objectPosition: recipe.coverPosition ?? 'center center',
+                  },
+                  ...(recipe.galleryImages ?? []).map((img, i) => ({
+                    src: img.url,
+                    alt: `${recipe.title} photo ${i + 2}`,
+                  })),
+                ]}
               />
-              {/* Cute sticker on cover image */}
-              <span className="absolute top-3 right-3 text-3xl select-none pointer-events-none drop-shadow-md rotate-[8deg]" aria-hidden="true">🍜</span>
-              {/* Tape strip on image */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-5 border border-foreground/60 rotate-[-1deg]" style={{ backgroundColor: 'var(--brass)', opacity: 0.65 }} aria-hidden="true" />
-            </div>
-          )}
+            )}
 
-          {/* Stats */}
-          <div className="my-8 border-y-2 border-dashed border-foreground py-5" style={{ backgroundColor: 'var(--cream-warm)' }}>
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="p-5 md:p-7 space-y-8">
+
+              {/* Story */}
+              {recipe.story && (
+                <div className="border-2 border-foreground p-4 paper-shadow-sm relative" style={{ backgroundColor: 'var(--blush-light)' }}>
+                  <div className="absolute -top-2 left-6 w-10 h-4 border border-foreground/60 rotate-[2deg]" style={{ backgroundColor: 'var(--lavender)', opacity: 0.8 }} aria-hidden="true" />
+                  <h2 className="font-headline text-lg flex items-center gap-1.5 mb-2">The Story <span aria-hidden="true">📖</span></h2>
+                  <p className="italic leading-relaxed text-sm text-foreground/90">{recipe.story}</p>
+                </div>
+              )}
+
+              {/* Instructions */}
               <div>
-                <p className="text-sm text-muted-foreground uppercase tracking-wide font-medium">Prep Time</p>
-                <p className="font-bold text-lg mt-0.5">{recipe.prepTime}</p>
+                <h2 className="mb-1 font-headline text-2xl flex items-center gap-2">Instructions <span aria-hidden="true">📝</span></h2>
+                <div className="mb-5"><SquigglyLine width={150} opacity={0.45} /></div>
+                <ol className="list-none space-y-5 text-base leading-loose">
+                  {recipe.steps.map((step, index) => (
+                    <li key={index} className="flex items-start gap-4">
+                      <div className="mt-1.5 flex h-7 w-7 flex-shrink-0 items-center justify-center border-2 border-foreground font-bold font-headline text-base">
+                        {index + 1}
+                      </div>
+                      <p>{step}</p>
+                    </li>
+                  ))}
+                </ol>
               </div>
-              <div className="border-x-2 border-dashed border-foreground/30">
-                <p className="text-sm text-muted-foreground uppercase tracking-wide font-medium">Cook Time</p>
-                <p className="font-bold text-lg mt-0.5">{recipe.cookTime}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground uppercase tracking-wide font-medium">Servings</p>
-                <p className="font-bold text-lg mt-0.5">{recipe.servings}</p>
-              </div>
-            </div>
-          </div>
 
-          {/* Story block */}
-          <div className="my-8 border-2 border-foreground p-6 text-lg text-foreground/90 paper-shadow-sm relative" style={{ backgroundColor: 'var(--blush-light)' }}>
-            {/* Tape strip on story card */}
-            <div className="absolute -top-2 left-8 w-10 h-4 border border-foreground/60 rotate-[2deg]" style={{ backgroundColor: 'var(--lavender)', opacity: 0.8 }} aria-hidden="true" />
-            <p className="italic leading-relaxed">{recipe.story}</p>
-          </div>
-
-          {/* Ingredients + Instructions */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 lg:gap-12">
-            <div className="md:col-span-2">
-              <h2 className="mb-1 font-headline text-3xl flex items-center gap-2">Ingredients <span aria-hidden="true">🥕</span></h2>
-              <div className="mb-4"><SquigglyLine width={140} opacity={0.45} /></div>
-              <ul className="space-y-3 text-base">
-                {recipe.ingredients.map((ing, index) => (
-                  <li key={index} className="flex gap-3 items-start p-2">
-                    <div>
-                      {ing.quantity && ing.quantity !== 'to taste' && (
-                        <span className="font-semibold">{ing.quantity} </span>
-                      )}
-                      <span className="text-muted-foreground">{ing.name}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {/* Reel */}
+              {recipe.reelUrl && (
+                <div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <SquigglyLine width={80} opacity={0.4} />
+                    <span aria-hidden="true">🎬</span>
+                    <SquigglyLine width={80} opacity={0.4} />
+                  </div>
+                  <ReelSection reelUrl={recipe.reelUrl} />
+                </div>
+              )}
             </div>
 
-            <div className="md:col-span-3">
-              <h2 className="mb-1 font-headline text-3xl flex items-center gap-2">Instructions <span aria-hidden="true">📝</span></h2>
-              <div className="mb-4"><SquigglyLine width={160} opacity={0.45} /></div>
-              <ol className="list-none space-y-6 text-base leading-loose">
-                {recipe.steps.map((step, index) => (
-                  <li key={index} className="flex items-start gap-4">
-                    <div className="mt-1.5 flex h-8 w-8 flex-shrink-0 items-center justify-center border-2 border-foreground text-foreground font-bold font-headline text-lg">
-                      {index + 1}
-                    </div>
-                    <p>{step}</p>
-                  </li>
-                ))}
-              </ol>
+            {/* Action bar — outside space-y-8 to control its own spacing */}
+            <div className="flex items-center gap-6 px-5 md:px-7 py-3 border-t border-foreground/15">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void toggleLike()}
+                disabled={pendingAction === 'like'}
+                className={`flex items-center gap-1.5 font-semibold ${isLiked ? 'text-rose-600' : ''}`}
+              >
+                <Heart className={`h-4 w-4 ${isLiked ? 'fill-rose-600' : ''}`} />
+                <span className="text-sm">{likeCount}</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void toggleFavorite()}
+                disabled={pendingAction === 'favorite'}
+                className={`flex items-center gap-1.5 font-semibold ${isFavorited ? 'text-amber-600' : ''}`}
+              >
+                <Bookmark className={`h-4 w-4 ${isFavorited ? 'fill-amber-600' : ''}`} />
+                <span className="text-sm">{favoriteCount}</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void shareRecipe()}
+                disabled={isSharing}
+                className="flex items-center gap-1.5 font-semibold"
+              >
+                <Share2 className="h-4 w-4" />
+                <span className="text-sm">{isSharing ? 'Sharing…' : 'Share'}</span>
+              </Button>
             </div>
-          </div>
+          </main>
 
-          {recipe.tips.length > 0 ? (
-            <>
-              <div className="my-10 flex items-center justify-center gap-3">
-                <span className="text-base" aria-hidden="true">✦</span>
-                <SquigglyLine width={120} opacity={0.4} />
-                <span className="text-base" aria-hidden="true">🌿</span>
-                <SquigglyLine width={120} opacity={0.4} />
-                <span className="text-base" aria-hidden="true">✦</span>
-              </div>
-              <section>
-                <h2 className="mb-4 pb-1 font-headline text-3xl flex items-center gap-2">
-                  Tips <span className="text-xl" aria-hidden="true">💡</span>
+          {/* ══ RIGHT: Ingredients + Tips ══ */}
+          <aside className="lg:border-l-2 border-foreground p-5 md:p-6" style={{ backgroundColor: 'var(--blush-light)' }}>
+            <div className="themed-scrollbar lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto pb-4 pr-2">
+
+              {/* Ingredients */}
+              <div className="py-4">
+                <h2 className="font-headline text-2xl flex items-center gap-2 mb-1">
+                  Ingredients <span aria-hidden="true">🥕</span>
                 </h2>
-                <RecipeTipsPanel tips={recipe.tips} />
-              </section>
-            </>
-          ) : null}
-
-          {recipe.galleryImages && recipe.galleryImages.length > 0 ? (
-            <>
-              <div className="my-10 flex items-center justify-center gap-3">
-                <span className="text-base" aria-hidden="true">✦</span>
-                <SquigglyLine width={120} opacity={0.4} />
-                <span className="text-base" aria-hidden="true">📸</span>
-                <SquigglyLine width={120} opacity={0.4} />
-                <span className="text-base" aria-hidden="true">✦</span>
+                <div className="mb-4"><SquigglyLine width={130} opacity={0.45} /></div>
+                <ul className="space-y-2 text-sm">
+                  {recipe.ingredients.map((ing, index) => (
+                    <li key={index} className="flex gap-2 items-start border-b border-foreground/10 pb-2">
+                      <span className="text-foreground/30 text-xs mt-0.5 shrink-0">✦</span>
+                      <div>
+                        {ing.quantity && ing.quantity !== 'to taste' && (
+                          <span className="font-semibold">{ing.quantity} </span>
+                        )}
+                        <span className="text-muted-foreground">{ing.name}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <section>
-                <h2 className="mb-4 font-headline text-3xl flex items-center gap-2">More Photos</h2>
-                <ImageStripLightbox
-                  dialogTitle={`${recipe.title} photos`}
-                  dialogDescription={`Large preview for the additional images in ${recipe.title}.`}
-                  images={recipe.galleryImages.map((image, index) => ({
-                    alt: `${recipe.title} photo ${index + 2}`,
-                    src: image.url,
-                  }))}
-                />
-              </section>
-            </>
-          ) : null}
 
-          {recipe.reelUrl ? (
-            <>
-              <div className="my-10 flex items-center justify-center gap-3">
-                <span className="text-base" aria-hidden="true">✦</span>
-                <SquigglyLine width={120} opacity={0.4} />
-                <span className="text-base" aria-hidden="true">🎬</span>
-                <SquigglyLine width={120} opacity={0.4} />
-                <span className="text-base" aria-hidden="true">✦</span>
-              </div>
-              <ReelSection reelUrl={recipe.reelUrl} />
-            </>
-          ) : null}
+              {/* Tips */}
+              {recipe.tips.length > 0 && (
+                <div className="py-4 border-t border-foreground/15">
+                  <h2 className="font-headline text-2xl flex items-center gap-2 mb-1">
+                    Tips <span className="text-lg" aria-hidden="true">💡</span>
+                  </h2>
+                  <div className="mb-4"><SquigglyLine width={100} opacity={0.45} /></div>
+                  <RecipeTipsPanel tips={recipe.tips} />
+                </div>
+              )}
+            </div>
+          </aside>
 
-          <div className="my-10 flex items-center justify-center gap-3">
-            <span className="text-base" aria-hidden="true">🌸</span>
-            <SquigglyLine width={100} opacity={0.4} />
-            <span className="text-base" aria-hidden="true">🫶</span>
-            <SquigglyLine width={100} opacity={0.4} />
-            <span className="text-base" aria-hidden="true">🌸</span>
-          </div>
-
-          {/* Like / Favorite / Share */}
-          <div className="flex justify-center items-center gap-4 flex-wrap">
-            <Button
-              variant={isLiked ? 'secondary' : 'outline'}
-              onClick={() => void toggleLike()}
-              disabled={pendingAction === 'like'}
-              className="border-2 border-foreground paper-btn font-semibold"
-            >
-              Likes ({likeCount})
-            </Button>
-            <Button
-              variant={isFavorited ? 'secondary' : 'outline'}
-              onClick={() => void toggleFavorite()}
-              disabled={pendingAction === 'favorite'}
-              className="border-2 border-foreground paper-btn font-semibold"
-            >
-              Favorite ({favoriteCount})
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => void shareRecipe()}
-              disabled={isSharing}
-              className="border-2 border-foreground paper-btn font-semibold"
-            >
-              {isSharing ? 'Sharing...' : 'Share'}
-            </Button>
-          </div>
         </div>
 
-        {/* Bottom floral strip: mirrors hero */}
+        {/* Bottom floral strip */}
         <div className="w-full border-t-2 border-foreground py-2 flex justify-center gap-3 text-lg" style={{ backgroundColor: 'var(--blush-light)' }} aria-hidden="true">
           <span>🌷</span><span>🌿</span><span>🫶</span><span>🌿</span><span>🌷</span>
         </div>
       </article>
 
+      {/* Q&A */}
+      <div className="max-w-7xl mx-auto mt-12 px-4">
+        <RecipeQaSection
+          recipeId={recipe.id}
+          initialComments={recipe.comments}
+          currentUser={currentUser}
+        />
+      </div>
 
-      {/* Community Creations section */}
-      <section className="max-w-6xl mx-auto mt-16 px-4">
+      {/* Community Creations */}
+      <section className="max-w-7xl mx-auto mt-16 px-4">
         <div className="text-center mb-8">
           <h2 className="font-headline text-3xl md:text-4xl" style={{ color: '#2d4a2a' }}>Community Creations</h2>
           <div className="flex justify-center mt-3">
@@ -446,43 +455,14 @@ export default function RecipeClientPage({
         <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:overflow-x-auto md:pb-4 md:snap-x md:snap-mandatory">
           {relatedPosts.map(post => (
             <div key={post.id} className="w-full md:w-[min(88vw,420px)] md:shrink-0 md:snap-start">
-              <CommunityPostCard
-                post={post}
-                currentUser={currentUser}
-              />
+              <CommunityPostCard post={post} currentUser={currentUser} />
             </div>
           ))}
           <div className="w-full md:w-[min(88vw,420px)] md:shrink-0 md:snap-start">
-            <CreateCommunityPostCard
-              recipeId={recipe.id}
-              recipeTitle={recipe.title}
-              currentUser={currentUser}
-            />
+            <CreateCommunityPostCard recipeId={recipe.id} recipeTitle={recipe.title} currentUser={currentUser} />
           </div>
         </div>
       </section>
-
-      {/* You May Also Like section */}
-      {relatedRecipes.length > 0 && (
-        <section className="max-w-6xl mx-auto mt-16 px-4">
-          <div className="text-center mb-8">
-            <div className="flex justify-center gap-2 mb-3" aria-hidden="true">
-              {SECTION_FLOWERS.map((f, i) => <span key={i} className="text-lg">{f}</span>)}
-            </div>
-            <h2 className="font-headline text-3xl md:text-4xl" style={{ color: '#2d4a2a' }}>You May Also Like</h2>
-            <div className="flex justify-center mt-3">
-              <SquigglyLine width={160} opacity={0.45} />
-            </div>
-          </div>
-          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
-            {relatedRecipes.map(relatedRecipe => (
-              <div key={relatedRecipe.id} className="w-[min(85vw,320px)] shrink-0 snap-start">
-                <RecipeImageCard recipe={relatedRecipe} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
     </div>
   );

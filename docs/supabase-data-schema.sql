@@ -53,6 +53,8 @@ create table if not exists public.recipe_comments (
   recipe_id uuid not null references public.recipes(id) on delete cascade,
   user_id uuid not null references public.profiles(id) on delete cascade,
   body text not null check (char_length(trim(body)) > 0),
+  parent_id uuid references public.recipe_comments(id) on delete cascade,
+  is_pinned boolean not null default false,
   created_at timestamptz not null default now()
 );
 

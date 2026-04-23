@@ -112,7 +112,7 @@ export default async function PublicProfilePage({
 
   const postIds = (myPostRows ?? []).map((r) => r.id);
 
-  const [{ data: likesData }, { data: viewerLikesData }, { data: commentsData }, { data: viewsData }] = await Promise.all([
+  const [{ data: likesData }, { data: viewerLikesData }, { data: commentsData }] = await Promise.all([
     postIds.length
       ? supabase.from('community_post_likes').select('post_id').in('post_id', postIds)
       : Promise.resolve({ data: [] }),
@@ -129,9 +129,6 @@ export default async function PublicProfilePage({
           .select('id, post_id, user_id, body, created_at')
           .in('post_id', postIds)
           .order('created_at', { ascending: true })
-      : Promise.resolve({ data: [] }),
-    postIds.length
-      ? supabase.from('community_post_views').select('post_id').in('post_id', postIds)
       : Promise.resolve({ data: [] }),
   ]);
 
@@ -158,11 +155,6 @@ export default async function PublicProfilePage({
     (viewerLikesData ?? []).map((like: { post_id: string }) => like.post_id)
   );
 
-  const viewCounts = new Map<string, number>();
-  (viewsData ?? []).forEach((view: { post_id: string }) => {
-    viewCounts.set(view.post_id, (viewCounts.get(view.post_id) ?? 0) + 1);
-  });
-
   const commentsByPost = new Map<string, { id: string; text: string; user: User; createdAt: string }[]>();
   (commentsData ?? []).forEach(
     (c: { id: string; post_id: string; user_id: string; body: string; created_at: string }) => {
@@ -182,7 +174,6 @@ export default async function PublicProfilePage({
         imageUrl,
         imageHint: row.image_hint ?? '',
         likes: likeCounts.get(row.id) ?? 0,
-        views: viewCounts.get(row.id) ?? 0,
         isLiked: viewerLikedPostIds.has(row.id),
         isHidden: row.is_hidden ?? false,
         comments: commentsByPost.get(row.id) ?? [],

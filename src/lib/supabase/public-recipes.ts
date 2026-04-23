@@ -428,26 +428,35 @@ export async function getPublicRecipeByIdentifier(identifier: string) {
   );
 }
 
+function shuffled<T>(arr: T[]): T[] {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 export async function getRelatedPublicRecipes(recipe: Recipe, count: number) {
   const { recipes } = await getPublicRecipesData();
-  const relatedByCategory = recipes.filter(
-    (candidate) =>
-      candidate.category.id === recipe.category.id && candidate.id !== recipe.id
+  const relatedByCategory = shuffled(
+    recipes.filter(
+      (candidate) =>
+        candidate.category.id === recipe.category.id && candidate.id !== recipe.id
+    )
   );
 
   if (relatedByCategory.length >= count) {
-    return relatedByCategory
-      .sort((left, right) => right.likes - left.likes)
-      .slice(0, count);
+    return relatedByCategory.slice(0, count);
   }
 
-  const otherRecipes = recipes
-    .filter(
+  const otherRecipes = shuffled(
+    recipes.filter(
       (candidate) =>
         candidate.id !== recipe.id &&
         !relatedByCategory.some((related) => related.id === candidate.id)
     )
-    .sort((left, right) => right.likes - left.likes);
+  );
 
   return [...relatedByCategory, ...otherRecipes].slice(0, count);
 }

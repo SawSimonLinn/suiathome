@@ -229,7 +229,6 @@ export const communityPosts: CommunityPost[] = [
     imageUrl: 'https://picsum.photos/seed/comm1/600/600',
     imageHint: 'plate of carbonara',
     likes: 42,
-    views: 124,
     comments: [
       { id: 'cc-1', text: 'Looks delicious!', user: users[2], createdAt: '2024-05-20T10:00:00Z' }
     ],
@@ -243,7 +242,6 @@ export const communityPosts: CommunityPost[] = [
     imageUrl: 'https://picsum.photos/seed/comm2/600/600',
     imageHint: 'cookies on a rack',
     likes: 108,
-    views: 209,
     comments: [],
     createdAt: '2024-05-18T12:30:00Z',
     linkedRecipe: recipes[1], // Chewy Chocolate Chip Cookies
@@ -255,7 +253,6 @@ export const communityPosts: CommunityPost[] = [
     imageUrl: 'https://picsum.photos/seed/comm3/600/600',
     imageHint: 'plated tacos',
     likes: 95,
-    views: 176,
     comments: [],
     createdAt: '2024-05-17T09:00:00Z',
     linkedRecipe: recipes[4], // Flavorful Beef Tacos

@@ -62,7 +62,6 @@ export type CommunityPost = {
   imageUrl: string;
   imageHint: string;
   likes: number;
-  views: number;
   isLiked?: boolean;
   isHidden?: boolean;
   comments: CommunityComment[];

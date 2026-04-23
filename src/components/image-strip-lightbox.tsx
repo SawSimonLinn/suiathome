@@ -45,7 +45,7 @@ export function ImageStripLightbox({
             key={`${image.src}-${index}`}
             type="button"
             className={cn(
-              'group relative w-[min(80vw,22rem)] shrink-0 snap-start overflow-hidden border-2 border-foreground bg-secondary/10 paper-shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              'group relative w-32 h-32 shrink-0 snap-start overflow-hidden border-2 border-foreground bg-secondary/10 paper-shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               itemClassName
             )}
             onClick={() => setSelectedIndex(index)}
@@ -55,10 +55,10 @@ export function ImageStripLightbox({
             <img
               src={image.src}
               alt={image.alt}
-              className="aspect-[4/3] h-auto w-full object-cover transition-transform duration-200 group-hover:scale-[1.01]"
+              className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
             />
-            <span className="absolute bottom-3 right-3 border-2 border-foreground bg-paper px-2 py-1 text-xs font-semibold uppercase tracking-wide opacity-0 transition-opacity group-hover:opacity-100">
-              View Full Image
+            <span className="absolute inset-0 flex items-center justify-center bg-foreground/20 opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="border-2 border-foreground bg-paper px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">Open</span>
             </span>
           </button>
         ))}

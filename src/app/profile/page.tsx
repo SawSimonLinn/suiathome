@@ -111,7 +111,7 @@ export default async function ProfilePage() {
     ]);
 
   const postIds = (myPostRows ?? []).map((row) => row.id);
-  const [{ data: myPostLikes }, { data: myViewerLikes }, { data: myPostViews }] = await Promise.all([
+  const [{ data: myPostLikes }, { data: myViewerLikes }] = await Promise.all([
     postIds.length
       ? supabase
           .from('community_post_likes')
@@ -123,12 +123,6 @@ export default async function ProfilePage() {
           .from('community_post_likes')
           .select('post_id')
           .eq('user_id', user.id)
-          .in('post_id', postIds)
-      : Promise.resolve({ data: [] }),
-    postIds.length
-      ? supabase
-          .from('community_post_views')
-          .select('post_id')
           .in('post_id', postIds)
       : Promise.resolve({ data: [] }),
   ]);
@@ -163,11 +157,6 @@ export default async function ProfilePage() {
     (myViewerLikes ?? []).map((like: { post_id: string }) => like.post_id)
   );
 
-  const viewCounts = new Map<string, number>();
-  (myPostViews ?? []).forEach((view: { post_id: string }) => {
-    viewCounts.set(view.post_id, (viewCounts.get(view.post_id) ?? 0) + 1);
-  });
-
   const myPosts: CommunityPost[] = await Promise.all(
     (myPostRows ?? []).map(async (row) => {
       const imageUrl = await resolveCommunityImageUrl(supabase, row.image_path);
@@ -178,7 +167,6 @@ export default async function ProfilePage() {
         imageUrl,
         imageHint: row.image_hint ?? '',
         likes: likeCounts.get(row.id) ?? 0,
-        views: viewCounts.get(row.id) ?? 0,
         isLiked: viewerLikedPostIds.has(row.id),
         isHidden: row.is_hidden ?? false,
         comments: [],

@@ -1,5 +1,5 @@
 'use client';
-import { Eye, MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
@@ -34,7 +34,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/supabase/client';
-import { hasSupabaseEnv } from '@/lib/supabase/config';
 import { UserRoleBadge } from '@/components/user-role-badge';
 import { cn } from '@/lib/utils';
 import type { CommunityPost, User } from '@/lib/types';
@@ -60,7 +59,6 @@ export function CommunityPostCard({
   const captionRef = useRef<HTMLParagraphElement | null>(null);
   const [isLiked, setIsLiked] = useState(post.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(post.likes);
-  const [viewCount, setViewCount] = useState(post.views);
   const [comments, setComments] = useState(post.comments);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [isImageOpen, setIsImageOpen] = useState(false);
@@ -75,9 +73,8 @@ export function CommunityPostCard({
   useEffect(() => {
     setIsLiked(post.isLiked ?? false);
     setLikeCount(post.likes);
-    setViewCount(post.views);
     setComments(post.comments);
-  }, [post.comments, post.isLiked, post.likes, post.views]);
+  }, [post.comments, post.isLiked, post.likes]);
 
   useEffect(() => {
     setIsCaptionExpanded(false);
@@ -121,46 +118,8 @@ export function CommunityPostCard({
     };
   }, [isCaptionExpanded, post.caption]);
 
-  async function recordImageView() {
-    if (!post.imageUrl || !hasSupabaseEnv()) {
-      return;
-    }
-
-    const storageKey = `community-post-image-view:${post.id}`;
-
-    try {
-      if (window.sessionStorage.getItem(storageKey)) {
-        return;
-      }
-    } catch {
-      // Ignore sessionStorage issues and continue with the insert attempt.
-    }
-
-    try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from('community_post_views')
-        .insert({ post_id: post.id });
-
-      if (error) {
-        return;
-      }
-
-      try {
-        window.sessionStorage.setItem(storageKey, '1');
-      } catch {
-        // Ignore sessionStorage issues after a successful insert.
-      }
-
-      setViewCount((current) => current + 1);
-    } catch {
-      // Ignore view insert errors so the image dialog still opens.
-    }
-  }
-
-  const handleImageOpen = async () => {
+  const handleImageOpen = () => {
     setIsImageOpen(true);
-    await recordImageView();
   };
 
   const handleLike = async () => {
@@ -484,14 +443,7 @@ export function CommunityPostCard({
         >
           {isLiked ? 'Unlike' : 'Like'} ({likeCount})
         </Button>
-        {post.imageUrl ? (
-          <div className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-            <Eye className="h-3.5 w-3.5" />
-            <span>{viewCount}</span>
-          </div>
-        ) : (
-          <div />
-        )}
+        <div />
         <Button size="sm" variant="ghost" onClick={() => setIsCommentsOpen((open) => !open)} className="shrink-0">
           {isCommentsOpen ? 'Hide' : 'Comment'} ({comments.length})
         </Button>

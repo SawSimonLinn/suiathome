@@ -35,7 +35,7 @@ type CommunityPageClientProps = {
   currentUser: User | null;
 };
 
-type CommunitySortOption = 'newest' | 'oldest' | 'most-viewed';
+type CommunitySortOption = 'newest' | 'oldest';
 
 function createImagePath(userId: string, fileName: string) {
   const sanitizedName = fileName.replace(/[^a-zA-Z0-9.-]/g, '-');
@@ -80,17 +80,6 @@ export function CommunityPageClient({
     if (sortOption === 'oldest') {
       return (
         new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()
-      );
-    }
-
-    if (sortOption === 'most-viewed') {
-      if (right.views !== left.views) {
-        return right.views - left.views;
-      }
-
-      return (
-        new Date(right.createdAt).getTime() -
-        new Date(left.createdAt).getTime()
       );
     }
 
@@ -479,7 +468,6 @@ export function CommunityPageClient({
           <SelectContent>
             <SelectItem value="newest">Newest</SelectItem>
             <SelectItem value="oldest">Oldest</SelectItem>
-            <SelectItem value="most-viewed">Most viewed</SelectItem>
           </SelectContent>
         </Select>
       </div>

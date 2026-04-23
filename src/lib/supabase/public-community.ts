@@ -25,10 +25,6 @@ type CommunityLikeRow = {
   post_id: string;
 };
 
-type CommunityViewRow = {
-  post_id: string;
-};
-
 type CommunityCommentRow = {
   id: string;
   post_id: string;
@@ -100,7 +96,6 @@ async function getCommunityPostsFromSupabase({
     profilesResult,
     likesResult,
     viewerLikesResult,
-    viewsResult,
     commentsResult,
   ] =
     await Promise.all([
@@ -113,7 +108,6 @@ async function getCommunityPostsFromSupabase({
             .select('post_id')
             .eq('user_id', viewerId)
         : Promise.resolve({ data: [], error: null }),
-      supabase.from('community_post_views').select('post_id'),
       supabase
         .from('community_post_comments')
         .select('id, post_id, user_id, body, created_at')
@@ -128,7 +122,6 @@ async function getCommunityPostsFromSupabase({
   const profiles = (profilesResult.data as CommunityProfileRow[]) ?? [];
   const likes = (likesResult.data as CommunityLikeRow[]) ?? [];
   const viewerLikeRows = (viewerLikesResult.data as CommunityLikeRow[]) ?? [];
-  const views = (viewsResult.data as CommunityViewRow[]) ?? [];
   const comments = (commentsResult.data as CommunityCommentRow[]) ?? [];
 
   const visiblePostIds = new Set(posts.map((post) => post.id));
@@ -145,12 +138,6 @@ async function getCommunityPostsFromSupabase({
       .map((like) => like.post_id)
       .filter((postId) => visiblePostIds.has(postId))
   );
-
-  const viewCounts = new Map<string, number>();
-  views.forEach((view) => {
-    if (!visiblePostIds.has(view.post_id)) return;
-    viewCounts.set(view.post_id, (viewCounts.get(view.post_id) || 0) + 1);
-  });
 
   const commentsByPostId = new Map<string, CommunityComment[]>();
   comments.forEach((comment) => {
@@ -173,7 +160,6 @@ async function getCommunityPostsFromSupabase({
       imageUrl: await resolveCommunityImageUrl(supabase, post.image_path),
       imageHint: post.image_hint || 'community food post',
       likes: likeCounts.get(post.id) || 0,
-      views: viewCounts.get(post.id) || 0,
       isLiked: viewerLikedPostIds.has(post.id),
       isHidden: post.is_hidden ?? false,
       comments: commentsByPostId.get(post.id) || [],
@@ -219,7 +205,7 @@ export async function getTopTriedItPosts(limit = 10) {
   const posts = postsData as CommunityPostRow[];
   const postIds = posts.map((p) => p.id);
 
-  const [profilesResult, likesResult, viewerLikesResult, viewsResult] = await Promise.all([
+  const [profilesResult, likesResult, viewerLikesResult] = await Promise.all([
     supabase.from('profiles').select('id, name, avatar_url, role'),
     supabase.from('community_post_likes').select('post_id').in('post_id', postIds),
     viewerId
@@ -229,13 +215,11 @@ export async function getTopTriedItPosts(limit = 10) {
           .eq('user_id', viewerId)
           .in('post_id', postIds)
       : Promise.resolve({ data: [], error: null }),
-    supabase.from('community_post_views').select('post_id').in('post_id', postIds),
   ]);
 
   const profiles = (profilesResult.data as CommunityProfileRow[]) ?? [];
   const likes = (likesResult.data as CommunityLikeRow[]) ?? [];
   const viewerLikeRows = (viewerLikesResult.data as CommunityLikeRow[]) ?? [];
-  const views = (viewsResult.data as CommunityViewRow[]) ?? [];
   const profilesById = new Map(profiles.map((p) => [p.id, p]));
 
   const likeCounts = new Map<string, number>();
@@ -245,11 +229,6 @@ export async function getTopTriedItPosts(limit = 10) {
 
   const viewerLikedPostIds = new Set(viewerLikeRows.map((like) => like.post_id));
 
-  const viewCounts = new Map<string, number>();
-  views.forEach((view) => {
-    viewCounts.set(view.post_id, (viewCounts.get(view.post_id) || 0) + 1);
-  });
-
   const resolved = await Promise.all(
     posts.map(async (post) => ({
       id: post.id,
@@ -258,7 +237,6 @@ export async function getTopTriedItPosts(limit = 10) {
       imageUrl: await resolveCommunityImageUrl(supabase, post.image_path),
       imageHint: post.image_hint || 'community food post',
       likes: likeCounts.get(post.id) || 0,
-      views: viewCounts.get(post.id) || 0,
       isLiked: viewerLikedPostIds.has(post.id),
       isHidden: post.is_hidden ?? false,
       comments: [],
@@ -310,7 +288,7 @@ export async function getCommunityPostById(
 
   if (error || !postData) return null;
 
-  const [profilesResult, likesResult, viewerLikesResult, viewsResult, commentsResult] =
+  const [profilesResult, likesResult, viewerLikesResult, commentsResult] =
     await Promise.all([
       supabase.from('profiles').select('id, name, avatar_url, role'),
       supabase.from('community_post_likes').select('post_id').eq('post_id', postId),
@@ -321,7 +299,6 @@ export async function getCommunityPostById(
             .eq('post_id', postId)
             .eq('user_id', viewerId)
         : Promise.resolve({ data: [], error: null }),
-      supabase.from('community_post_views').select('post_id').eq('post_id', postId),
       supabase
         .from('community_post_comments')
         .select('id, post_id, user_id, body, created_at')
@@ -332,7 +309,6 @@ export async function getCommunityPostById(
   const profiles = (profilesResult.data as CommunityProfileRow[]) ?? [];
   const likes = (likesResult.data as CommunityLikeRow[]) ?? [];
   const viewerLikeRows = (viewerLikesResult.data as CommunityLikeRow[]) ?? [];
-  const views = (viewsResult.data as CommunityViewRow[]) ?? [];
   const comments = (commentsResult.data as CommunityCommentRow[]) ?? [];
 
   const profilesById = new Map(profiles.map((p) => [p.id, p]));
@@ -352,7 +328,6 @@ export async function getCommunityPostById(
     imageUrl: await resolveCommunityImageUrl(supabase, postData.image_path),
     imageHint: postData.image_hint || 'community food post',
     likes: likes.length,
-    views: views.length,
     isLiked,
     isHidden: postData.is_hidden ?? false,
     comments: postComments,
