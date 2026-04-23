@@ -5,7 +5,7 @@ import { RestaurantVote } from "./restaurant-vote";
 
 const ABOUT_TITLE = "About Sui | Burmese Home Cooking Story | Sui at home";
 const ABOUT_DESCRIPTION =
-  "Learn about Sui, a Burmese home cook from Thangtlan, Chin State, Myanmar, and Yangon sharing authentic Myanmar recipes, family food stories, and her restaurant dream in the USA.";
+  "Learn about Sui, a Burmese home cook from Thangtlang, Chin State, Myanmar, and Yangon sharing authentic Myanmar recipes, family food stories, and her restaurant dream in the USA.";
 
 export const metadata: Metadata = {
   title: ABOUT_TITLE,
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "Myanmar food",
     "Burmese home cooking",
     "Sui cooking story",
-    "Thangtlan Chin State",
+    "Thangtlang Chin State",
     "Yangon food culture",
   ],
   alternates: {
@@ -131,10 +131,9 @@ export default function AboutPage() {
               className="mt-5 max-w-xl mx-auto text-base sm:text-lg leading-relaxed"
               style={{ color: "#4a5e47" }}
             >
-              Sui is a Burmese home cook, born in Thangtlan, Chin State,
-              Myanmar, and raised in Yangon,
-              now sharing authentic Myanmar recipes and family food memories in
-              the USA.
+              Sui is a Burmese home cook, born in Thangtlang, Chin State,
+              Myanmar, and raised in Yangon, now sharing authentic Myanmar
+              recipes and family food memories in the USA.
             </p>
             <p
               className="mt-3 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed"
@@ -158,7 +157,7 @@ export default function AboutPage() {
                 className="border-2 border-foreground px-3 py-1 paper-shadow-sm"
                 style={{ backgroundColor: "var(--sage-light)" }}
               >
-                🏔️ Born in Thangtlan
+                🏔️ Born in Thangtlang
               </span>
               <span
                 className="border-2 border-foreground px-3 py-1 paper-shadow-sm"
@@ -203,7 +202,7 @@ export default function AboutPage() {
             title: "Roots",
             tape: "var(--brass)",
             bg: "var(--sage-light)",
-            body: "Sui was born in Thangtlan, a town in Chin State, Myanmar. From a young age she grew up surrounded by the bold, earthy flavors that define Chin and Burmese home cooking.",
+            body: "Sui was born in Thangtlang, a town in Chin State, Myanmar. From a young age she grew up surrounded by the bold, earthy flavors that define Chin and Burmese home cooking.",
           },
           {
             emoji: "🌆",
