@@ -20,7 +20,7 @@ export type TopRecipeMetric = {
   likes: number;
   comments: number;
   favorites: number;
-  total: number;
+  views: number;
 };
 
 export type AdminCategory = {
@@ -187,7 +187,7 @@ async function getRecipeSummaries() {
     .from('recipes')
     .select('id, title, slug')
     .order('created_at', { ascending: false })
-    .limit(100);
+    .limit(1000);
 
   if (error) {
     return [] as RecipeSummary[];
@@ -209,6 +209,13 @@ async function getInteractionRows(table: string) {
   return (data as InteractionRow[]) ?? [];
 }
 
+async function getViewRows() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('recipe_views').select('recipe_id');
+  if (error) return [] as { recipe_id: string }[];
+  return (data as { recipe_id: string }[]) ?? [];
+}
+
 async function getCountRows(table: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.from(table).select('created_at');
@@ -218,6 +225,58 @@ async function getCountRows(table: string) {
   }
 
   return (data as CountRow[]) ?? [];
+}
+
+export type AdminUser = {
+  id: string;
+  name: string | null;
+  avatarUrl: string | null;
+  role: string | null;
+  createdAt: string;
+  likes: number;
+  favorites: number;
+  comments: number;
+  posts: number;
+};
+
+export async function getAllUsers(): Promise<AdminUser[]> {
+  const supabase = await createClient();
+
+  const [profilesResult, likesResult, favoritesResult, commentsResult, postsResult] =
+    await Promise.all([
+      supabase.from('profiles').select('id, name, avatar_url, role, created_at').order('created_at', { ascending: false }),
+      supabase.from('recipe_likes').select('user_id'),
+      supabase.from('recipe_favorites').select('user_id'),
+      supabase.from('recipe_comments').select('user_id'),
+      supabase.from('community_posts').select('user_id'),
+    ]);
+
+  if (profilesResult.error) return [];
+
+  const countByUser = (rows: { user_id: string }[] | null) => {
+    const map = new Map<string, number>();
+    for (const row of rows ?? []) {
+      map.set(row.user_id, (map.get(row.user_id) ?? 0) + 1);
+    }
+    return map;
+  };
+
+  const likesById = countByUser(likesResult.data as { user_id: string }[] | null);
+  const favoritesById = countByUser(favoritesResult.data as { user_id: string }[] | null);
+  const commentsById = countByUser(commentsResult.data as { user_id: string }[] | null);
+  const postsById = countByUser(postsResult.data as { user_id: string }[] | null);
+
+  return (profilesResult.data as { id: string; name: string | null; avatar_url: string | null; role: string | null; created_at: string }[]).map((p) => ({
+    id: p.id,
+    name: p.name,
+    avatarUrl: p.avatar_url,
+    role: p.role,
+    createdAt: p.created_at,
+    likes: likesById.get(p.id) ?? 0,
+    favorites: favoritesById.get(p.id) ?? 0,
+    comments: commentsById.get(p.id) ?? 0,
+    posts: postsById.get(p.id) ?? 0,
+  }));
 }
 
 export async function getRecentProfiles(limit = 6) {
@@ -248,6 +307,7 @@ export async function getAdminDashboardData() {
     likeRows,
     favoriteRows,
     commentRows,
+    viewRows,
   ] = await Promise.all([
     getCount('profiles'),
     getCount('recipes'),
@@ -260,6 +320,7 @@ export async function getAdminDashboardData() {
     getInteractionRows('recipe_likes'),
     getInteractionRows('recipe_favorites'),
     getInteractionRows('recipe_comments'),
+    getViewRows(),
   ]);
 
   const stats: AdminStat[] = [
@@ -304,17 +365,19 @@ export async function getAdminDashboardData() {
       likes: number;
       comments: number;
       favorites: number;
+      views: number;
     }
   >(
-    recipes.map((recipe) => [
+    recipes.map((recipe: RecipeSummary) => [
       recipe.id,
       {
         ...recipe,
         likes: 0,
         comments: 0,
         favorites: 0,
+        views: 0,
       },
-    ])
+    ] as [string, { id: string; title: string; slug: string; likes: number; comments: number; favorites: number; views: number }])
   );
 
   likeRows.forEach((row) => {
@@ -332,14 +395,13 @@ export async function getAdminDashboardData() {
     if (target) target.comments += 1;
   });
 
+  viewRows.forEach((row) => {
+    const target = metricsByRecipe.get(row.recipe_id);
+    if (target) target.views += 1;
+  });
+
   const topRecipes: TopRecipeMetric[] = [...metricsByRecipe.values()]
-    .map((recipe) => ({
-      ...recipe,
-      total: recipe.likes + recipe.comments + recipe.favorites,
-    }))
-    .filter((recipe) => recipe.total > 0)
-    .sort((left, right) => right.total - left.total)
-    .slice(0, 6);
+    .sort((left, right) => right.views - left.views);
 
   const engagementTrendRaw = buildTrendPoints(14);
   incrementTrendPoints(engagementTrendRaw, likeRows, 'likes');
@@ -711,7 +773,7 @@ async function getCommunityCommentsForModeration(limit: number) {
   };
 }
 
-export async function getCommentModerationData(limit = 20): Promise<ModerationData> {
+export async function getCommentModerationData(limit = 1000): Promise<ModerationData> {
   const [recipeCommentResult, communityCommentResult] = await Promise.all([
     getRecipeCommentsForModeration(limit),
     getCommunityCommentsForModeration(limit),

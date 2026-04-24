@@ -77,6 +77,7 @@ export function RecipeManagementPanel({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [dialogError, setDialogError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
 
   const displayed = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -89,6 +90,9 @@ export function RecipeManagementPanel({
       : recipes;
     return sortRecipes(filtered, sort);
   }, [recipes, search, sort]);
+
+  const totalPages = Math.ceil(displayed.length / 10);
+  const pageRecipes = displayed.slice(page * 10, (page + 1) * 10);
 
   const withTimeout = <T,>(promise: PromiseLike<T>, ms: number): Promise<T> =>
     Promise.race([
@@ -178,7 +182,7 @@ export function RecipeManagementPanel({
             {(['newest', 'oldest', 'most-views'] as const).map((key, i) => (
               <button
                 key={key}
-                onClick={() => setSort(key)}
+                onClick={() => { setSort(key); setPage(0); }}
                 className={`flex-1 py-1.5 text-xs font-medium transition-colors sm:flex-none sm:px-3 ${i > 0 ? 'border-l border-input' : ''} ${sort === key ? 'bg-foreground text-background' : 'bg-background text-muted-foreground hover:text-foreground'}`}
               >
                 {key === 'newest' ? 'Newest' : key === 'oldest' ? 'Oldest' : 'Most Views'}
@@ -198,7 +202,7 @@ export function RecipeManagementPanel({
             <Input
               placeholder="Search by title or category…"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(0); }}
               className="sm:max-w-xs"
             />
             <span className="text-sm text-muted-foreground sm:ml-auto">
@@ -220,8 +224,8 @@ export function RecipeManagementPanel({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayed.length > 0 ? (
-                  displayed.map((recipe) => (
+                {pageRecipes.length > 0 ? (
+                  pageRecipes.map((recipe) => (
                     <TableRow key={recipe.id} className={recipe.isHidden ? 'opacity-50' : ''}>
                       <TableCell className="font-medium max-w-[140px] truncate">
                         {recipe.title}
@@ -307,6 +311,32 @@ export function RecipeManagementPanel({
               </TableBody>
             </Table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-2 text-sm">
+              <span className="text-muted-foreground">
+                Page {page + 1} of {totalPages}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                >
+                  Prev
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page === totalPages - 1}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

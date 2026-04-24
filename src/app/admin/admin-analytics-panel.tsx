@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -69,13 +70,18 @@ const recipeBreakdownConfig = {
 } satisfies ChartConfig;
 
 function truncateTitle(title: string) {
-  return title.length > 26 ? `${title.slice(0, 26)}...` : title;
+  const englishPart = title.includes('(') ? title.split('(')[0].trim() : title;
+  return englishPart.length > 26 ? `${englishPart.slice(0, 26)}...` : englishPart;
 }
+
+const PAGE_SIZE = 10;
 
 export function AdminAnalyticsPanel({
   engagementTrend,
   topRecipes,
 }: AdminAnalyticsPanelProps) {
+  const [page, setPage] = useState(0);
+
   const hasTrendData = engagementTrend.some(
     (point) =>
       point.likes > 0 ||
@@ -84,9 +90,12 @@ export function AdminAnalyticsPanel({
   );
   const hasTopRecipes = topRecipes.length > 0;
 
+  const totalPages = Math.ceil(topRecipes.length / PAGE_SIZE);
+  const pageRecipes = topRecipes.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
   return (
     <div className="grid gap-4 sm:gap-6">
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <div className="overflow-hidden">
           {hasTrendData ? (
             <ChartContainer
@@ -187,45 +196,70 @@ export function AdminAnalyticsPanel({
         </div>
       </div>
 
-      <ScrollArea className="w-full whitespace-nowrap rounded-none border-2 border-foreground bg-paper paper-shadow">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Recipe</TableHead>
-              <TableHead>Likes</TableHead>
-              <TableHead>Favorites</TableHead>
-              <TableHead>Comments</TableHead>
-              <TableHead>Total</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {hasTopRecipes ? (
-              topRecipes.map((recipe) => (
-                <TableRow key={recipe.id}>
-                  <TableCell className="font-medium">
-                    <Link
-                      href={`/recipes/${recipe.id}`}
-                      className="underline-offset-4 hover:underline"
-                  >
-                      {recipe.title}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{recipe.likes}</TableCell>
-                  <TableCell>{recipe.favorites}</TableCell>
-                  <TableCell>{recipe.comments}</TableCell>
-                  <TableCell>{recipe.total}</TableCell>
-                </TableRow>
-              ))
-            ) : (
+      <div className="border-2 border-foreground bg-paper paper-shadow">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-muted-foreground">
-                  No recipe engagement has been recorded yet.
-                </TableCell>
+                <TableHead>Recipe</TableHead>
+                <TableHead>Likes</TableHead>
+                <TableHead>Favorites</TableHead>
+                <TableHead>Comments</TableHead>
+                <TableHead>Views</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </ScrollArea>
+            </TableHeader>
+            <TableBody>
+              {hasTopRecipes ? (
+                pageRecipes.map((recipe) => (
+                  <TableRow key={recipe.id}>
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/recipes/${recipe.slug}`}
+                        className="underline-offset-4 hover:underline"
+                      >
+                        {recipe.title}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{recipe.likes}</TableCell>
+                    <TableCell>{recipe.favorites}</TableCell>
+                    <TableCell>{recipe.comments}</TableCell>
+                    <TableCell>{recipe.views}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-muted-foreground">
+                    No recipes found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-t-2 border-foreground px-4 py-2 text-sm">
+            <span className="text-muted-foreground">
+              Page {page + 1} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="px-3 py-1 border border-foreground disabled:opacity-40 hover:bg-foreground hover:text-background transition-colors"
+              >
+                Prev
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page === totalPages - 1}
+                className="px-3 py-1 border border-foreground disabled:opacity-40 hover:bg-foreground hover:text-background transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
