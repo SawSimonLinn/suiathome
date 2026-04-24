@@ -42,7 +42,7 @@ export default async function RecipeDetailPage({
   
   const [authContext, relatedRecipes, relatedPosts] = await Promise.all([
     getAuthContext(),
-    getRelatedPublicRecipes(recipe, 3),
+    getRelatedPublicRecipes(recipe, 5),
     getPublicCommunityPostsByRecipeId(recipe.id, 4),
   ]);
 

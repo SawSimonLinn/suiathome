@@ -20,7 +20,7 @@ export function RecipesCarousel({ recipes }: RecipesCarouselProps) {
       <Carousel opts={{ align: 'start', loop: true }}>
         <CarouselContent>
           {recipes.map((recipe) => (
-            <CarouselItem key={recipe.id} className="basis-1/2 md:basis-1/2 lg:basis-1/3">
+            <CarouselItem key={recipe.id} className="basis-full md:basis-1/2 lg:basis-1/3">
               <RecipeImageCard recipe={recipe} />
             </CarouselItem>
           ))}

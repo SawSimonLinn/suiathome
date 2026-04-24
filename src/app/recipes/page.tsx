@@ -1,14 +1,5 @@
-import { RecipeCard } from "@/components/recipe-card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { getPublicRecipesData } from "@/lib/supabase/public-recipes";
+import { RecipesClient } from "./RecipesClient";
 
 export default async function RecipesPage() {
   const { recipes, categories } = await getPublicRecipesData();
@@ -24,39 +15,7 @@ export default async function RecipesPage() {
         </p>
       </header>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-8">
-        <div className="relative flex-grow">
-          <Input placeholder="Search recipes..." className="pl-3" />
-        </div>
-        <div className="flex gap-3">
-            <Select>
-              <SelectTrigger className="flex-1 sm:w-[160px] md:w-[180px] sm:flex-none">
-                <SelectValue placeholder="🏷️ All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button className="shrink-0">🔍 Search</Button>
-        </div>
-      </div>
-
-      <div className="mx-auto grid w-full max-w-[78rem] grid-cols-[repeat(auto-fit,minmax(min(100%,17rem),18rem))] justify-center gap-6 md:gap-8">
-        {recipes.length > 0 ? (
-          recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))
-        ) : (
-          <div className="col-span-full border-2 border-foreground bg-paper p-8 text-center text-muted-foreground paper-shadow">
-            No recipes are published yet.
-          </div>
-        )}
-      </div>
+      <RecipesClient recipes={recipes} categories={categories} />
     </div>
   );
 }
