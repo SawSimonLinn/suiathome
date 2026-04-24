@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import nodemailer from 'nodemailer';
 
+function escapeHtml(str: string) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function sendAdminNotification({
   foodName,
   country,
@@ -30,22 +39,22 @@ async function sendAdminNotification({
     port: smtpPort,
     secure: smtpPort === 465,
     auth: { user: smtpUser, pass: smtpPass },
-    tls: { rejectUnauthorized: false },
   });
 
-  const photoLine = photoUrl
-    ? `<p><strong>Photo:</strong> <a href="${photoUrl}">${photoUrl}</a></p>`
+  const safePhotoUrl = photoUrl ? escapeHtml(photoUrl) : null;
+  const photoLine = safePhotoUrl
+    ? `<p><strong>Photo:</strong> <a href="${safePhotoUrl}">${safePhotoUrl}</a></p>`
     : '';
 
   await transporter.sendMail({
     from: `"Sui at Home" <${fromEmail}>`,
     to: adminEmail,
-    subject: `New Food Request: ${foodName}`,
+    subject: `New Food Request: ${escapeHtml(foodName)}`,
     html: `
       <h2>New food request from a user</h2>
-      <p><strong>Food:</strong> ${foodName}</p>
-      <p><strong>Country:</strong> ${country}</p>
-      <p><strong>From:</strong> ${userEmail}</p>
+      <p><strong>Food:</strong> ${escapeHtml(foodName)}</p>
+      <p><strong>Country:</strong> ${escapeHtml(country)}</p>
+      <p><strong>From:</strong> ${escapeHtml(userEmail)}</p>
       ${photoLine}
     `,
   });
