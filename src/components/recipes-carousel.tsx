@@ -28,10 +28,6 @@ export function RecipesCarousel({ recipes }: RecipesCarouselProps) {
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
-      <p className="md:hidden text-center text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1" aria-hidden="true">
-        <span>swipe for more</span>
-        <span>→</span>
-      </p>
     </div>
   );
 }
