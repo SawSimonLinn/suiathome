@@ -162,6 +162,24 @@ export function CommentModerationPanel({
                 <div className="flex justify-end gap-1 sm:gap-2">
                   <Button
                     type="button"
+                    variant="secondary"
+                    size="sm"
+                    asChild
+                  >
+                    <a
+                      href={
+                        kind === 'recipe'
+                          ? `/recipes/${comment.parentSlug ?? comment.parentId}`
+                          : `/community/${comment.parentId}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View Post
+                    </a>
+                  </Button>
+                  <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     disabled={

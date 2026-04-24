@@ -68,6 +68,7 @@ export type ModerationComment = {
   userName: string;
   parentId: string;
   parentLabel: string;
+  parentSlug?: string;
   isHidden: boolean;
 };
 
@@ -118,6 +119,7 @@ type NamedProfile = {
 type ParentRecipe = {
   id: string;
   title: string;
+  slug: string;
 };
 
 type ParentPost = {
@@ -600,21 +602,24 @@ async function getProfilesByIds(userIds: string[]) {
 
 async function getRecipeTitles(recipeIds: string[]) {
   if (recipeIds.length === 0) {
-    return new Map<string, string>();
+    return new Map<string, { title: string; slug: string }>();
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('recipes')
-    .select('id, title')
+    .select('id, title, slug')
     .in('id', recipeIds);
 
   if (error) {
-    return new Map<string, string>();
+    return new Map<string, { title: string; slug: string }>();
   }
 
   return new Map(
-    ((data as ParentRecipe[]) ?? []).map((recipe) => [recipe.id, recipe.title])
+    ((data as ParentRecipe[]) ?? []).map((recipe) => [
+      recipe.id,
+      { title: recipe.title, slug: recipe.slug },
+    ])
   );
 }
 
@@ -732,16 +737,20 @@ export async function getCommentModerationData(limit = 20): Promise<ModerationDa
   ]);
 
   return {
-    recipeComments: recipeCommentResult.comments.map((comment) => ({
-      id: comment.id,
-      body: comment.body,
-      createdAt: comment.created_at,
-      userId: comment.user_id,
-      userName: profileNames.get(comment.user_id) || 'Unknown user',
-      parentId: comment.recipe_id,
-      parentLabel: recipeTitles.get(comment.recipe_id) || 'Unknown recipe',
-      isHidden: Boolean(comment.is_hidden),
-    })),
+    recipeComments: recipeCommentResult.comments.map((comment) => {
+      const recipe = recipeTitles.get(comment.recipe_id);
+      return {
+        id: comment.id,
+        body: comment.body,
+        createdAt: comment.created_at,
+        userId: comment.user_id,
+        userName: profileNames.get(comment.user_id) || 'Unknown user',
+        parentId: comment.recipe_id,
+        parentLabel: recipe?.title || 'Unknown recipe',
+        parentSlug: recipe?.slug,
+        isHidden: Boolean(comment.is_hidden),
+      };
+    }),
     communityComments: communityCommentResult.comments.map((comment) => ({
       id: comment.id,
       body: comment.body,
