@@ -33,6 +33,11 @@ const adminLinks = [
     label: 'Categories',
     isActive: (pathname: string) => pathname.startsWith('/admin/categories'),
   },
+  {
+    href: '/admin/food-requests',
+    label: 'Food Requests',
+    isActive: (pathname: string) => pathname.startsWith('/admin/food-requests'),
+  },
 ];
 
 export function AdminNav() {

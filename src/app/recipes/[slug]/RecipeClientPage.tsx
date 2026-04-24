@@ -420,6 +420,39 @@ export default function RecipeClientPage({
                   <p className="italic leading-relaxed text-sm text-foreground/90">
                     {recipe.story}
                   </p>
+                  {/* Like / Favorite / Share */}
+                  <div className="flex items-center gap-4 mt-4 pt-3 border-t border-foreground/15">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void toggleLike()}
+                      disabled={pendingAction === "like"}
+                      className={`flex items-center gap-1.5 font-semibold ${isLiked ? "text-rose-600" : ""}`}
+                    >
+                      <Heart className={`h-4 w-4 ${isLiked ? "fill-rose-600" : ""}`} />
+                      <span className="text-sm">{likeCount}</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void toggleFavorite()}
+                      disabled={pendingAction === "favorite"}
+                      className={`flex items-center gap-1.5 font-semibold ${isFavorited ? "text-amber-600" : ""}`}
+                    >
+                      <Bookmark className={`h-4 w-4 ${isFavorited ? "fill-amber-600" : ""}`} />
+                      <span className="text-sm">{favoriteCount}</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void shareRecipe()}
+                      disabled={isSharing}
+                      className="flex items-center gap-1.5 font-semibold"
+                    >
+                      <Share2 className="h-4 w-4" />
+                      <span className="text-sm">{isSharing ? "Sharing…" : "Share"}</span>
+                    </Button>
+                  </div>
                 </div>
               )}
 
@@ -456,45 +489,6 @@ export default function RecipeClientPage({
               )}
             </div>
 
-            {/* Action bar — outside space-y-8 to control its own spacing */}
-            <div className="flex items-center gap-6 px-5 md:px-7 py-3 border-t border-foreground/15">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => void toggleLike()}
-                disabled={pendingAction === "like"}
-                className={`flex items-center gap-1.5 font-semibold ${isLiked ? "text-rose-600" : ""}`}
-              >
-                <Heart
-                  className={`h-4 w-4 ${isLiked ? "fill-rose-600" : ""}`}
-                />
-                <span className="text-sm">{likeCount}</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => void toggleFavorite()}
-                disabled={pendingAction === "favorite"}
-                className={`flex items-center gap-1.5 font-semibold ${isFavorited ? "text-amber-600" : ""}`}
-              >
-                <Bookmark
-                  className={`h-4 w-4 ${isFavorited ? "fill-amber-600" : ""}`}
-                />
-                <span className="text-sm">{favoriteCount}</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => void shareRecipe()}
-                disabled={isSharing}
-                className="flex items-center gap-1.5 font-semibold"
-              >
-                <Share2 className="h-4 w-4" />
-                <span className="text-sm">
-                  {isSharing ? "Sharing…" : "Share"}
-                </span>
-              </Button>
-            </div>
           </main>
 
           {/* ══ RIGHT: Ingredients + Tips ══ */}

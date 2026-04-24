@@ -436,16 +436,16 @@ export function CommunityPageClient({
         </Card>
       )}
 
-      <div className="mx-auto mb-6 grid max-w-4xl gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_220px_220px]">
+      <div className="mx-auto mb-6 max-w-4xl flex flex-col sm:flex-row gap-3">
         <Input
           placeholder="Search posts..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full"
+          className="flex-1 min-w-0"
         />
         <Select value={filterRecipeId} onValueChange={setFilterRecipeId}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Filter by recipe" />
+          <SelectTrigger className="sm:w-[200px] shrink-0">
+            <SelectValue placeholder="All recipes" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All recipes</SelectItem>
@@ -458,12 +458,10 @@ export function CommunityPageClient({
         </Select>
         <Select
           value={sortOption}
-          onValueChange={(value) =>
-            setSortOption(value as CommunitySortOption)
-          }
+          onValueChange={(value) => setSortOption(value as CommunitySortOption)}
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Sort posts" />
+          <SelectTrigger className="sm:w-[140px] shrink-0">
+            <SelectValue placeholder="Sort" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="newest">Newest</SelectItem>

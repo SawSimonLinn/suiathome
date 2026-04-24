@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Eye,
   Heart,
+  UtensilsCrossed,
 } from 'lucide-react';
 
 import { AdminNav } from '@/components/layout/admin-nav';
@@ -149,6 +150,23 @@ export default async function AdminPage() {
               <CardFooter className="mt-auto">
                 <Button asChild size="sm" variant="outline">
                   <Link href="/admin/categories">Manage Categories</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="flex flex-col">
+              <CardHeader>
+                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-paper paper-shadow-sm">
+                  <UtensilsCrossed className="h-4 w-4" />
+                </div>
+                <CardTitle className="text-base">Food Requests</CardTitle>
+                <CardDescription>
+                  See what foods users are asking for, who's requesting them, and track status.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="mt-auto">
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/admin/food-requests">View Requests</Link>
                 </Button>
               </CardFooter>
             </Card>
