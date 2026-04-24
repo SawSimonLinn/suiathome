@@ -6,10 +6,12 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { NavigationFeedbackProvider } from '@/components/layout/navigation-feedback-provider';
 import { hasSupabaseEnv } from '@/lib/supabase/config';
+import { SITE_URL } from '@/lib/site';
 import { getAuthContext } from '@/lib/supabase/auth';
 import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'Sui at home',
   description: 'Delicious recipes for the home cook.',
 };

@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Linkedin,
+  Menu,
+  Music2,
+  type LucideIcon,
+} from "lucide-react";
 import { useState } from "react";
 
 import { AccountMenu } from "@/components/layout/account-menu";
@@ -15,6 +22,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { SITE_SOCIAL_LINKS, type SiteSocialPlatform } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -22,6 +30,15 @@ const navLinks = [
   { href: "/community", label: "Community", emoji: "💬" },
   { href: "/about", label: "About", emoji: "🌸" },
 ];
+
+const drawerUtilityLinks = [{ href: "/contact", label: "Contact", emoji: "✉️" }];
+
+const SOCIAL_ICONS: Record<SiteSocialPlatform, LucideIcon> = {
+  instagram: Instagram,
+  tiktok: Music2,
+  facebook: Facebook,
+  linkedin: Linkedin,
+};
 
 type HeaderProps = {
   userEmail: string | null;
@@ -109,7 +126,7 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-[min(88vw,24rem)] border-l-2 border-foreground px-5 pt-4"
+              className="w-[min(88vw,24rem)] overflow-y-auto border-l-2 border-foreground px-5 pt-4"
             >
               <SheetHeader className="pr-14 text-left">
                 <SheetTitle className="font-headline text-2xl leading-none">
@@ -119,6 +136,19 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
               <div className="mt-8 flex flex-col gap-6">
                 <nav className="flex flex-col gap-3">
                   {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={mobileLinkClassName(link.href)}
+                    >
+                      <span>{link.emoji} {link.label}</span>
+                    </Link>
+                  ))}
+                </nav>
+
+                <nav className="flex flex-col gap-3">
+                  {drawerUtilityLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
@@ -178,6 +208,27 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
                     </div>
                   )}
                 </div>
+
+                <nav className="mt-2 flex items-center justify-center gap-2 border-t-2 border-foreground pt-4" aria-label="Social links">
+                  {SITE_SOCIAL_LINKS.map((socialLink) => {
+                    const Icon = SOCIAL_ICONS[socialLink.platform];
+
+                    return (
+                      <a
+                        key={socialLink.href}
+                        href={socialLink.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="inline-flex h-10 w-10 items-center justify-center border-2 border-foreground bg-background transition-colors hover:bg-secondary"
+                        aria-label={`${socialLink.label} (opens in a new tab)`}
+                        title={socialLink.label}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </a>
+                    );
+                  })}
+                </nav>
               </div>
             </SheetContent>
           </Sheet>
