@@ -9,6 +9,7 @@ import { hasSupabaseEnv } from '@/lib/supabase/config';
 import { SITE_URL } from '@/lib/site';
 import { getAuthContext } from '@/lib/supabase/auth';
 import { Analytics } from "@vercel/analytics/next"
+import { FoodRequestButton } from '@/components/food-request-button';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -23,12 +24,14 @@ export default async function RootLayout({
 }>) {
   let userEmail: string | null = null;
   let isAdmin = false;
+  let isLoggedIn = false;
   const supabaseReady = hasSupabaseEnv();
 
   if (supabaseReady) {
     const authContext = await getAuthContext();
     userEmail = authContext.userEmail;
     isAdmin = authContext.isAdmin;
+    isLoggedIn = authContext.isLoggedIn;
   }
 
   return (
@@ -125,6 +128,7 @@ export default async function RootLayout({
             <Footer />
           </div>
           <Toaster />
+          {isLoggedIn && <FoodRequestButton />}
         </NavigationFeedbackProvider>
         <Analytics />
       </body>
