@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/password-input';
+import { AdSlot } from '@/components/ad-slot';
 import { createClient } from '@/lib/supabase/client';
 import { useNavigationFeedback } from '@/components/layout/navigation-feedback-provider';
 import {
@@ -101,7 +102,19 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
   const isBusy = isSigningIn || isStartingGoogle;
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
+    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
+      {/* Top ad — leaderboard desktop, banner mobile */}
+      <div className="w-full flex justify-center py-2 px-4">
+        <AdSlot variant="leaderboard" />
+      </div>
+
+      <div className="flex flex-1 items-center justify-center">
+        {/* Left skyscraper — xl+ only */}
+        <aside className="hidden xl:flex shrink-0 w-[160px] items-center justify-center px-2" aria-hidden="true">
+          <AdSlot variant="skyscraper" />
+        </aside>
+
+        <div className="flex flex-1 items-center justify-center p-4">
       <div className="w-full max-w-md border-2 border-foreground bg-paper paper-shadow relative overflow-hidden">
 
         {/* Sage green top ribbon */}
@@ -219,6 +232,18 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
         <div className="w-full border-t-2 border-foreground py-2 flex justify-center gap-3 text-lg" style={{ backgroundColor: 'var(--blush-light)' }} aria-hidden="true">
           <span>🌷</span><span>🌿</span><span>🫶</span><span>🌿</span><span>🌷</span>
         </div>
+      </div>
+        </div>
+
+        {/* Right skyscraper — xl+ only */}
+        <aside className="hidden xl:flex shrink-0 w-[160px] items-center justify-center px-2" aria-hidden="true">
+          <AdSlot variant="skyscraper" />
+        </aside>
+      </div>
+
+      {/* Bottom ad */}
+      <div className="w-full flex justify-center py-2 px-4">
+        <AdSlot variant="leaderboard" />
       </div>
     </div>
   );

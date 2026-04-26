@@ -15,6 +15,7 @@ import { CreateCommunityPostCard } from "@/components/create-community-post-card
 import { RecipeCoverCarousel } from "@/components/recipe-cover-carousel";
 import { RecipeTipsPanel } from "@/components/recipe-tips-panel";
 import { RecipeQaSection } from "./RecipeQaSection";
+import { AdSlot } from "@/components/ad-slot";
 import type { Recipe, CommunityPost, User } from "@/lib/types";
 
 interface RecipeClientPageProps {
@@ -379,6 +380,11 @@ export default function RecipeClientPage({
                   </div>
                 </div>
               )}
+
+              {/* Sidebar square ad */}
+              <div className="pt-5 border-t border-foreground/15 mt-5">
+                <AdSlot variant="square" />
+              </div>
             </div>
           </aside>
 
@@ -455,6 +461,9 @@ export default function RecipeClientPage({
                   </div>
                 </div>
               )}
+
+              {/* Inline ad — between story and instructions */}
+              <AdSlot variant="inline" />
 
               {/* Instructions */}
               <div>
@@ -542,6 +551,11 @@ export default function RecipeClientPage({
                   <RecipeTipsPanel tips={recipe.tips} />
                 </div>
               )}
+
+              {/* Right sidebar square ad */}
+              <div className="pt-5 border-t border-foreground/15">
+                <AdSlot variant="square" />
+              </div>
             </div>
           </aside>
         </div>
@@ -567,6 +581,11 @@ export default function RecipeClientPage({
           initialComments={recipe.comments}
           currentUser={currentUser}
         />
+      </div>
+
+      {/* Ad — between Q&A and Community Creations */}
+      <div className="max-w-7xl mx-auto mt-10 px-4">
+        <AdSlot variant="leaderboard" />
       </div>
 
       {/* Community Creations */}

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { RecipeCard } from '@/components/recipe-card';
+import { AdSlot } from '@/components/ad-slot';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -58,9 +59,32 @@ export function RecipesClient({ recipes, categories }: RecipesClientProps) {
 
       <div className="mx-auto grid w-full max-w-[78rem] grid-cols-[repeat(auto-fit,minmax(min(100%,17rem),18rem))] justify-center gap-6 md:gap-8">
         {filtered.length > 0 ? (
-          filtered.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))
+          filtered.map((recipe, index) => {
+            const pos = index + 1;
+            // Desktop: ad every 6 items (≈ every 2 rows at 3–4 cols)
+            const showDesktopAd = pos % 6 === 0;
+            // Mobile: ad every 3 items, but skip positions already covered by desktop ad
+            const showMobileAd = pos % 3 === 0 && !showDesktopAd;
+            return (
+              <div key={recipe.id} className="contents">
+                <RecipeCard recipe={recipe} />
+
+                {/* Mobile-only ad: every 3 recipes (not at desktop ad positions) */}
+                {showMobileAd && (
+                  <div className="col-span-full md:hidden">
+                    <AdSlot variant="inline" />
+                  </div>
+                )}
+
+                {/* Desktop ad: every 6 recipes (every ~2 rows), visible on all sizes */}
+                {showDesktopAd && (
+                  <div className="col-span-full">
+                    <AdSlot variant="leaderboard" />
+                  </div>
+                )}
+              </div>
+            );
+          })
         ) : (
           <div className="col-span-full border-2 border-foreground bg-paper p-8 text-center text-muted-foreground paper-shadow">
             {recipes.length === 0 ? 'No recipes are published yet.' : 'No recipes match your search.'}

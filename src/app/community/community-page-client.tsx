@@ -1,9 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CommunityPostCard } from '@/components/community-post-card';
+import { AdSlot } from '@/components/ad-slot';
 import { convertHeicToJpeg } from '@/lib/convert-heic';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,44 @@ export function CommunityPageClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRecipeId, setFilterRecipeId] = useState('all');
   const [sortOption, setSortOption] = useState<CommunitySortOption>('newest');
+
+  // Infinite scroll
+  const [nextPage, setNextPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    try {
+      const res = await fetch(`/api/community/posts?page=${nextPage}`);
+      if (!res.ok) throw new Error('fetch failed');
+      const data = (await res.json()) as { posts: CommunityPost[]; hasMore: boolean };
+      setPosts((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const fresh = data.posts.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...fresh];
+      });
+      setNextPage((p) => p + 1);
+      setHasMore(data.hasMore);
+    } catch {
+      // silently ignore load failures — user can scroll again
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, hasMore, nextPage]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) void loadMore(); },
+      { rootMargin: '300px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   const filteredPosts = posts.filter((post) => {
     const matchesSearch =
@@ -312,12 +351,17 @@ export function CommunityPageClient({
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 md:py-12">
-      <header className="text-center mb-8 md:mb-12">
+      <header className="text-center mb-6 md:mb-8">
         <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl">Community Feed</h1>
         <p className="text-muted-foreground mt-2 max-w-2xl mx-auto text-lg">
           See what fellow home cooks are creating and sharing.
         </p>
       </header>
+
+      {/* Top banner ad */}
+      <div className="mx-auto max-w-3xl mb-8">
+        <AdSlot variant="leaderboard" />
+      </div>
 
       {isLoggedIn && currentUser ? (
         <Card className="mb-8 mx-auto max-w-2xl">
@@ -472,17 +516,37 @@ export function CommunityPageClient({
 
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         {sortedPosts.length > 0 ? (
-          sortedPosts.map((post) => (
-            <CommunityPostCard
-              key={post.id}
-              post={post}
-              currentUser={currentUser}
-              canEdit={currentUser?.id === post.user.id}
-              onEdit={startEditingPost}
-              onDelete={handleDeletePost}
-              onToggleHide={handleToggleHide}
-            />
-          ))
+          <>
+            {sortedPosts.map((post, index) => (
+              <div key={post.id} className="contents">
+                <CommunityPostCard
+                  post={post}
+                  currentUser={currentUser}
+                  canEdit={currentUser?.id === post.user.id}
+                  onEdit={startEditingPost}
+                  onDelete={handleDeletePost}
+                  onToggleHide={handleToggleHide}
+                />
+                {/* Ad every 3 posts */}
+                {(index + 1) % 3 === 0 && <AdSlot variant="inline" />}
+              </div>
+            ))}
+
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} className="h-4" aria-hidden="true" />
+
+            {isLoadingMore && (
+              <p className="text-center text-sm text-muted-foreground py-4">
+                Loading more posts…
+              </p>
+            )}
+
+            {!hasMore && sortedPosts.length > 0 && (
+              <p className="text-center text-xs text-muted-foreground/50 py-4">
+                You&apos;ve reached the end ✨
+              </p>
+            )}
+          </>
         ) : (
           <div>
             <Card>
