@@ -177,6 +177,108 @@ export async function getPublicCommunityPosts() {
   return getCommunityPostsFromSupabase({});
 }
 
+const PAGE_SIZE = 10;
+
+export async function getPublicCommunityPostsPage(page: number) {
+  if (!hasSupabaseEnv()) {
+    const from = page * PAGE_SIZE;
+    return {
+      posts: mockCommunityPosts.slice(from, from + PAGE_SIZE),
+      hasMore: from + PAGE_SIZE < mockCommunityPosts.length,
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const viewerId = user?.id ?? null;
+
+  const from = page * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
+  const { data: postsData, error } = await supabase
+    .from('community_posts')
+    .select('id, user_id, linked_recipe_id, caption, image_path, image_hint, is_hidden, created_at')
+    .eq('is_hidden', false)
+    .order('created_at', { ascending: false })
+    .range(from, to + 1); // fetch one extra to know if there's a next page
+
+  if (error || !postsData) return { posts: [] as CommunityPost[], hasMore: false };
+
+  const hasMore = postsData.length > PAGE_SIZE;
+  const posts = (hasMore ? postsData.slice(0, PAGE_SIZE) : postsData) as CommunityPostRow[];
+  const postIds = posts.map((p) => p.id);
+
+  if (postIds.length === 0) return { posts: [] as CommunityPost[], hasMore: false };
+
+  const [profilesResult, likesResult, viewerLikesResult, commentsResult] = await Promise.all([
+    supabase.from('profiles').select('id, name, avatar_url, role'),
+    supabase.from('community_post_likes').select('post_id').in('post_id', postIds),
+    viewerId
+      ? supabase
+          .from('community_post_likes')
+          .select('post_id')
+          .eq('user_id', viewerId)
+          .in('post_id', postIds)
+      : Promise.resolve({ data: [], error: null }),
+    supabase
+      .from('community_post_comments')
+      .select('id, post_id, user_id, body, created_at')
+      .in('post_id', postIds)
+      .order('created_at', { ascending: true }),
+  ]);
+
+  const profiles = (profilesResult.data as CommunityProfileRow[]) ?? [];
+  const likes = (likesResult.data as CommunityLikeRow[]) ?? [];
+  const viewerLikeRows = (viewerLikesResult.data as CommunityLikeRow[]) ?? [];
+  const comments = (commentsResult.data as CommunityCommentRow[]) ?? [];
+
+  const profilesById = new Map(profiles.map((p) => [p.id, p]));
+  const visiblePostIds = new Set(postIds);
+
+  const likeCounts = new Map<string, number>();
+  likes.forEach((like) => {
+    if (!visiblePostIds.has(like.post_id)) return;
+    likeCounts.set(like.post_id, (likeCounts.get(like.post_id) || 0) + 1);
+  });
+
+  const viewerLikedPostIds = new Set(
+    viewerLikeRows.filter((l) => visiblePostIds.has(l.post_id)).map((l) => l.post_id)
+  );
+
+  const commentsByPostId = new Map<string, CommunityComment[]>();
+  comments.forEach((comment) => {
+    if (!visiblePostIds.has(comment.post_id)) return;
+    const bucket = commentsByPostId.get(comment.post_id) || [];
+    bucket.push({
+      id: comment.id,
+      text: comment.body,
+      user: buildUser(comment.user_id, profilesById.get(comment.user_id)),
+      createdAt: comment.created_at,
+    });
+    commentsByPostId.set(comment.post_id, bucket);
+  });
+
+  const resolved = await Promise.all(
+    posts.map(async (post) => ({
+      id: post.id,
+      user: buildUser(post.user_id, profilesById.get(post.user_id)),
+      caption: post.caption,
+      imageUrl: await resolveCommunityImageUrl(supabase, post.image_path),
+      imageHint: post.image_hint || 'community food post',
+      likes: likeCounts.get(post.id) || 0,
+      isLiked: viewerLikedPostIds.has(post.id),
+      isHidden: post.is_hidden ?? false,
+      comments: commentsByPostId.get(post.id) || [],
+      createdAt: post.created_at,
+      linkedRecipeId: post.linked_recipe_id,
+    }))
+  );
+
+  return { posts: resolved, hasMore };
+}
+
 export async function getTopTriedItPosts(limit = 10) {
   if (!hasSupabaseEnv()) {
     return mockCommunityPosts
