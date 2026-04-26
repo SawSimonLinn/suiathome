@@ -105,13 +105,13 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       {/* Top ad — leaderboard desktop, banner mobile */}
       <div className="w-full flex justify-center py-2 px-4">
-        <AdSlot variant="leaderboard" />
+        <AdSlot variant="leaderboard" adSlot="4817982526" />
       </div>
 
       <div className="flex flex-1 items-center justify-center">
         {/* Left skyscraper — xl+ only */}
         <aside className="hidden xl:flex shrink-0 w-[160px] items-center justify-center px-2" aria-hidden="true">
-          <AdSlot variant="skyscraper" />
+          <AdSlot variant="skyscraper" adSlot="4195165992" />
         </aside>
 
         <div className="flex flex-1 items-center justify-center p-4">
@@ -237,13 +237,13 @@ export function LoginForm({ supabaseReady }: LoginFormProps) {
 
         {/* Right skyscraper — xl+ only */}
         <aside className="hidden xl:flex shrink-0 w-[160px] items-center justify-center px-2" aria-hidden="true">
-          <AdSlot variant="skyscraper" />
+          <AdSlot variant="skyscraper" adSlot="4195165992" />
         </aside>
       </div>
 
       {/* Bottom ad */}
       <div className="w-full flex justify-center py-2 px-4">
-        <AdSlot variant="leaderboard" />
+        <AdSlot variant="leaderboard" adSlot="4817982526" />
       </div>
     </div>
   );

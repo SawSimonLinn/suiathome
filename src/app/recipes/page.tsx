@@ -18,14 +18,14 @@ export default async function RecipesPage() {
 
       {/* Top banner ad — below header */}
       <div className="mb-8">
-        <AdSlot variant="leaderboard" />
+        <AdSlot variant="leaderboard" adSlot="4817982526" />
       </div>
 
       <RecipesClient recipes={recipes} categories={categories} />
 
       {/* Bottom banner ad */}
       <div className="mt-12">
-        <AdSlot variant="leaderboard" />
+        <AdSlot variant="leaderboard" adSlot="4817982526" />
       </div>
     </div>
   );

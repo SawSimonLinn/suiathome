@@ -72,14 +72,14 @@ export function RecipesClient({ recipes, categories }: RecipesClientProps) {
                 {/* Mobile-only ad: every 3 recipes (not at desktop ad positions) */}
                 {showMobileAd && (
                   <div className="col-span-full md:hidden">
-                    <AdSlot variant="inline" />
+                    <AdSlot variant="inline" adSlot="4817982526" />
                   </div>
                 )}
 
                 {/* Desktop ad: every 6 recipes (every ~2 rows), visible on all sizes */}
                 {showDesktopAd && (
                   <div className="col-span-full">
-                    <AdSlot variant="leaderboard" />
+                    <AdSlot variant="leaderboard" adSlot="4817982526" />
                   </div>
                 )}
               </div>

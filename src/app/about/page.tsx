@@ -196,7 +196,7 @@ export default function AboutPage() {
       </section>
 
       {/* Banner ad — below hero */}
-      <AdSlot variant="leaderboard" />
+      <AdSlot variant="leaderboard" adSlot="4817982526" />
 
       {/* ── Story cards ── */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
@@ -253,7 +253,7 @@ export default function AboutPage() {
       </section>
 
       {/* Inline ad — between story cards and "What Drives Her" */}
-      <AdSlot variant="inline" />
+      <AdSlot variant="inline" adSlot="4817982526" />
 
       {/* ── What she loves ── */}
       <section
@@ -317,7 +317,7 @@ export default function AboutPage() {
       </section>
 
       {/* Ad — between "What Drives Her" and Restaurant Dream */}
-      <AdSlot variant="inline" />
+      <AdSlot variant="inline" adSlot="4817982526" />
 
       {/* ── Restaurant Dream ── */}
       <section
@@ -418,7 +418,7 @@ export default function AboutPage() {
       </section>
 
       {/* Inline ad — before CTA */}
-      <AdSlot variant="leaderboard" />
+      <AdSlot variant="leaderboard" adSlot="4817982526" />
 
       {/* ── CTA ── */}
       <section className="text-center py-4 md:py-8">

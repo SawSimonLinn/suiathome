@@ -360,7 +360,7 @@ export function CommunityPageClient({
 
       {/* Top banner ad */}
       <div className="mx-auto max-w-3xl mb-8">
-        <AdSlot variant="leaderboard" />
+        <AdSlot variant="leaderboard" adSlot="4817982526" />
       </div>
 
       {isLoggedIn && currentUser ? (
@@ -528,7 +528,7 @@ export function CommunityPageClient({
                   onToggleHide={handleToggleHide}
                 />
                 {/* Ad every 3 posts */}
-                {(index + 1) % 3 === 0 && <AdSlot variant="inline" />}
+                {(index + 1) % 3 === 0 && <AdSlot variant="inline" adSlot="4817982526" />}
               </div>
             ))}
 

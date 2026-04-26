@@ -250,7 +250,7 @@ export default async function ProfilePage() {
 
       {/* Inline ad — between Favorites and Community Posts */}
       <div className="mb-10">
-        <AdSlot variant="leaderboard" />
+        <AdSlot variant="leaderboard" adSlot="4817982526" />
       </div>
 
       {/* Community Posts */}

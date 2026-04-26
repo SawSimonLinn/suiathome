@@ -383,7 +383,7 @@ export default function RecipeClientPage({
 
               {/* Sidebar square ad */}
               <div className="pt-5 border-t border-foreground/15 mt-5">
-                <AdSlot variant="square" />
+                <AdSlot variant="square" adSlot="4817982526" />
               </div>
             </div>
           </aside>
@@ -463,7 +463,7 @@ export default function RecipeClientPage({
               )}
 
               {/* Inline ad — between story and instructions */}
-              <AdSlot variant="inline" />
+              <AdSlot variant="inline" adSlot="4817982526" />
 
               {/* Instructions */}
               <div>
@@ -554,7 +554,7 @@ export default function RecipeClientPage({
 
               {/* Right sidebar square ad */}
               <div className="pt-5 border-t border-foreground/15">
-                <AdSlot variant="square" />
+                <AdSlot variant="square" adSlot="4817982526" />
               </div>
             </div>
           </aside>
@@ -585,7 +585,7 @@ export default function RecipeClientPage({
 
       {/* Ad — between Q&A and Community Creations */}
       <div className="max-w-7xl mx-auto mt-10 px-4">
-        <AdSlot variant="leaderboard" />
+        <AdSlot variant="leaderboard" adSlot="4817982526" />
       </div>
 
       {/* Community Creations */}

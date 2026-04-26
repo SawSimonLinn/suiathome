@@ -10,7 +10,7 @@ export function SideRailAdLayout({ children }: SideRailAdLayoutProps) {
       {/* Left skyscraper — laptop and up */}
       <aside className="hidden xl:block shrink-0 w-[140px]" aria-hidden="true">
         <div className="sticky top-6">
-          <AdSlot variant="skyscraper" />
+          <AdSlot variant="skyscraper" adSlot="4762142206" />
         </div>
       </aside>
 
@@ -22,7 +22,7 @@ export function SideRailAdLayout({ children }: SideRailAdLayoutProps) {
       {/* Right skyscraper — laptop and up */}
       <aside className="hidden xl:block shrink-0 w-[140px]" aria-hidden="true">
         <div className="sticky top-6">
-          <AdSlot variant="skyscraper" />
+          <AdSlot variant="skyscraper" adSlot="4762142206" />
         </div>
       </aside>
     </div>

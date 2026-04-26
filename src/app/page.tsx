@@ -99,7 +99,7 @@ export default async function Home() {
 
       {/* Top banner ad — below hero */}
       <div className="py-4">
-        <AdSlot variant="leaderboard" />
+        <AdSlot variant="leaderboard" adSlot="6075223871" />
       </div>
 
       <section className="py-12">
@@ -125,7 +125,7 @@ export default async function Home() {
       
       {/* Inline ad — between Most Loved and Tried It sections */}
       <div className="py-4">
-        <AdSlot variant="inline" />
+        <AdSlot variant="inline" adSlot="9447492675" />
       </div>
 
       <section className="py-12 mt-8">
@@ -204,7 +204,7 @@ export default async function Home() {
 
       {/* Bottom banner ad */}
       <div className="py-6">
-        <AdSlot variant="leaderboard" />
+        <AdSlot variant="leaderboard" adSlot="3397089646" />
       </div>
     </div>
   );
