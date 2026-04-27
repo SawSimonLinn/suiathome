@@ -90,6 +90,9 @@ export function ProgressiveImage({
         <Image
           {...props}
           src={props.src}
+          // Skip Next.js image proxy for Supabase URLs — browser fetches directly,
+          // so remotePatterns config and build-time env vars are irrelevant.
+          unoptimized={isSupabase}
           placeholder="blur"
           blurDataURL={WARM_BLUR_URL}
           className={cn(
