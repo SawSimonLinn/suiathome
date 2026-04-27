@@ -19,8 +19,8 @@ function isSupabaseStorageUrl(src: unknown): src is string {
   );
 }
 
-// Supabase transform API uses /render/image/ instead of /object/
-// https://supabase.com/docs/guides/storage/serving/image-transformations
+// Supabase image transform API: /render/image/ path + width/quality params
+// Drastically reduces egress vs serving full-size originals
 function toSupabaseRenderUrl(src: string, width: number, quality: number): string {
   const renderSrc = src.replace(
     "/storage/v1/object/public/",
@@ -42,60 +42,73 @@ export function ProgressiveImage({
   ...props
 }: ProgressiveImageProps) {
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [lqipError, setLqipError] = useState(false);
 
   const isSupabase = isSupabaseStorageUrl(props.src);
 
-  // LQIP: tiny 20px version of the real image — loads in <2KB even on 2G
+  // Serve resized image to avoid burning Supabase egress quota with full-size originals
+  const optimizedSrc = isSupabase
+    ? toSupabaseRenderUrl(props.src as string, 800, 80)
+    : props.src;
+
+  // LQIP: tiny 20px version — ~1-2KB, loads instantly even on slow connections
   const lqipUrl =
     isSupabase && !lqipError
       ? toSupabaseRenderUrl(props.src as string, 20, 10)
       : null;
 
+  const showShimmer = !loaded && (lqipError || !isSupabase || failed);
+  const showLqip = !loaded && !failed && lqipUrl;
+
   return (
     <div className="relative w-full h-full">
-      {!loaded && (
-        <>
-          {lqipUrl ? (
-            /* Blurred real-content preview — the actual photo, just tiny */
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={lqipUrl}
-              alt=""
-              aria-hidden="true"
-              loading={props.priority ? "eager" : "lazy"}
-              decoding="async"
-              fetchPriority={props.priority ? "high" : "low"}
-              onError={() => setLqipError(true)}
-              className="absolute inset-0 w-full h-full object-cover scale-110 blur-lg"
-            />
-          ) : (
-            /* Fallback shimmer for non-Supabase images or if LQIP fails */
-            <div
-              className={cn(
-                "absolute inset-0 overflow-hidden animate-pulse",
-                shimmerClassName ?? "bg-[var(--blush-light,#f5e6e8)]",
-              )}
-              aria-hidden="true"
-            >
-              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-            </div>
-          )}
-        </>
+      {/* Blurred real-content LQIP */}
+      {showLqip && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={lqipUrl!}
+          alt=""
+          aria-hidden="true"
+          loading={props.priority ? "eager" : "lazy"}
+          decoding="async"
+          fetchPriority={props.priority ? "high" : "low"}
+          onError={() => setLqipError(true)}
+          className="absolute inset-0 w-full h-full object-cover scale-110 blur-lg"
+        />
       )}
 
-      {/* src is unchanged — Next.js Image handles sizing via srcset/sizes */}
-      <Image
-        {...props}
-        placeholder="blur"
-        blurDataURL={WARM_BLUR_URL}
-        className={cn(
-          "transition-opacity duration-500",
-          loaded ? "opacity-100" : "opacity-0",
-          className,
-        )}
-        onLoad={() => setLoaded(true)}
-      />
+      {/* Shimmer fallback: non-Supabase images, LQIP failure, or main image error */}
+      {showShimmer && (
+        <div
+          className={cn(
+            "absolute inset-0 overflow-hidden animate-pulse",
+            shimmerClassName ?? "bg-[var(--blush-light,#f5e6e8)]",
+          )}
+          aria-hidden="true"
+        >
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        </div>
+      )}
+
+      {!failed && (
+        <Image
+          {...props}
+          src={optimizedSrc}
+          placeholder="blur"
+          blurDataURL={WARM_BLUR_URL}
+          className={cn(
+            "transition-opacity duration-500",
+            loaded ? "opacity-100" : "opacity-0",
+            className,
+          )}
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            setFailed(true);
+            setLoaded(false);
+          }}
+        />
+      )}
     </div>
   );
 }
