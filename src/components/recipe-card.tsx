@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import type { Recipe } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -8,6 +7,7 @@ import { useRecipeInteractions } from "@/hooks/use-recipe-interactions";
 import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Heart, Share2, Eye } from "lucide-react";
+import { ProgressiveImage } from "./progressive-image";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -80,7 +80,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
         {/* Image */}
         <div className="relative w-full aspect-[4/3] overflow-hidden">
           {coverImage ? (
-            <Image
+            <ProgressiveImage
               src={coverImage.imageUrl}
               alt={recipe.title}
               fill

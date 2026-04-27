@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-type AdSlotVariant = 'banner' | 'inline' | 'square' | 'leaderboard' | 'skyscraper';
+type AdSlotVariant = 'banner' | 'inline' | 'leaderboard' | 'skyscraper';
 
 interface AdSlotProps {
   variant?: AdSlotVariant;
@@ -20,20 +20,19 @@ interface AdSlotProps {
 const AD_CLIENT = 'ca-pub-9272137381598865';
 
 const variantStyle: Record<AdSlotVariant, React.CSSProperties> = {
-  banner:      { display: 'block', width: '728px', height: '90px' },
-  leaderboard: { display: 'block', width: '728px', height: '90px' },
-  inline:      { display: 'block' },
-  square:      { display: 'inline-block', width: '300px', height: '250px' },
-  skyscraper:  { display: 'block', width: '120px', height: '600px' },
+  banner:      { display: 'block', width: '100%' },
+  leaderboard: { display: 'block', width: '100%' },
+  inline:      { display: 'block', width: '100%' },
+  skyscraper:  { display: 'block', width: '100%' },
 };
 
 const variantFormat: Record<AdSlotVariant, string> = {
-  banner:      'horizontal',
-  leaderboard: 'horizontal',
+  banner:      'auto',
+  leaderboard: 'auto',
   inline:      'auto',
-  square:      'rectangle',
   skyscraper:  'vertical',
 };
+
 
 export function AdSlot({ variant = 'inline', adSlot, className }: AdSlotProps) {
   const insRef = useRef<HTMLModElement>(null);
@@ -41,17 +40,29 @@ export function AdSlot({ variant = 'inline', adSlot, className }: AdSlotProps) {
 
   useEffect(() => {
     if (!adSlot || pushed.current) return;
-    pushed.current = true;
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch {
-      // adsbygoogle not yet loaded
-    }
+
+    const el = insRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.width > 0 && !pushed.current) {
+          pushed.current = true;
+          observer.disconnect();
+          try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch {
+            // adsbygoogle not yet loaded
+          }
+        }
+      }
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [adSlot]);
 
   if (!adSlot) return null;
-
-  const isResponsive = variant === 'inline';
 
   return (
     <div className={cn('w-full flex justify-center', className)} aria-label="Advertisement">
@@ -62,7 +73,7 @@ export function AdSlot({ variant = 'inline', adSlot, className }: AdSlotProps) {
         data-ad-client={AD_CLIENT}
         data-ad-slot={adSlot}
         data-ad-format={variantFormat[variant]}
-        {...(isResponsive ? { 'data-full-width-responsive': 'true' } : {})}
+        data-full-width-responsive="true"
       />
     </div>
   );
