@@ -47,12 +47,7 @@ export function ProgressiveImage({
 
   const isSupabase = isSupabaseStorageUrl(props.src);
 
-  // Serve resized image to avoid burning Supabase egress quota with full-size originals
-  const optimizedSrc = isSupabase
-    ? toSupabaseRenderUrl(props.src as string, 800, 80)
-    : props.src;
-
-  // LQIP: tiny 20px version — ~1-2KB, loads instantly even on slow connections
+  // LQIP: tiny 20px version via Supabase transform (Pro plan feature — falls back to shimmer on free plan)
   const lqipUrl =
     isSupabase && !lqipError
       ? toSupabaseRenderUrl(props.src as string, 20, 10)
@@ -94,7 +89,7 @@ export function ProgressiveImage({
       {!failed && (
         <Image
           {...props}
-          src={optimizedSrc}
+          src={props.src}
           placeholder="blur"
           blurDataURL={WARM_BLUR_URL}
           className={cn(
