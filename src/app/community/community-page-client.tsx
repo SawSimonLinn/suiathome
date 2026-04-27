@@ -32,6 +32,7 @@ import type { CommunityPost, Recipe, User } from '@/lib/types';
 
 type CommunityPageClientProps = {
   initialPosts: CommunityPost[];
+  initialHasMore?: boolean;
   availableRecipes?: Recipe[];
   currentUser: User | null;
 };
@@ -45,6 +46,7 @@ function createImagePath(userId: string, fileName: string) {
 
 export function CommunityPageClient({
   initialPosts,
+  initialHasMore = true,
   availableRecipes = [],
   currentUser,
 }: CommunityPageClientProps) {
@@ -69,7 +71,7 @@ export function CommunityPageClient({
 
   // Infinite scroll
   const [nextPage, setNextPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 

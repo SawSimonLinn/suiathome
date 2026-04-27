@@ -1,6 +1,6 @@
 import { CommunityPageClient } from './community-page-client';
 import { getAuthContext, type AuthContext } from '@/lib/supabase/auth';
-import { getPublicCommunityPosts } from '@/lib/supabase/public-community';
+import { getPublicCommunityPostsPage } from '@/lib/supabase/public-community';
 import { getPublicRecipesData } from '@/lib/supabase/public-recipes';
 import type { User } from '@/lib/types';
 
@@ -21,15 +21,16 @@ function buildCurrentUser(authContext: AuthContext): User | null {
 }
 
 export default async function CommunityPage() {
-  const [authContext, posts, recipeData] = await Promise.all([
+  const [authContext, postsResult, recipeData] = await Promise.all([
     getAuthContext(),
-    getPublicCommunityPosts(),
+    getPublicCommunityPostsPage(0),
     getPublicRecipesData(),
   ]);
 
   return (
     <CommunityPageClient
-      initialPosts={posts}
+      initialPosts={postsResult.posts}
+      initialHasMore={postsResult.hasMore}
       availableRecipes={recipeData.recipes}
       currentUser={buildCurrentUser(authContext)}
     />

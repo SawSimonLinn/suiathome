@@ -378,6 +378,153 @@ async function getSupabaseRecipeData() {
   };
 }
 
+export const RECIPE_PAGE_SIZE = 6;
+
+export async function getPublicRecipesPageData(options: {
+  page?: number;
+  search?: string;
+  categoryId?: string;
+}): Promise<{ recipes: Recipe[]; categories: Category[]; hasMore: boolean }> {
+  if (!hasSupabaseEnv()) {
+    const page = options.page ?? 0;
+    const search = options.search?.toLowerCase().trim() ?? '';
+    const filtered = mockRecipes.filter((r) => {
+      const matchesSearch =
+        !search ||
+        r.title.toLowerCase().includes(search) ||
+        (r.description ?? '').toLowerCase().includes(search);
+      const matchesCategory =
+        !options.categoryId ||
+        options.categoryId === 'all' ||
+        r.category?.id === options.categoryId;
+      return matchesSearch && matchesCategory;
+    });
+    const from = page * RECIPE_PAGE_SIZE;
+    return {
+      recipes: filtered.slice(from, from + RECIPE_PAGE_SIZE),
+      categories: mockCategories,
+      hasMore: from + RECIPE_PAGE_SIZE < filtered.length,
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const viewerId = user?.id ?? null;
+
+  const page = options.page ?? 0;
+  const from = page * RECIPE_PAGE_SIZE;
+  const to = from + RECIPE_PAGE_SIZE - 1;
+
+  let recipesQuery = supabase
+    .from('recipes')
+    .select(
+      'id, author_id, category_id, slug, title, description, story, image_url, image_hint, cover_position, reel_url, prep_time, cook_time, servings, created_at, views_count'
+    )
+    .eq('is_hidden', false)
+    .order('created_at', { ascending: false })
+    .range(from, to + 1); // +1 to detect hasMore
+
+  if (options.search?.trim()) {
+    const s = options.search.trim();
+    recipesQuery = recipesQuery.or(`title.ilike.%${s}%,description.ilike.%${s}%`);
+  }
+  if (options.categoryId && options.categoryId !== 'all') {
+    recipesQuery = recipesQuery.eq('category_id', options.categoryId);
+  }
+
+  const [recipesResult, categoriesResult, profilesResult] = await Promise.all([
+    recipesQuery,
+    supabase.from('categories').select('id, name, slug').order('name', { ascending: true }),
+    supabase.from('profiles').select('id, name, avatar_url, role'),
+  ]);
+
+  if (recipesResult.error || !recipesResult.data) {
+    return { recipes: [], categories: [], hasMore: false };
+  }
+
+  const hasMore = recipesResult.data.length > RECIPE_PAGE_SIZE;
+  const recipeRows = (
+    hasMore ? recipesResult.data.slice(0, RECIPE_PAGE_SIZE) : recipesResult.data
+  ) as RecipeRow[];
+  const categoryRows = (categoriesResult.data as CategoryRow[]) ?? [];
+  const profileRows = (profilesResult.data as ProfileRow[]) ?? [];
+  const recipeIds = recipeRows.map((r) => r.id);
+
+  if (recipeIds.length === 0) {
+    return {
+      recipes: [],
+      categories: categoryRows.map((c) => ({ id: c.id, name: c.name })),
+      hasMore: false,
+    };
+  }
+
+  const [likesResult, favoritesResult, viewerLikesResult, viewerFavoritesResult] =
+    await Promise.all([
+      supabase.from('recipe_likes').select('recipe_id').in('recipe_id', recipeIds),
+      supabase.from('recipe_favorites').select('recipe_id').in('recipe_id', recipeIds),
+      viewerId
+        ? supabase
+            .from('recipe_likes')
+            .select('recipe_id')
+            .eq('user_id', viewerId)
+            .in('recipe_id', recipeIds)
+        : Promise.resolve({ data: [], error: null }),
+      viewerId
+        ? supabase
+            .from('recipe_favorites')
+            .select('recipe_id')
+            .eq('user_id', viewerId)
+            .in('recipe_id', recipeIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+
+  const categoriesById = new Map<string, Category>(
+    categoryRows.map((c) => [c.id, { id: c.id, name: c.name }])
+  );
+  const profilesById = new Map<string, ProfileRow>(
+    profileRows.map((p) => [p.id, p])
+  );
+
+  const likeRows = (likesResult.data as RecipeInteractionRow[]) ?? [];
+  const favoriteRows = (favoritesResult.data as RecipeInteractionRow[]) ?? [];
+  const viewerLikeRows = (viewerLikesResult.data as RecipeInteractionRow[]) ?? [];
+  const viewerFavoriteRows = (viewerFavoritesResult.data as RecipeInteractionRow[]) ?? [];
+
+  const likeCounts = new Map<string, number>();
+  likeRows.forEach((row) => {
+    likeCounts.set(row.recipe_id, (likeCounts.get(row.recipe_id) || 0) + 1);
+  });
+
+  const favoriteCounts = new Map<string, number>();
+  favoriteRows.forEach((row) => {
+    favoriteCounts.set(row.recipe_id, (favoriteCounts.get(row.recipe_id) || 0) + 1);
+  });
+
+  const viewerLikedRecipeIds = new Set(viewerLikeRows.map((row) => row.recipe_id));
+  const viewerFavoritedRecipeIds = new Set(viewerFavoriteRows.map((row) => row.recipe_id));
+
+  const recipes = recipeRows.map((recipe) =>
+    mapSummaryRecipe(
+      recipe,
+      categoriesById,
+      profilesById,
+      likeCounts,
+      favoriteCounts,
+      new Map(),
+      viewerLikedRecipeIds,
+      viewerFavoritedRecipeIds
+    )
+  ) as Recipe[];
+
+  return {
+    recipes,
+    categories: categoryRows.map((c) => ({ id: c.id, name: c.name })),
+    hasMore,
+  };
+}
+
 export async function getPublicRecipesData(): Promise<PublicRecipesData> {
   if (!hasSupabaseEnv()) {
     return fallbackData();

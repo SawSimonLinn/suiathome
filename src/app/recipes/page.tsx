@@ -1,9 +1,9 @@
-import { getPublicRecipesData } from "@/lib/supabase/public-recipes";
+import { getPublicRecipesPageData } from "@/lib/supabase/public-recipes";
 import { RecipesClient } from "./RecipesClient";
 import { AdSlot } from "@/components/ad-slot";
 
 export default async function RecipesPage() {
-  const { recipes, categories } = await getPublicRecipesData();
+  const { recipes, categories, hasMore } = await getPublicRecipesPageData({});
 
   return (
     <div className="py-8 md:py-12">
@@ -21,7 +21,11 @@ export default async function RecipesPage() {
         <AdSlot variant="leaderboard" adSlot="4817982526" />
       </div>
 
-      <RecipesClient recipes={recipes} categories={categories} />
+      <RecipesClient
+        initialRecipes={recipes}
+        categories={categories}
+        initialHasMore={hasMore}
+      />
 
       {/* Bottom banner ad */}
       <div className="mt-12">

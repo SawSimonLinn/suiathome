@@ -177,7 +177,7 @@ export async function getPublicCommunityPosts() {
   return getCommunityPostsFromSupabase({});
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 3;
 
 export async function getPublicCommunityPostsPage(page: number) {
   if (!hasSupabaseEnv()) {
