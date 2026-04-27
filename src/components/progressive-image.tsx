@@ -46,23 +46,18 @@ export function ProgressiveImage({
 
   const isSupabase = isSupabaseStorageUrl(props.src);
 
-  // LQIP: tiny 20px version for instant real-content blur preview
+  // LQIP: tiny 20px version of the real image — loads in <2KB even on 2G
   const lqipUrl =
     isSupabase && !lqipError
       ? toSupabaseRenderUrl(props.src as string, 20, 10)
       : null;
-
-  // Main image: capped at 800px to avoid serving 4K originals to small screens
-  const optimizedSrc = isSupabase
-    ? toSupabaseRenderUrl(props.src as string, 800, 82)
-    : props.src;
 
   return (
     <div className="relative w-full h-full">
       {!loaded && (
         <>
           {lqipUrl ? (
-            /* Actual image content blurred — loads in <1KB even on 2G */
+            /* Blurred real-content preview — the actual photo, just tiny */
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={lqipUrl}
@@ -89,9 +84,9 @@ export function ProgressiveImage({
         </>
       )}
 
+      {/* src is unchanged — Next.js Image handles sizing via srcset/sizes */}
       <Image
         {...props}
-        src={optimizedSrc}
         placeholder="blur"
         blurDataURL={WARM_BLUR_URL}
         className={cn(

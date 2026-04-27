@@ -170,7 +170,11 @@ export default function RecipeClientPage({
     async function trackView() {
       try {
         const supabase = createClient();
-        await supabase.from("recipe_views").insert({ recipe_id: recipe.id });
+        // Insert into log table and increment the denormalized count atomically
+        await Promise.all([
+          supabase.from("recipe_views").insert({ recipe_id: recipe.id }),
+          supabase.rpc("increment_recipe_views", { recipe_id_arg: recipe.id }),
+        ]);
         setViewCount((c) => c + 1);
       } catch {
         // Silently ignore: view tracking is non-critical.

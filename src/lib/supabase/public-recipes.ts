@@ -19,6 +19,7 @@ type RecipeRow = {
   cook_time: string;
   servings: number;
   created_at: string;
+  views_count?: number | null;
 };
 
 type CategoryRow = {
@@ -138,7 +139,6 @@ function mapSummaryRecipe(
   profilesById: Map<string, ProfileRow>,
   likeCounts: Map<string, number>,
   favoriteCounts: Map<string, number>,
-  viewCounts: Map<string, number>,
   commentsByRecipeId: Map<string, Comment[]>,
   viewerLikedRecipeIds: Set<string>,
   viewerFavoritedRecipeIds: Set<string>
@@ -167,7 +167,7 @@ function mapSummaryRecipe(
     tips: [],
     likes: likeCounts.get(recipe.id) || 0,
     favorites: favoriteCounts.get(recipe.id) || 0,
-    views: viewCounts.get(recipe.id) || 0,
+    views: recipe.views_count ?? 0,
     isLiked: viewerLikedRecipeIds.has(recipe.id),
     isFavorited: viewerFavoritedRecipeIds.has(recipe.id),
     comments: commentsByRecipeId.get(recipe.id) || [],
@@ -196,12 +196,11 @@ async function getSupabaseRecipeData() {
     commentsResult,
     viewerLikesResult,
     viewerFavoritesResult,
-    viewsResult,
   ] = await Promise.all([
     supabase
       .from('recipes')
       .select(
-        'id, author_id, category_id, slug, title, description, story, image_url, image_hint, cover_position, reel_url, prep_time, cook_time, servings, created_at, is_hidden'
+        'id, author_id, category_id, slug, title, description, story, image_url, image_hint, cover_position, reel_url, prep_time, cook_time, servings, created_at, is_hidden, views_count'
       )
       .order('created_at', { ascending: false }),
     supabase.from('categories').select('id, name, slug').order('name', {
@@ -240,7 +239,6 @@ async function getSupabaseRecipeData() {
           .select('recipe_id')
           .eq('user_id', viewerId)
       : Promise.resolve({ data: [], error: null }),
-    supabase.from('recipe_views').select('recipe_id'),
   ]);
 
   if (recipesResult.error || !recipesResult.data) {
@@ -264,7 +262,6 @@ async function getSupabaseRecipeData() {
   const viewerLikeRows = (viewerLikesResult.data as RecipeInteractionRow[]) ?? [];
   const viewerFavoriteRows =
     (viewerFavoritesResult.data as RecipeInteractionRow[]) ?? [];
-  const viewRows = (viewsResult.data as RecipeInteractionRow[]) ?? [];
 
   const categoriesById = new Map<string, Category>(
     categoryRows.map((category) => [
@@ -320,11 +317,6 @@ async function getSupabaseRecipeData() {
     );
   });
 
-  const viewCounts = new Map<string, number>();
-  viewRows.forEach((row) => {
-    viewCounts.set(row.recipe_id, (viewCounts.get(row.recipe_id) || 0) + 1);
-  });
-
   const viewerLikedRecipeIds = new Set(
     viewerLikeRows.map((row) => row.recipe_id)
   );
@@ -339,7 +331,6 @@ async function getSupabaseRecipeData() {
       profilesById,
       likeCounts,
       favoriteCounts,
-      viewCounts,
       commentsByRecipeId,
       viewerLikedRecipeIds,
       viewerFavoritedRecipeIds
