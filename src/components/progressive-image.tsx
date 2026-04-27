@@ -4,7 +4,7 @@ import Image, { type ImageProps } from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-// Warm cream fallback blurDataURL for non-Supabase images
+// Warm cream 1×1 JPEG shown instantly while the real image loads
 const WARM_BLUR_URL =
   "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoH" +
   "BwYIDAoMCwsKCwsNCxAQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkU" +
@@ -12,24 +12,24 @@ const WARM_BLUR_URL =
   "AAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAU" +
   "AQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AJgAB/9k=";
 
-function getSupabaseTransformUrl(
-  src: string,
-  width: number,
-  quality: number,
-): string {
-  // Supabase storage transform API: append /render/image/public/ path with params
-  // URLs look like: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
-  const url = new URL(src);
-  url.searchParams.set("width", String(width));
-  url.searchParams.set("quality", String(quality));
-  return url.toString();
-}
-
 function isSupabaseStorageUrl(src: unknown): src is string {
   return (
     typeof src === "string" &&
-    src.includes(".supabase.co/storage/")
+    src.includes(".supabase.co/storage/v1/object/public/")
   );
+}
+
+// Supabase transform API uses /render/image/ instead of /object/
+// https://supabase.com/docs/guides/storage/serving/image-transformations
+function toSupabaseRenderUrl(src: string, width: number, quality: number): string {
+  const renderSrc = src.replace(
+    "/storage/v1/object/public/",
+    "/storage/v1/render/image/public/",
+  );
+  const url = new URL(renderSrc);
+  url.searchParams.set("width", String(width));
+  url.searchParams.set("quality", String(quality));
+  return url.toString();
 }
 
 type ProgressiveImageProps = Omit<ImageProps, "placeholder" | "blurDataURL"> & {
@@ -42,26 +42,27 @@ export function ProgressiveImage({
   ...props
 }: ProgressiveImageProps) {
   const [loaded, setLoaded] = useState(false);
+  const [lqipError, setLqipError] = useState(false);
 
   const isSupabase = isSupabaseStorageUrl(props.src);
-  const lqipUrl = isSupabase
-    ? getSupabaseTransformUrl(props.src as string, 20, 10)
-    : null;
 
-  // For Supabase images, serve at 800px max — still passes through Next.js srcset
+  // LQIP: tiny 20px version for instant real-content blur preview
+  const lqipUrl =
+    isSupabase && !lqipError
+      ? toSupabaseRenderUrl(props.src as string, 20, 10)
+      : null;
+
+  // Main image: capped at 800px to avoid serving 4K originals to small screens
   const optimizedSrc = isSupabase
-    ? getSupabaseTransformUrl(props.src as string, 800, 80)
+    ? toSupabaseRenderUrl(props.src as string, 800, 82)
     : props.src;
-
-  // Priority images (above-the-fold) load eagerly; everything else is lazy
-  const fetchPriority = props.priority ? "high" : "low";
 
   return (
     <div className="relative w-full h-full">
       {!loaded && (
         <>
           {lqipUrl ? (
-            /* Real blurred thumbnail — actual image content, instantly visible */
+            /* Actual image content blurred — loads in <1KB even on 2G */
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={lqipUrl}
@@ -69,11 +70,12 @@ export function ProgressiveImage({
               aria-hidden="true"
               loading={props.priority ? "eager" : "lazy"}
               decoding="async"
-              fetchPriority={fetchPriority}
+              fetchPriority={props.priority ? "high" : "low"}
+              onError={() => setLqipError(true)}
               className="absolute inset-0 w-full h-full object-cover scale-110 blur-lg"
             />
           ) : (
-            /* Fallback shimmer for non-Supabase images */
+            /* Fallback shimmer for non-Supabase images or if LQIP fails */
             <div
               className={cn(
                 "absolute inset-0 overflow-hidden animate-pulse",

@@ -46,6 +46,13 @@ const nextConfig: NextConfig = {
               port: '',
               pathname: '/storage/v1/object/public/**',
             },
+            // Supabase image transform API (used for LQIP and resized thumbnails)
+            {
+              protocol: 'https' as const,
+              hostname: supabaseHost,
+              port: '',
+              pathname: '/storage/v1/render/image/public/**',
+            },
           ]
         : []),
     ],
