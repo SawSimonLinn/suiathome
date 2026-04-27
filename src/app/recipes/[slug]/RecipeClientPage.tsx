@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProgressiveImage } from "@/components/progressive-image";
 import { useEffect, useRef, useState } from "react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useRecipeInteractions } from "@/hooks/use-recipe-interactions";
@@ -352,11 +352,12 @@ export default function RecipeClientPage({
                       >
                         <div className="relative w-16 h-16 shrink-0 border-r-2 border-foreground overflow-hidden">
                           {r.imageUrl ? (
-                            <Image
+                            <ProgressiveImage
                               src={r.imageUrl}
                               alt={r.title}
                               fill
                               className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              sizes="64px"
                             />
                           ) : (
                             <div
@@ -383,7 +384,7 @@ export default function RecipeClientPage({
 
               {/* Sidebar square ad */}
               <div className="pt-5 border-t border-foreground/15 mt-5">
-                <AdSlot variant="square" adSlot="4817982526" />
+                <AdSlot variant="leaderboard" adSlot="4817982526" />
               </div>
             </div>
           </aside>
@@ -554,7 +555,7 @@ export default function RecipeClientPage({
 
               {/* Right sidebar square ad */}
               <div className="pt-5 border-t border-foreground/15">
-                <AdSlot variant="square" adSlot="4817982526" />
+                <AdSlot variant="leaderboard" adSlot="4817982526" />
               </div>
             </div>
           </aside>

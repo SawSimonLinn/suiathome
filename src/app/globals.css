@@ -73,6 +73,10 @@
 }
 .paper-btn-dark:hover { box-shadow: none; transform: translate(3px, 3px); }
 
+@keyframes shimmer {
+  100% { transform: translateX(200%); }
+}
+
 @keyframes sui-loading-bar {
   0% { transform: translateX(-120%); }
   55% { transform: translateX(10%); }
