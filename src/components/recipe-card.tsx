@@ -12,6 +12,7 @@ import { ProgressiveImage } from "./progressive-image";
 interface RecipeCardProps {
   recipe: Recipe;
   className?: string;
+  priority?: boolean;
 }
 
 const CUTE_STICKERS = ['🌸', '🍓', '🌷', '✨', '🧁', '🌼', '🍰', '🌺', '🫶', '🌿'];
@@ -28,7 +29,7 @@ function getDoodleProps(id: string) {
   };
 }
 
-export function RecipeCard({ recipe, className }: RecipeCardProps) {
+export function RecipeCard({ recipe, className, priority }: RecipeCardProps) {
   const {
     isLiked,
     likeCount,
@@ -84,6 +85,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
               src={coverImage.imageUrl}
               alt={recipe.title}
               fill
+              priority={priority}
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               style={{ objectPosition: recipe.coverPosition ?? 'center center' }}
               data-ai-hint={coverImage.imageHint}

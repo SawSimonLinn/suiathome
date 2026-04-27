@@ -67,7 +67,7 @@ export function RecipesClient({ recipes, categories }: RecipesClientProps) {
             const showMobileAd = pos % 3 === 0 && !showDesktopAd;
             return (
               <div key={recipe.id} className="contents">
-                <RecipeCard recipe={recipe} />
+                <RecipeCard recipe={recipe} priority={index < 3} />
 
                 {/* Mobile-only ad: every 3 recipes (not at desktop ad positions) */}
                 {showMobileAd && (
