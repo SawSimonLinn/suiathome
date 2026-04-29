@@ -733,8 +733,9 @@ export function NewRecipeForm({
           .from('recipe_images')
           .insert(extraImages);
         if (imagesError) {
+          const savedAction = isEditMode ? 'updated' : 'created';
           setErrorMessage(
-            `Recipe created, but extra images failed to save: ${getFriendlyAdminError(imagesError.message)}`
+            `Recipe ${savedAction}, but extra images failed to save: ${getFriendlyAdminError(imagesError.message)}`
           );
           return;
         }

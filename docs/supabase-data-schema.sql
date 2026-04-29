@@ -48,6 +48,15 @@ create table if not exists public.recipe_tips (
   unique (recipe_id, position)
 );
 
+create table if not exists public.recipe_images (
+  id uuid primary key default gen_random_uuid(),
+  recipe_id uuid not null references public.recipes(id) on delete cascade,
+  url text not null check (char_length(trim(url)) > 0),
+  position integer not null,
+  created_at timestamptz not null default now(),
+  unique (recipe_id, position)
+);
+
 create table if not exists public.recipe_comments (
   id uuid primary key default gen_random_uuid(),
   recipe_id uuid not null references public.recipes(id) on delete cascade,
@@ -115,6 +124,7 @@ create table if not exists public.community_post_views (
 create index if not exists recipes_created_at_idx on public.recipes (created_at desc);
 create index if not exists recipes_author_id_idx on public.recipes (author_id);
 create index if not exists recipes_category_id_idx on public.recipes (category_id);
+create index if not exists recipe_images_recipe_id_position_idx on public.recipe_images (recipe_id, position);
 create index if not exists recipe_comments_recipe_id_idx on public.recipe_comments (recipe_id, created_at desc);
 create index if not exists community_posts_created_at_idx on public.community_posts (created_at desc);
 create index if not exists community_posts_recipe_id_idx on public.community_posts (linked_recipe_id);
@@ -127,6 +137,7 @@ alter table public.recipes enable row level security;
 alter table public.recipe_ingredients enable row level security;
 alter table public.recipe_steps enable row level security;
 alter table public.recipe_tips enable row level security;
+alter table public.recipe_images enable row level security;
 alter table public.recipe_comments enable row level security;
 alter table public.recipe_likes enable row level security;
 alter table public.recipe_saves enable row level security;
@@ -155,6 +166,10 @@ on public.recipe_steps for select using (true);
 drop policy if exists "recipe tips are viewable by everyone" on public.recipe_tips;
 create policy "recipe tips are viewable by everyone"
 on public.recipe_tips for select using (true);
+
+drop policy if exists "recipe images are viewable by everyone" on public.recipe_images;
+create policy "recipe images are viewable by everyone"
+on public.recipe_images for select using (true);
 
 drop policy if exists "recipe comments are viewable by everyone" on public.recipe_comments;
 create policy "recipe comments are viewable by everyone"
@@ -276,6 +291,15 @@ on public.community_post_views for select using (true);
 drop policy if exists "community post views can be created by everyone" on public.community_post_views;
 create policy "community post views can be created by everyone"
 on public.community_post_views for insert with check (true);
+
+insert into storage.buckets (id, name, public)
+values ('recipe-images', 'recipe-images', true)
+on conflict (id) do nothing;
+
+drop policy if exists "recipe images are publicly readable" on storage.objects;
+create policy "recipe images are publicly readable"
+on storage.objects for select
+using (bucket_id = 'recipe-images');
 
 insert into storage.buckets (id, name, public)
 values ('community-images', 'community-images', true)
