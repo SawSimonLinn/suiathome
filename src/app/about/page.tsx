@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { RestaurantVote } from "./restaurant-vote";
-import { AdSlot } from "@/components/ad-slot";
 
 const ABOUT_TITLE = "About Sui | Burmese Home Cooking Story | Sui at home";
 const ABOUT_DESCRIPTION =
@@ -195,9 +194,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Banner ad — below hero */}
-      <AdSlot variant="leaderboard" adSlot="4817982526" />
-
       {/* ── Story cards ── */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         {[
@@ -251,9 +247,6 @@ export default function AboutPage() {
           </div>
         ))}
       </section>
-
-      {/* Inline ad — between story cards and "What Drives Her" */}
-      <AdSlot variant="inline" adSlot="4817982526" />
 
       {/* ── What she loves ── */}
       <section
@@ -315,9 +308,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      {/* Ad — between "What Drives Her" and Restaurant Dream */}
-      <AdSlot variant="inline" adSlot="4817982526" />
 
       {/* ── Restaurant Dream ── */}
       <section
@@ -416,9 +406,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      {/* Inline ad — before CTA */}
-      <AdSlot variant="leaderboard" adSlot="4817982526" />
 
       {/* ── CTA ── */}
       <section className="text-center py-4 md:py-8">

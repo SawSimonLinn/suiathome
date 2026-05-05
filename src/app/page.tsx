@@ -7,7 +7,6 @@ import { RecipesCarousel } from '@/components/recipes-carousel';
 import { getHomepageRecipes } from '@/lib/supabase/public-recipes';
 import { getTopTriedItPosts } from '@/lib/supabase/public-community';
 import { TriedItCarousel } from '@/components/tried-it-carousel';
-import { AdSlot } from '@/components/ad-slot';
 
 export default async function Home() {
   const [{ popularRecipes }, triedItPosts] = await Promise.all([
@@ -97,11 +96,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Top banner ad — below hero */}
-      <div className="py-4">
-        <AdSlot variant="leaderboard" adSlot="6075223871" />
-      </div>
-
       <section className="py-12">
         <div className="text-center mb-12">
           <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl">Most Loved Recipes</h2>
@@ -122,12 +116,6 @@ export default async function Home() {
           </Button>
         </div>
       </section>
-      
-      {/* Inline ad — between Most Loved and Tried It sections */}
-      <div className="py-4">
-        <AdSlot variant="inline" adSlot="9447492675" />
-      </div>
-
       <section className="py-12 mt-8">
         <div className="text-center mb-12 px-4">
           <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl">Tried It!</h2>
@@ -202,10 +190,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Bottom banner ad */}
-      <div className="py-6">
-        <AdSlot variant="leaderboard" adSlot="3397089646" />
-      </div>
     </div>
   );
 }

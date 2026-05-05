@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CommunityPostCard } from '@/components/community-post-card';
-import { AdSlot } from '@/components/ad-slot';
 import { convertHeicToJpeg } from '@/lib/convert-heic';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -360,11 +359,6 @@ export function CommunityPageClient({
         </p>
       </header>
 
-      {/* Top banner ad */}
-      <div className="mx-auto max-w-3xl mb-8">
-        <AdSlot variant="leaderboard" adSlot="4817982526" />
-      </div>
-
       {isLoggedIn && currentUser ? (
         <Card className="mb-8 mx-auto max-w-2xl">
           {!isCreateExpanded ? (
@@ -519,19 +513,16 @@ export function CommunityPageClient({
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         {sortedPosts.length > 0 ? (
           <>
-            {sortedPosts.map((post, index) => (
-              <div key={post.id} className="contents">
-                <CommunityPostCard
-                  post={post}
-                  currentUser={currentUser}
-                  canEdit={currentUser?.id === post.user.id}
-                  onEdit={startEditingPost}
-                  onDelete={handleDeletePost}
-                  onToggleHide={handleToggleHide}
-                />
-                {/* Ad every 3 posts */}
-                {(index + 1) % 3 === 0 && <AdSlot variant="inline" adSlot="4817982526" />}
-              </div>
+            {sortedPosts.map((post) => (
+              <CommunityPostCard
+                key={post.id}
+                post={post}
+                currentUser={currentUser}
+                canEdit={currentUser?.id === post.user.id}
+                onEdit={startEditingPost}
+                onDelete={handleDeletePost}
+                onToggleHide={handleToggleHide}
+              />
             ))}
 
             {/* Infinite scroll sentinel */}

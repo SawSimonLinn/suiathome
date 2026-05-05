@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { AdSlot } from '@/components/ad-slot';
 
 import { ProfilePostsClient } from './[userId]/profile-posts-client';
 import { ProfileSocialLinks } from '@/components/profile-social-links';
@@ -247,11 +246,6 @@ export default async function ProfilePage() {
           </div>
         )}
       </section>
-
-      {/* Inline ad — between Favorites and Community Posts */}
-      <div className="mb-10">
-        <AdSlot variant="leaderboard" adSlot="4817982526" />
-      </div>
 
       {/* Community Posts */}
       <section className="space-y-4">

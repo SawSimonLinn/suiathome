@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RecipeCard } from '@/components/recipe-card';
-import { AdSlot } from '@/components/ad-slot';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -113,28 +112,9 @@ export function RecipesClient({ initialRecipes, categories, initialHasMore }: Re
             <p className="text-muted-foreground animate-pulse">Loading recipes…</p>
           </div>
         ) : recipes.length > 0 ? (
-          recipes.map((recipe, index) => {
-            const pos = index + 1;
-            const showDesktopAd = pos % 6 === 0;
-            const showMobileAd = pos % 3 === 0 && !showDesktopAd;
-            return (
-              <div key={recipe.id} className="contents">
-                <RecipeCard recipe={recipe} priority={index < 3} />
-
-                {showMobileAd && (
-                  <div className="col-span-full md:hidden">
-                    <AdSlot variant="inline" adSlot="4817982526" />
-                  </div>
-                )}
-
-                {showDesktopAd && (
-                  <div className="col-span-full">
-                    <AdSlot variant="leaderboard" adSlot="4817982526" />
-                  </div>
-                )}
-              </div>
-            );
-          })
+          recipes.map((recipe, index) => (
+            <RecipeCard key={recipe.id} recipe={recipe} priority={index < 3} />
+          ))
         ) : (
           <div className="col-span-full border-2 border-foreground bg-paper p-8 text-center text-muted-foreground paper-shadow">
             {debouncedSearch || categoryId !== 'all'
