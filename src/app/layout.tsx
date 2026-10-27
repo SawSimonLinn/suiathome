@@ -40,7 +40,7 @@ export default async function RootLayout({
         {/* SharkNinja / Impact Website Verification */}
         <meta
           name="impact-site-verification"
-          value="625213f8-754d-4fc7-812e-0a54d09d837f"
+          content="625213f8-754d-4fc7-812e-0a54d09d837f"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
